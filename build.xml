@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Based on eclipse generated build.xml -->
+
+<project basedir="." default="build" name="CDMS">
+
+    <path id="project.classpath">
+        <pathelement location="CDMS"/>
+        <pathelement location="Camml"/>
+        <pathelement location="jar/junit.jar"/>
+        <pathelement location="jar/NeticaJ.jar"/>
+        <pathelement location="jar/weka.jar"/>
+		<pathelement location="jar/tetrad4.jar"/>
+    </path>
+
+    <target name="init">
+	</target>
+
+    <target name="clean">
+	    <delete>
+	        <fileset dir="." includes="**/*.class"/>
+	    </delete>
+	</target>
+
+
+    <target name="doc">
+
+	    <javadoc
+           destdir="doc/api-docs"
+           author="true"
+           version="true"
+           use="true"
+           windowtitle="Test API">
+
+	        <packageset dir="CDMS" defaultexcludes="yes">
+		        <include name="**"/>
+				<exclude name="cdms/plugin/go3dviz/"/>
+			</packageset>
+
+	        <packageset dir="Camml" defaultexcludes="yes">
+		        <include name="**"/>
+			</packageset>
+            <classpath refid="project.classpath"/>
+
+        </javadoc>
+	</target>
+
+    <target depends="init,buildCDMS,buildCamml" name="build">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+    </target>
+
+    <target depends="init" name="buildCDMS">
+        <javac destdir="CDMS">
+            <src path="CDMS"/>
+            <exclude name="cdms/plugin/go3dviz/"/>
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+    <target depends="init,buildCDMS" name="buildCamml">
+        <javac destdir="Camml">
+            <src path="Camml"/>
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+	<!-- Run CaMML gui -->
+    <target depends="build" name="run">
+        <java classname="cdms.core.Cdms" failonerror="true" fork="yes">
+            <jvmarg value="-Xmx512m"/>
+            <jvmarg value="-Dnetica.reg=+NicholsonA/MonashU/120,310-1-A/20929"/>
+            <arg value="cdms.plugin.fpli.Fpli$Interpreter"/>
+            <arg value="Camml/script/cammlBootstrap.fp"/>
+            <classpath refid="project.classpath"/>
+        </java>
+    </target>
+
+
+	<!-- Run complete test suite. Slow.
+	     NOTE: For this task to work junit.jar must be in ant/lib directory -->
+    <target depends="build" name="test">
+
+        <junit fork="yes" printsummary="withOutAndErr" dir="CDMS">
+            <classpath refid="project.classpath"/>
+            <formatter type="plain"/>
+            <test name="test.cdms.TestCases"/>
+            <jvmarg value="-Xmx512m"/>
+        </junit>
+
+        <junit fork="yes" printsummary="withOutAndErr" dir="Camml">
+            <classpath refid="project.classpath"/>
+            <formatter type="plain"/>
+            <test name="camml.test.TestCases"/>
+            <jvmarg value="-Xmx512m"/>
+        </junit>
+
+    </target>
+
+	<target depends="jar" name="zip">
+	    <zip destfile="cammlSrc.zip"
+		    basedir="."
+			excludes="**/*.jar **/*.zip **/*.class doc/** rodo/** lib/** **/*.so **/*.dll **/*.log **/TEST*.txt"
+		/>
+	    <zip destfile="cammlDoc.zip"
+		    basedir="."
+			includes="doc/**"
+		/>
+	    <zip destfile="cammlClass.zip"
+		    basedir="."
+			excludes="**/*.jar **/*.zip rodo/** **/*.so **/*.dll **/*.log **/TEST*.txt"
+		/>
+	    <zip destfile="cammlDist.zip"
+		    basedir="."
+			includes="camml.jar cdms.jar README"
+		/>
+	    <zip destfile="cammlAll.zip"
+		    basedir="."
+			excludes="**/*.zip"
+		/>
+	</target>
+
+
+	<!-- Build jar of camml and cdms. -->
+	<target depends="build" name="cdmsjar">
+	    <jar destfile="cdms.jar"
+		     basedir="CDMS"
+			 manifest="CDMS/Manifest.txt"
+			 excludes="**/*.java" />
+	</target>
+
+	<target depends="build" name="cammljar">
+	    <jar destfile="camml.jar"
+		     basedir="Camml" 
+			 manifest="Camml/Manifest.txt"
+			 excludes="**/*.java"/>
+	</target>
+
+	<target depends="cdmsjar,cammljar" name="jar">
+	</target>
+
+
+
+</project>

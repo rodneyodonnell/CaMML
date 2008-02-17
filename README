@@ -1,0 +1,108 @@
+
+Quick guide to getting CaMML started (updated 22-08-06) :
+
+for a full guide see:
+http://bruce.csse.monash.edu.au:7777/CAMML/
+http://bruce.csse.monash.edu.au:7777/CAMML/wiki
+
+==============================
+== Installing/Running CaMML ==
+==============================
+1. Checkout from CVS
+> export CVSROOT=:ext:$user@bruce.csse.monash.edu.au:/u/csse/public/bai/bepi/cvs
+> export CVS_RSH=ssh
+> mkdir ~/BAI; cd ~/BAI
+> cvs checkout CAMML   # You may be prompted for your bruce.csse password
+
+2. Get library/jar files
+- Download files from
+	Tetrad : http://www.phil.cmu.edu/projects/tetrad_download/download/
+	Weka : http://www.cs.waikato.ac.nz/ml/weka/
+	Netica : http://www.norsys.com/
+	junit : http://www.junit.org/
+- Tetrad.jar, weka.jar, NeticaJ.jar and junit.jar must be in your classpath
+> export CLASSPATH=$CLASSPATH:Tetrad.jar:weka.jar:NeticaJ.jar:junit.jar
+- libNeticaJ.so must be in your $LD_LIBRARY_PATH
+> mkdir ~/lib; cp libNeticaJ.so ~/lib
+> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
+
+3. Compile CaMML
+> cd ~/BAI/CAMML
+> ant
+
+
+4. Run     
+> ./camml.sh
+
+=================
+== Using CaMML ==
+=================
+
+There are two main ways to use the CaMML gui, clicking manually
+and writing scripts.  One or the other may be easiest depending
+on the task.
+
+== Manual Tasks
+Loading Data: 
+	Click File->Load Data from the main menu.
+	This is fairly straightforward.  Choose a filename and tell
+	CaMML the type of file you are loading.  If you don't tell
+	CaMML the file type it gets confused.
+	The most useful types are:
+	.cas : Same format as the C version of CaMML
+	.arff : Load a weka file
+	.arff (discretize) : As above, but converts file to a format
+	 the CaMML can work with (ie. all discrete, no missing).
+	Delimited Text : Try to automatically convert a plain text
+	 file into a dataset.
+	
+	A tabular view of the data should pop-up onto the screen.
+
+Running CaMML:
+	Right-clicking on the data allows us to run a function on it.
+	The most common option is to run 'camml' using all the default
+	options.  We generally get better results (though slowly) using
+	the 'cammlDualCTL' function which runs CaMML using hybrid models
+	of local structure.
+	
+	Right-click data.
+	Choose "Apply Function"
+	Choose "camml", hit ok
+	
+	The GUI becomes unresponsive while CaMML is running, but 
+	progress can be seen in the text window you launched CaMML
+	from.  When CaMML is done a results window appears.
+
+Results:
+	CaMML produced a heirachy of networks. The heirachy
+	is MMLECs -> SECs -> DAGs -> TOMs.	
+	The results window initially shows only the best MMLECs
+	along with their posterior and MML score.
+	To view a representative model of the MMLEC, right-click the [n SECs] item, 
+	 apply-function, ShowNet
+	To save a representative model of the MMLEC, right-click the [n SECs] item, 
+     apply-function, SaveNet
+	To go to the lower level of the heirachy, right-click the [n SECs] item, 
+	 and select "Extract". A table of all the SECs in the MMLEC will appear.
+	You can save, show or extract the DAGs from each SEC the same way you
+	 would for a MMLEC.
+
+
+== CDMS Envinronment
+	The CDMS Environment contains Values of various types. A complete
+	list (sorted by type) is available on the left side of the GUI.
+	To add something to the environment (eg. a dataset or learned model)
+	click on in, choose add/copy and name it.  It should appear under the
+	appropriate type.  If  you double click on its name it pops-up, and
+	you can also refer to it by name in scripts.
+
+== Scripting
+	The CDMS scripting language is based on functional programming and
+	is quite powerful, though underdocumented.
+	Sample scripts can be found in CAMML/Camml/scripts
+	NOTE: The "{" and "}" characters are used for comments.
+
+
+== More documentation?
+	Sorry, this doesn't exist yet.  Hopefully it will.
+	For queries email rodo@csse.monash.edu.au

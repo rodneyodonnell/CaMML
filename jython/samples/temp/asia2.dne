@@ -1,0 +1,84 @@
+// ~->[DNET-1]->~
+// Network : cammlNet
+// File created by CaMML2, Version : 1.0
+
+bnet Reconstructed_Learned_Network {
+autoupdate = TRUE;
+node VisitAsia {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( Cancer, TbOrCa );
+	probs = 
+		(((0.01371480472297911, 0.9862851952770209),
+		(0.5, 0.5)),
+		((0.05595482546201233, 0.9440451745379876),
+		(0.009671314315042128, 0.9903286856849579)));
+	};
+node Tuberculosis {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( Cancer, TbOrCa );
+	probs = 
+		(((0.010263396911898277, 0.9897366030881017),
+		(0.5, 0.5)),
+		((0.9994866529774127, 5.13347022587269E-4),
+		(5.34622129079167E-6, 0.9999946537787092)));
+	};
+node Smoking {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( Cancer );
+	probs = 
+		((0.9047229791099001, 0.0952770208900999),
+		(0.47723737261500365, 0.5227626273849963));
+	};
+node Cancer {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = (  );
+	probs = 
+		(0.05504444955550444, 0.9449555504444955);
+	};
+node TbOrCa {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( Cancer );
+	probs = 
+		((0.9999091734786558, 9.082652134423252E-5),
+		(0.010301914346487194, 0.9896980856535128));
+	};
+node XRay {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( TbOrCa );
+	probs = 
+		((0.982942266131522, 0.017057733868477927),
+		(0.05036675078054831, 0.9496332492194517));
+	};
+node Bronchitis {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( Smoking );
+	probs = 
+		((0.599454850433324, 0.400545149566676),
+		(0.30016625270411024, 0.6998337472958898));
+	};
+node Dyspnea {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	parents = ( TbOrCa, Bronchitis );
+	probs = 
+		(((0.8905676362609433, 0.10943236373905676),
+		(0.6941797140912185, 0.30582028590878146)),
+		((0.7995538405884481, 0.20044615941155194),
+		(0.09902996542451017, 0.9009700345754899)));
+	};
+};

@@ -1,0 +1,89 @@
+// ~->[DNET-1]->~
+// Network : cammlNet
+// File created by CaMML2, Version : 1.0
+
+bnet Reconstructed_Learned_Network {
+autoupdate = TRUE;
+node VisitAsia {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Visit, No_Visit);
+	parents = (  );
+	probs = 
+		(0.009999990000000004, 0.99);
+	};
+node Tuberculosis {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Present, Absent);
+	parents = ( VisitAsia );
+	probs = 
+		((0.05, 0.94999998),
+		(0.009999990000000004, 0.99));
+	};
+node Smoking {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Smoker, NonSmoker);
+	parents = (  );
+	probs = 
+		(0.5, 0.5);
+	};
+node Cancer {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Present, Absent);
+	parents = ( Smoking );
+	probs = 
+		((0.10000000000000002, 0.89999997),
+		(0.009999990000000004, 0.99));
+	};
+node TbOrCa {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (True, False);
+	parents = ( Tuberculosis, Cancer );
+	probs = 
+		(((1.0, 0.0),
+		(1.0, 0.0)),
+		((1.0, 0.0),
+		(0.0, 1.0)));
+	};
+node XRay {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Abnormal, Normal);
+	parents = ( TbOrCa );
+	probs = 
+		((0.98000001, 0.019999989999999995),
+		(0.05, 0.94999998));
+	};
+node Bronchitis {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Present, Absent);
+	parents = ( Smoking );
+	probs = 
+		((0.60000002, 0.4),
+		(0.30000001, 0.69999998));
+	};
+node Dyspnea {
+	kind = NATURE;
+	discrete = TRUE;
+	numstates = 2;
+	states = (Present, Absent);
+	parents = ( TbOrCa, Bronchitis );
+	probs = 
+		(((0.89999997, 0.10000000000000002),
+		(0.69999998, 0.30000001)),
+		((0.80000001, 0.2),
+		(0.10000000000000002, 0.89999997)));
+	};
+};

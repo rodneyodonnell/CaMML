@@ -1,0 +1,3 @@
+Main-Class: camml.core.Main
+Class-Path: cdms.jar weka.jar NeticaJ.jar tetrad4.jar
+

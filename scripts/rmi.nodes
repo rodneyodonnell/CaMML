@@ -1,0 +1,77 @@
+# List of all nodes to be  loaded by the serveAll.sh script
+# Any line with a '#' char in it (yes.. anywhere in it) is treated as a comment.
+# All the machines below should be dual processor and run at 700-800 mhz each.
+
+node01
+node02
+node03
+node04
+node05
+node06
+node07
+node08
+node09
+node10
+node11
+node12
+node13
+node14
+node15
+node16
+node17
+node18
+node19
+node20
+node21
+node22
+node23
+node24
+node25
+node26
+node27
+node28
+node29
+node30
+node31
+node32
+node33
+node34
+node35
+node36
+node37
+node38
+node39
+node40
+node41
+node42
+
+
+
+#cluster01
+#cluster03
+#cluster05
+##cluster06
+#cluster07
+##cluster09
+##cluster10
+#cluster12
+#cluster13
+#cluster14
+##cluster15
+#cluster16
+#cluster17
+##cluster20
+##shannon
+
+
+### cluster04	
+### cluster08
+### cluster19
+### cluster21  
+### cluster22  
+
+###cluster02 
+###cluster11
+###cluster18
+
+
