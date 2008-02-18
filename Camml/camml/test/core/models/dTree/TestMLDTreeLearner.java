@@ -73,7 +73,7 @@ public class TestMLDTreeLearner extends TestCase {
 	/** Ensure that Max LH CPT and DTree models return the same answer. */
 	public final void testMLTreeVsCPT() throws Exception {
 		Value.Vector data = 
-			Weka.load("/home/rodo/Repository/data/UCI/medium/letter.symbolic.arff", false, false); 
+			Weka.load("camml/test/letter.symbolic.arff", false, false);
 		
 		for (int ii = 0; ii < 3; ii++) {		
 			Value.Vector x = data.cmpnt(0);
