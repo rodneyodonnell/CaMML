@@ -32,7 +32,7 @@ import java.util.Comparator;
 public class CaseInfo implements Serializable {
 	
 	/** Serial ID required to evolve class while maintaining serialisation compatibility. */
-	private static final long serialVersionUID = 6773205128107956892L;
+	private static final long serialVersionUID = 6773205128107956893L;
 
 	/** BNet model with appropriate data type */
 	public BNet bNet;
@@ -94,8 +94,8 @@ public class CaseInfo implements Serializable {
 	/** Should the merging by KL distance step consider mergers to models with more arcs? */
 	protected boolean allowMergeToModelWithMoreArcs = false;
 	
-	/** Should model cleaning be used? */
-	public boolean cleanModels = true;
+	/** Function used for cleaning. */
+	public TOM.TOMCleaner tomCleaner = TOM.StandardTOMCleaner.tomCleaner;
 	
 	/** Type of SEC joining used. 0 -> KL, 3 -> CKL3, ignored if joinSECs = false. */
 	public int cklJoinType = 0;

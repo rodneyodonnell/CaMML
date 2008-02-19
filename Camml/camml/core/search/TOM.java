@@ -690,31 +690,83 @@ public class TOM implements Cloneable
 		return s.toString();       
 	}
 	
+	/** Interface class for a function to clean TOMs */
+	public interface TOMCleaner
+	{
+		void cleanTOM(TOM tom);
+	}
+	
+	public static class StandardTOMCleaner implements TOMCleaner
+	{		
+		public static StandardTOMCleaner tomCleaner = new StandardTOMCleaner();
+		private StandardTOMCleaner() {}
+		public void cleanTOM(TOM tom)
+		{
+			// loop through nodes cleaning each in turn.
+			for ( int i = 0; i < tom.getNumNodes(); i++ ) {
+				int nodeI = tom.nodeAt(i);
+				int[] dirtyParent = tom.node[nodeI].parent;
+				
+				double oldCost = tom.caseInfo.nodeCache.getMMLCost( tom.node[nodeI] );
+				for (int j = dirtyParent.length-1; j >= 0; j--) {
+					int nodeJ = dirtyParent[j];
+					double structureDiff = tom.caseInfo.tomCoster.costToToggleArc(tom,nodeI,nodeJ);				
+					tom.removeArc(nodeI,nodeJ);
+					double newCost = tom.caseInfo.nodeCache.getMMLCost(tom.node[nodeI]);
+					if ( newCost > oldCost - structureDiff) {
+						tom.addArc(nodeI,nodeJ);
+					}
+					else {
+						oldCost = newCost;
+					}
+				}
+			}			
+		}
+	}
+
+	/** Don't perform any cleaning  */
+	public static class NoCleanTOMCleaner implements TOMCleaner
+	{		
+		public static NoCleanTOMCleaner tomCleaner = new NoCleanTOMCleaner();
+		private NoCleanTOMCleaner() {}
+		public void cleanTOM(TOM tom) {}
+	}
+
+	/** remove all arcs which are not a parent of the specified target node */
+	public static class TargetOnlyTOMCleaner implements TOMCleaner
+	{		
+		int target;
+		public TargetOnlyTOMCleaner(int target) {this.target = target;}
+		public void cleanTOM(TOM tom) {
+			// loop through nodes cleaning each in turn.
+			for ( int nodeI = 0; nodeI < tom.getNumNodes(); nodeI++ ) {
+				if (nodeI != target) {				
+					int[] dirtyParent = tom.node[nodeI].parent;					
+								
+					for (int j = 0; j < dirtyParent.length; j++) {
+						int nodeJ = dirtyParent[j];
+						tom.removeArc(nodeI,nodeJ);
+					}
+				}
+			}			
+
+		}
+	}
+
+	/** Clean away all nodes not in the markov blanket of the specified variable */
+	public static class MarkovBlanketTOMCleaner implements TOMCleaner
+	{		
+		int target;
+		public MarkovBlanketTOMCleaner(int target) {this.target = target;}
+		public void cleanTOM(TOM tom) {
+			throw new RuntimeException("MarkovBlanketTOMCleaner not implemented");
+		}
+	}
+	
 	/** Remove insignificant arcs from TOM */
 	synchronized public void clean( )
 	{
-		// If cleaning has been disabled, each TOM is a clean version of itself
-		if (caseInfo.cleanModels == false) { return; }
-		
-		// loop through nodes cleaning each in turn.
-		for ( int i = 0; i < getNumNodes(); i++ ) {
-			int nodeI = this.nodeAt(i);
-			int[] dirtyParent = node[nodeI].parent;
-			
-			double oldCost = caseInfo.nodeCache.getMMLCost( node[nodeI] );
-			for (int j = dirtyParent.length-1; j >= 0; j--) {
-				int nodeJ = dirtyParent[j];
-				double structureDiff = caseInfo.tomCoster.costToToggleArc(this,nodeI,nodeJ);				
-				this.removeArc(nodeI,nodeJ);
-				double newCost = caseInfo.nodeCache.getMMLCost(node[nodeI]);
-				if ( newCost > oldCost - structureDiff) {
-					this.addArc(nodeI,nodeJ);
-				}
-				else {
-					oldCost = newCost;
-				}
-			}
-		}
+		caseInfo.tomCleaner.cleanTOM(this);
 	}
 	
 	

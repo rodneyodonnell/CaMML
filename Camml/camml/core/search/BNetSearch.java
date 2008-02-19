@@ -210,8 +210,9 @@ public abstract class BNetSearch implements Search.SearchObject
 			setTOMStructure( tom, (Value.Vector)v );
 		}
 		else if ( option.equals("clean") ) {
-			caseInfo.cleanModels = (((Value.Discrete)v).getDiscrete() == 0);	    
-			System.out.println( "Setting arc cleaning: " + caseInfo.cleanModels );
+			boolean clean = (((Value.Discrete)v).getDiscrete() == 0);
+			if (clean == false) { caseInfo.tomCleaner = TOM.NoCleanTOMCleaner.tomCleaner; }
+			System.out.println( "Setting arc cleaning: " + clean );
 		}
 		else if ( option.equals("joinDAGs") ) {
 			caseInfo.joinDAGs = (((Value.Discrete)v).getDiscrete() == 0);	    

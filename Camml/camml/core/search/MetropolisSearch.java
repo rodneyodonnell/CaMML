@@ -167,6 +167,49 @@ public class MetropolisSearch extends BNetSearch
 				"multiplier = " + multiplier );
 	}
 	
+
+	/** Stochastically attempt transform.  Return true if TOM changed.*/
+	public boolean doTransform()
+	{
+		// If we always accept the first model we avoid some strange situations where
+		// the optimum MML model is not samples.
+		TOMTransformation transform;
+
+		// Randomly choose class of transformation to attempt.
+		double rnd = rand.nextDouble();
+		if (rnd < 0.16667) {         // 1/6 chance
+			transform = parentSwapChange;
+		} else if (rnd < 0.33333) {  // 1/6 chance
+			transform = doubleSkeletalChange;
+		} else if (rnd < 0.66667 ) { // 1/3 chance
+			transform = skeletalChange;
+		} else {                     // 1/3 chance
+			transform = temporalChange;
+		}
+			
+		// was it successful?
+		boolean accepted = transform.transform( tom, currentCost );
+				
+		// Recalculate the cost of the network if modified.	
+		if ( accepted == true ) {
+			// updateCosts updates dirtytom and cleantom.
+			updateCosts( transform.getNodesChanged() );
+			
+			// Reference Weight should be set to the best model cost found so far
+			// this avoids overflow / underflow issues.
+			if ( currentCost + 0.001 < bestCost ) {
+				updateReferenceWeight( currentCost );
+				bestCost = currentCost;
+				this.bestTOM.setStructure( tom );
+			}
+			
+			// if currentCost is really bad, only accept positive mutations.
+			// this stops us getting too far away from the good models.
+			caseInfo.safeMode = ( currentCost > bestCost + caseInfo.safeCap );
+		}	
+
+		return accepted;
+	}
 	
 	/**
 	 * In a single epoch, one mutation of the network is attempted.  If this mutation is accepted
@@ -224,51 +267,13 @@ public class MetropolisSearch extends BNetSearch
 			caseInfo.tomCoster.repairTOM(tom);
 		}
 		
-		// Was the mutation accepted?
-		boolean accepted;
-		
-		// If we always accept the first model we avoid some strange situations where
-		// the optimum MML model is not samples.
-		TOMTransformation transform;
-		if ( epoch == 0 ) { // always accept on first epoch
-			transform = null;
-			accepted = false;
-			updateCosts(null); // make sure cost is correct.
+		if ( epoch == 0 ) { 	// Never transform on the first epoch.
+			updateCosts(null); // This ensures starting model is sampled at least once.
 		}
 		else {
-			// Randomly choose class of transformation to attempt.
-			double rnd = rand.nextDouble();
-			if (rnd < 0.16667) {         // 1/6 chance
-				transform = parentSwapChange;
-			} else if (rnd < 0.33333) {  // 1/6 chance
-				transform = doubleSkeletalChange;
-			} else if (rnd < 0.66667 ) { // 1/3 chance
-				transform = skeletalChange;
-			} else {                     // 1/3 chance
-				transform = temporalChange;
-			}
-			
-			// was it successful?
-			accepted = transform.transform( tom, currentCost );
+			doTransform();
 		}
 		
-		// Recalculate the cost of the network if modified.	
-		if ( accepted == true ) {
-			// updateCosts updates dirtytom and cleantom.
-			updateCosts( transform.getNodesChanged() );
-			
-			// Reference Weight should be set to the best model cost found so far
-			// this avoids overflow / underflow issues.
-			if ( currentCost + 0.001 < bestCost ) {
-				updateReferenceWeight( currentCost );
-				bestCost = currentCost;
-				this.bestTOM.setStructure( tom );
-			}
-			
-			// if currentCost is really bad, only accept positive mutations.
-			// this stops us getting too far away from the good models.
-			caseInfo.safeMode = ( currentCost > bestCost + caseInfo.safeCap );
-		}	
 		
 		// Find the SEC hash of (a cleaned version of) the current tom.
 		// If we are not joining DAGs to form SECs then treat each
