@@ -83,11 +83,10 @@ public class MetropolisSearch extends BNetSearch
 	{
 		// Start sampling from the best model found.
 		tom.setStructure( bestTOM );
-		
-		// Initialise SEC hash table
-		secHashtable = new Hashtable<SECHashKey,SEC>();
-		
-		// Initial search vonditions
+				
+		secHashtable.clear();
+
+		// Initial search conditions
 		epoch = 0;
 		searchDone = false;
 		
@@ -813,6 +812,9 @@ public class MetropolisSearch extends BNetSearch
 		caseInfo.secHash = new SECHash( rand, numNodes );
 		caseInfo.arcWeights = new double[numNodes][numNodes];
 		
+		// Initialise SEC hash table
+		secHashtable = new Hashtable<SECHashKey,SEC>();
+
 		// Number of epochs is calculated properly during first epoch.
 		// max must be > 0 or it won't reach the first epoch.
 		max = 1;
