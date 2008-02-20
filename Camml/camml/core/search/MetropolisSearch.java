@@ -48,6 +48,7 @@ public class MetropolisSearch extends BNetSearch
 {
 	/** Hash Table containing the number of times each SEC is visited */
 	protected Hashtable<SECHashKey,SEC> secHashtable;
+	public Hashtable<SECHashKey,SEC> getSECHashTable() { return secHashtable; }
 	
 	/** Maximum number of epochs */
 	// Long required as int boundry may be exceeded at ~= 200 nodes. 
@@ -67,7 +68,7 @@ public class MetropolisSearch extends BNetSearch
 	 * @param nodeChanged: list of nodes with parent changes since last call to updateCosts. 
 	 * If (nodeChanges == null) all nodes are considered changed.
 	 */
-	protected void updateCosts( int[] nodesChanged )
+	public void updateCosts( int[] nodesChanged )
 	{
 		currentCost = costNodes( mmlModelLearner, false, nodesChanged ) + structureCost( false );
 		currentMLCost = costNodes( mlModelLearner, true, nodesChanged );
@@ -251,9 +252,7 @@ public class MetropolisSearch extends BNetSearch
 			
 			// print out progress bar header.
 			for (int i = 0; i < 100; i++) {	System.out.print(i % 10); }
-			System.out.println();
-			
-			
+			System.out.println();						
 		}
 		
 		// gradually print progress bar as search runs.
@@ -275,53 +274,9 @@ public class MetropolisSearch extends BNetSearch
 		}
 		
 		
-		// Find the SEC hash of (a cleaned version of) the current tom.
-		// If we are not joining DAGs to form SECs then treat each
-		//  DAG as a unique SEC.
-		long hashValue;
-		if ( caseInfo.joinDAGs ) {
-			// cleantom supplied, so no need to reclean TOMs.
-			hashValue = caseInfo.secHash.hash( cleantom, currentMLCost );
-		} else {
-			hashValue = caseInfo.tomHash.hash( cleantom, currentMLCost );
-		}
-		
-		// Check if current SEC is in secHashtable
-		tempKey.set( hashValue );
-		SEC sec = (SEC)secHashtable.get( tempKey );
-		
-		
-		// If SEC not found and current TOM has a reasonable posterior, add SEC to the list of SECs.
-		if ( sec == null && currentCost < bestCost + ignoreCap ) {
-			sec = new SEC( cleantom, currentMLCost, caseInfo);
-			secHashtable.put( new SECHashKey(hashValue), sec );	    
-		}
-		
-		// Add TOM posterior to SEC.  This also adds the current DAG to the SECs list of DAGs if
-		// it is not already present.
-		if ( sec != null ) {
-			sec.addTOM( cleantom, currentCost, temperature );
-		}
-		// If TOM and SEC are not good enough, add posterior to weightIgnored instead.
-		else {
-			double diff = caseInfo.referenceWeight - currentCost;
-			double weight = Math.exp( diff * (1.0 - 1.0/temperature));
-			
-			weightIgnored += weight;
-			caseInfo.totalWeight += weight;
-			
-			// debug logging.
-			if ( caseInfo.logging ) {
-				try {			
-					caseInfo.cammlLog.write( "weight = " + caseInfo.weightFormat.format(weight) + 
-							"\ttomWeight = " + caseInfo.weightFormat.format(0.0) + 
-							"\tdiff = " + caseInfo.weightFormat.format(diff) + 
-							"\ttotalWeight = " + 
-							caseInfo.weightFormat.format(caseInfo.totalWeight)+"\n");
-					caseInfo.cammlLog.flush();
-				} catch (java.io.IOException e) { /* ignore exception */ }
-			}
-		}	
+		// Extract SEC from Hash and update its posterior
+		SEC sec = getSEC();		
+		updatePosterior(sec);	
 		
 		// increment the number of epochs completed.
 		epoch++;
@@ -346,6 +301,64 @@ public class MetropolisSearch extends BNetSearch
 		
 		// currentCost is required by search interface to draw "pretty graphs", etc.  with.
 		return currentCost;
+	}
+
+	/**
+	 * Update the posterior of SEC based on currentCost and temperature
+	 * If SEC == NULL, add posterior to "ignored" instead
+	 */
+	private void updatePosterior(SEC sec) {
+		// Add TOM posterior to SEC.  This also adds the current DAG to the SECs list of DAGs if
+		// it is not already present.
+		if ( sec != null ) {
+			sec.addTOM( cleantom, currentCost, temperature );
+		}
+		// If TOM and SEC are not good enough, add posterior to weightIgnored instead.
+		else {
+			double diff = caseInfo.referenceWeight - currentCost;
+			double weight = Math.exp( diff * (1.0 - 1.0/temperature));
+			
+			weightIgnored += weight;
+			caseInfo.totalWeight += weight;
+			
+			// debug logging.
+			if ( caseInfo.logging ) {
+				try {			
+					caseInfo.cammlLog.write( "weight = " + caseInfo.weightFormat.format(weight) + 
+							"\ttomWeight = " + caseInfo.weightFormat.format(0.0) + 
+							"\tdiff = " + caseInfo.weightFormat.format(diff) + 
+							"\ttotalWeight = " + 
+							caseInfo.weightFormat.format(caseInfo.totalWeight)+"\n");
+					caseInfo.cammlLog.flush();
+				} catch (java.io.IOException e) { /* ignore exception */ }
+			}
+		}
+	}
+
+	/** Extract SEC from hashtable for the cleantom. Create the SEC if required */
+	public SEC getSEC() {
+		// Find the SEC hash of (a cleaned version of) the current tom.
+		// If we are not joining DAGs to form SECs then treat each
+		//  DAG as a unique SEC.
+		long hashValue;
+		if ( caseInfo.joinDAGs ) {
+			// cleantom supplied, so no need to reclean TOMs.
+			hashValue = caseInfo.secHash.hash( cleantom, currentMLCost );
+		} else {
+			hashValue = caseInfo.tomHash.hash( cleantom, currentMLCost );
+		}
+		
+		// Check if current SEC is in secHashtable
+		tempKey.set( hashValue );
+		SEC sec = (SEC)secHashtable.get( tempKey );
+		
+		
+		// If SEC not found and current TOM has a reasonable posterior, add SEC to the list of SECs.
+		if ( sec == null && currentCost < bestCost + ignoreCap ) {
+			sec = new SEC( cleantom, currentMLCost, caseInfo);
+			secHashtable.put( new SECHashKey(hashValue), sec );	    
+		}
+		return sec;
 	}
 	
 	/** If results have already been calculated, cache the value. */
