@@ -306,7 +306,7 @@ public class MetropolisSearch extends BNetSearch
 	 * Update the posterior of SEC based on currentCost and temperature
 	 * If SEC == NULL, add posterior to "ignored" instead
 	 */
-	private void updatePosterior(SEC sec) {
+	public void updatePosterior(SEC sec) {
 		// Add TOM posterior to SEC.  This also adds the current DAG to the SECs list of DAGs if
 		// it is not already present.
 		if ( sec != null ) {
@@ -392,7 +392,7 @@ public class MetropolisSearch extends BNetSearch
 		}
 		
 		// Sort all SECs by their posterior probability.  Highest posterior first
-		java.util.Collections.sort(secList, SEC.posteriorComparator );
+		java.util.Collections.sort(secList, SEC.secWeightComparator );
 		
 		// Each element of SECList contains a list of TOMs, these should also be sorted by
 		// posterior.  (or weight which is proportional to posterior.)

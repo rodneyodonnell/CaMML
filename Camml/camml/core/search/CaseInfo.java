@@ -178,7 +178,8 @@ public class CaseInfo implements Serializable {
 		return "bNet = " + bNet + "\n" + 
 		"tomHash = " + tomHash + "\n" + 
 		"secHash = " + secHash + "\n" + 
-		"data = " + data + "\n" + 
+		"data.t = " + data.t + "\n" +
+		"data.length()" + data.length() + "\n" +
 		"mmlModelLearner = " + mmlModelLearner + "\n" + 
 		"mlModelLearner = " + mlModelLearner + "\n" + 
 		"referenceWeight = " + referenceWeight + "\n" + 

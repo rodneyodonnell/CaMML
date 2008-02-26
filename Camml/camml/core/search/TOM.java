@@ -664,6 +664,14 @@ public class TOM implements Cloneable
 		return tempTOM;
 	}
 	
+	public String toNodeString(String[] name, int i)
+	{
+		StringBuffer s = new StringBuffer();
+		s.append( name[i] + " : ");
+		for (int j = 0; j < node[i].parent.length; j++)
+			s.append( " <- " + name[node[i].parent[j]] );
+		return s.toString();
+	}
 	
 	/** Create ascii version of TOM */
 	public String toString()
@@ -682,9 +690,7 @@ public class TOM implements Cloneable
 		StringBuffer s = new StringBuffer();
 		for (int i = 0; i < node.length; i++) {
 			//	    updateParents(i);
-			s.append( name[i] + " : ");
-			for (int j = 0; j < node[ i ].parent.length; j++)
-				s.append( " <- " + name[node[i].parent[j]] );
+			s.append( toNodeString(name, i) );
 			s.append('\n');
 		}
 		return s.toString();       

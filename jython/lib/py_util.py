@@ -38,6 +38,10 @@ def saveNet(fName, my, overwritable=False):
 	if os.path.isfile(fName) and (overwritable == False): raise Exception("File already exists : " + fName)
 	camml.plugin.netica.NeticaFn.SaveNet.saveNet._apply(fName,my.cmpnt(0),my.cmpnt(my.length()-1))
 			
+def saveNet2(fName, m, y, overwritable=False):
+	"Save a netica newtowk given a model/parameter pair"
+	if os.path.isfile(fName) and (overwritable == False): raise Exception("File already exists : " + fName)
+	camml.plugin.netica.NeticaFn.SaveNet.saveNet._apply(fName,m,y)
 			
 # Load object from disk, expect a gzipfile if gzip==True
 def loadObject(fName, check=True, gzip=False):

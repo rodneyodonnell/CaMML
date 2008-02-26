@@ -166,7 +166,7 @@ public abstract class BNetSearch implements Search.SearchObject
 	protected boolean searchDone = false;
 	
 	/** Current Epoch */
-	protected long epoch = 0;
+	public /*protected*/ long epoch = 0; // temporarily made public for jython
 	
 	/** 
 	 * Set an option by name to a given value. Some options are search specific. <br> 
@@ -353,7 +353,7 @@ public abstract class BNetSearch implements Search.SearchObject
 	/** Modify the current arc probability.  This effects structureCost and the TOM mutation
 	 *  operators (skeletalChange, temporalChange, doubleSkeletalChange, parentSwapChange)
 	 */
-	protected void setArcProb( double arcProb )
+	public void setArcProb( double arcProb )
 	{
 		if ( fixedArcProb ) { throw new RuntimeException("ArcProb value unchangable"); }
 		this.arcProb = arcProb;
@@ -364,7 +364,7 @@ public abstract class BNetSearch implements Search.SearchObject
 	/** Modify the current search temperature (defaults to 1.0).  Higher temperatures increace the
 	 likelyhood of a bad (ie. high mml cost) model being accepted.
 	 */
-	protected void setTemperature( double temperature )
+	public void setTemperature( double temperature )
 	{
 		if ( fixedTemperature ) { throw new RuntimeException("Temperature value unchangable"); }
 		this.temperature = temperature;	
