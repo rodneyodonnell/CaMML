@@ -364,11 +364,11 @@ public class SEC implements Serializable
 	}
 	
 	/** SEC posterior comparator */
-	public static Comparator<SEC> posteriorComparator = 
+	public static Comparator<SEC> secWeightComparator = 
 		new Comparator<SEC>() {
 		public int compare( SEC a, SEC b ) {		 
-			double posteriorA = ((SEC)a).posterior;
-			double posteriorB = ((SEC)b).posterior;
+			double posteriorA = a.weight;
+			double posteriorB = b.weight;
 			if ( posteriorA > posteriorB ) { return -1; }
 			if ( posteriorA < posteriorB ) { return  1; }
 			if ( posteriorA == posteriorB ) { return 0; }

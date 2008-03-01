@@ -95,7 +95,7 @@ public class CaseInfo implements Serializable {
 	protected boolean allowMergeToModelWithMoreArcs = false;
 	
 	/** Function used for cleaning. */
-	public TOM.TOMCleaner tomCleaner = TOM.StandardTOMCleaner.tomCleaner;
+	public TOMCleaner tomCleaner = TOMCleaner.StandardTOMCleaner.tomCleaner;
 	
 	/** Type of SEC joining used. 0 -> KL, 3 -> CKL3, ignored if joinSECs = false. */
 	public int cklJoinType = 0;
