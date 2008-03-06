@@ -12,11 +12,13 @@
 package camml.core.models.dTree;
 
 
-import cdms.core.*;
+import camml.core.library.DTreeSelectedVector;
 import camml.core.models.FunctionStruct;
 import camml.core.models.ModelLearner;
-import camml.core.library.DTreeSelectedVector;
 import camml.core.models.multinomial.MLMultinomialLearner;
+import cdms.core.Type;
+import cdms.core.Value;
+import cdms.core.VectorFN;
 
 /**
  * MLDtreeLearner calculates the Maximum Liklihood score of a dataset.  This
@@ -98,7 +100,7 @@ public class MLDTreeLearner extends ModelLearner.DefaultImplementation {
 		
 		boolean[] splitUsed = new boolean[parent.length];
 		
-		java.util.ArrayList leafList = new java.util.ArrayList();
+		java.util.ArrayList<TreeNode> leafList = new java.util.ArrayList<TreeNode>();
 		leafList.add(rootNode);
 		
 		// expand the tree until further expansions do not decreace MML cost

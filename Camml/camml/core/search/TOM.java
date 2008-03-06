@@ -14,8 +14,11 @@ package camml.core.search;
 
 
 import java.util.BitSet;
-import cdms.core.*;
-import camml.core.models.*;
+
+import camml.core.models.ModelLearner;
+import cdms.core.Type;
+import cdms.core.Value;
+import cdms.core.VectorFN;
 
 /**
  TOM is a Totally Ordered Model, it is a causal model where the time ordering of the nodes is
@@ -515,7 +518,7 @@ public class TOM implements Cloneable
 		
 		// set value of parents.
 		for ( int i = 0; i < subParents.length; i++ ) {
-			subParents[i] = new VectorFN.FastDiscreteVector( (int[])node[i].parent.clone() );
+			subParents[i] = new VectorFN.FastDiscreteVector( node[i].parent.clone() );
 		}       		
 		
 		// set CPT models and parameters for nodes.

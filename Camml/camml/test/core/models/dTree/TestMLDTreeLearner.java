@@ -10,8 +10,6 @@ package camml.test.core.models.dTree;
 
 import java.util.Random;
 
-import weka.core.WeightedInstancesHandler;
-
 import junit.framework.*;
 
 import camml.core.library.SelectedVector;
