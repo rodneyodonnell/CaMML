@@ -125,7 +125,7 @@ public class TestEnumerateDAGs extends TestCase {
 	public final void testIncrementOrder() {
 		int order[] = new int[] {0,1,2};
 		for ( int i = 0; i < 15; i++ ) {
-			java.util.ArrayList a = new java.util.ArrayList();
+			java.util.ArrayList<Integer> a = new java.util.ArrayList<Integer>();
 			for ( int j = 0; j < order.length; j++ ) { a.add( new Integer(order[j]) ); }
 			EnumerateDAGs.incrementOrder( order );
 		}

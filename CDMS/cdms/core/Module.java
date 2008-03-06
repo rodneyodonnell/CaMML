@@ -22,13 +22,13 @@ import java.lang.reflect.*;
 */
 public abstract class Module
 {
-  private static java.util.Vector installed = new java.util.Vector();
+  private static java.util.Vector<Module> installed = new java.util.Vector<Module>();
 
   public static Module getModuleByName(String name)
   {
     for (int i = 0; i < installed.size(); i++)
-      if (((Module) installed.elementAt(i)).getModuleName().compareTo(name) == 0)
-        return (Module) installed.elementAt(i);
+      if (installed.elementAt(i).getModuleName().compareTo(name) == 0)
+        return installed.elementAt(i);
     return null;
   }
 

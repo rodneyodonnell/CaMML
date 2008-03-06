@@ -369,8 +369,8 @@ public class SEC implements Serializable
 	public static Comparator<SEC> secWeightComparator = 
 		new Comparator<SEC>() {
 		public int compare( SEC a, SEC b ) {		 
-			double posteriorA = ((SEC)a).weight;
-			double posteriorB = ((SEC)b).weight;
+			double posteriorA = a.weight;
+			double posteriorB = b.weight;
 			if ( posteriorA > posteriorB ) { return -1; }
 			if ( posteriorA < posteriorB ) { return  1; }
 			if ( posteriorA == posteriorB ) { return 0; }

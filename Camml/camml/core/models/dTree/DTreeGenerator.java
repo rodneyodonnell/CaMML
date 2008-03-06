@@ -92,19 +92,19 @@ public class DTreeGenerator extends Value.Model
 		public final int[] parentArity;
 		public final int[] availableSplits;
 		public final TreeNode parent;
-		public final ArrayList children = new ArrayList();
+		public final ArrayList<TreeNode> children = new ArrayList<TreeNode>();
 		
 		public int splitAttribute = -1;
 		public Value.Model model;
 		public Value params;
 		
-		/** Return the number of leaf descendents this node has (leaf nodes return 1) */
+		/** Return the number of leaf descendants this node has (leaf nodes return 1) */
 		public int numDescendentLeaves()
 		{
 			if ( splitAttribute == -1 ) return 1;
 			int numLeaves = 0;
 			for ( int i = 0; i < children.size(); i++ ) {
-				numLeaves += ((TreeNode)children.get(i)).numDescendentLeaves();
+				numLeaves += children.get(i).numDescendentLeaves();
 			}
 			return numLeaves;
 		}
@@ -139,7 +139,7 @@ public class DTreeGenerator extends Value.Model
 			else {
 				Value[] subParamArray = new Value[children.size()];
 				for ( int i = 0; i < children.size(); i++ ) {
-					subParamArray[i] = ((TreeNode)children.get(i)).makeParams();
+					subParamArray[i] = children.get(i).makeParams();
 				}
 				subParams = new VectorFN.FatVector( subParamArray );
 				
@@ -202,8 +202,8 @@ public class DTreeGenerator extends Value.Model
 	{
 		// We start with an empty split list, and a leafList with a single leaf able to be split
 		// on any parent.
-		java.util.ArrayList leafList = new java.util.ArrayList();
-		java.util.ArrayList splitList = new java.util.ArrayList();
+		java.util.ArrayList<TreeNode> leafList = new java.util.ArrayList<TreeNode>();
+		java.util.ArrayList<TreeNode> splitList = new java.util.ArrayList<TreeNode>();
 		
 		if ( leafProb < 0 || leafProb > 1 ) {
 			throw new RuntimeException( "leafProb out of range : " + leafProb );
@@ -235,7 +235,7 @@ public class DTreeGenerator extends Value.Model
 			
 			// Randomly select a leaf from leafList
 			int nextLeaf = rand.nextInt( leafList.size() );
-			TreeNode currentLeaf = (TreeNode)leafList.remove( nextLeaf );
+			TreeNode currentLeaf = leafList.remove( nextLeaf );
 			int[] availableSplits = currentLeaf.availableSplits;	 
 			// If there are no possible splits, put the leaf back and try again.
 			if ( availableSplits.length == 0 ) { leafList.add(currentLeaf); continue; }
@@ -274,7 +274,7 @@ public class DTreeGenerator extends Value.Model
 		
 		// Now we need to populate each leaf with a distribution and set of parameters
 		for ( int j = 0; j < leafList.size(); j++ ) {
-			TreeNode currentLeaf = (TreeNode)leafList.get(j);
+			TreeNode currentLeaf = leafList.get(j);
 			Value.Structured currentStruct = (Value.Structured)leafParamVec.elt(j);
 			currentLeaf.model = (Value.Model)currentStruct.cmpnt(0);
 			currentLeaf.params = currentStruct.cmpnt(1);

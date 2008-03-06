@@ -211,7 +211,7 @@ public abstract class BNetSearch implements Search.SearchObject
 		}
 		else if ( option.equals("clean") ) {
 			boolean clean = (((Value.Discrete)v).getDiscrete() == 0);
-			if (clean == false) { caseInfo.tomCleaner = TOM.NoCleanTOMCleaner.tomCleaner; }
+			if (clean == false) { caseInfo.tomCleaner = TOMCleaner.NoCleanTOMCleaner.tomCleaner; }
 			System.out.println( "Setting arc cleaning: " + clean );
 		}
 		else if ( option.equals("joinDAGs") ) {
@@ -361,9 +361,11 @@ public abstract class BNetSearch implements Search.SearchObject
 		updateMutationOperators( arcProb, temperature );
 	}
 	
-	/** Modify the current search temperature (defaults to 1.0).  Higher temperatures increace the
-	 likelyhood of a bad (ie. high mml cost) model being accepted.
-	 */
+	protected double getTemperature() { return this.temperature; }
+	
+	/** Modify the current search temperature (defaults to 1.0).  Higher temperatures increase the
+	  * likelihood of a bad (i.e. high MML cost) model being accepted.
+	  */
 	public void setTemperature( double temperature )
 	{
 		if ( fixedTemperature ) { throw new RuntimeException("Temperature value unchangable"); }

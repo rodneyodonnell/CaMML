@@ -51,7 +51,7 @@ public class MetropolisSearch extends BNetSearch
 	public Hashtable<SECHashKey,SEC> getSECHashTable() { return secHashtable; }
 	
 	/** Maximum number of epochs */
-	// Long required as int boundry may be exceeded at ~= 200 nodes. 
+	// Long required as int boundary may be exceeded at ~= 200 nodes. 
 	protected long max;
 	
 	/** SECs costing more than bestCost + ignoreCap are not added to the secList. */
@@ -60,9 +60,11 @@ public class MetropolisSearch extends BNetSearch
 	/** Total weight ignored by sampling.  A TOM is ignored if it's MML cost is > best+ignoreCap */
 	protected double weightIgnored = 0;    
 	
-	/** Current clean Maximum Likelyhood cost */	
+	/** Current clean Maximum Likelihood cost */	
 	protected double currentMLCost;
 	
+	/** Should we treat the first epoch as special and do the anneal search there? */
+	public boolean doAnnealOnFirstEpoch = true;
 
 	/** Update currentCost and cleanMLCost. 
 	 * @param nodeChanged: list of nodes with parent changes since last call to updateCosts. 
@@ -219,7 +221,7 @@ public class MetropolisSearch extends BNetSearch
 	 */
 	public double doEpoch() 
 	{
-		if (epoch == 0) {
+		if (epoch == 0 && doAnnealOnFirstEpoch) {
 			// Calculate the number of epochs in the search.
 			long temp = numNodes;
 			if (temp < 10) {
@@ -259,7 +261,7 @@ public class MetropolisSearch extends BNetSearch
 		if ( epoch == max-1) { System.out.println(); }
 		
 		// Randomise TOM order in the current DAG.  Arc directions remain unchanged.		
-		if ( epoch == 0 ) {
+		if ( epoch == 0 && doAnnealOnFirstEpoch) {
 			tom.buildOrder( rand );
 			// Ensure any TOM constraints are honoured.
 			caseInfo.tomCoster.repairTOM(tom);

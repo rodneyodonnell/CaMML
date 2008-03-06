@@ -123,7 +123,7 @@ public class ForcedSplitDTreeLearner extends ModelLearner.DefaultImplementation 
 		
 		boolean[] splitUsed = new boolean[parent.length];
 		
-		java.util.ArrayList leafList = new java.util.ArrayList();
+		java.util.ArrayList<TreeNode> leafList = new java.util.ArrayList<TreeNode>();
 		leafList.add(rootNode);
 		
 		// expand the tree until further expansions do not decreace MML cost
