@@ -545,19 +545,32 @@ public class TOM implements Cloneable
 		return new VectorFN.FatVector( localStructure  );
 	}
 
+	public int[][] getParentArrays( Value.Vector params )
+	{
+		int parents[][] = new int[params.length()][];
+		for (int i = 0; i < params.length(); i++) {
+			Value.Vector arcVec = (Value.Vector)params.cmpnt(1).elt(i); 
+			parents[i] = new int[arcVec.length()];
+			for (int j = 0; j < arcVec.length(); j++) {
+				parents[i][j] = arcVec.intAt(j);
+			}
+		}
+		return parents;
+	}
+
+	
 	/** Set the current node ordering and edges based on params <br>
 	 *  Calling setStructure( makeParams( xx ) ) should leave 
 	 *  the original TOM in tact.
 	 */
 	public void setStructure( Value.Vector params ) {
-		Value.Vector arcs[] = new Value.Vector[params.length()];
-		for (int i = 0; i < params.length(); i++) {
-			arcs[i] = (Value.Vector)params.cmpnt(1).elt(i);
-		}
-
+		setStructure( getParentArrays(params) );
+	}
+	
+	/** Set the current node ordering and edges based on arcs <br> */
+	public void setStructure( int[][] arcs ) {
 		// Remove all arcs from current TOM
 		this.clearArcs();
-
 
 		// Use simplistic (and possibly slow) algorithm to ensure
 		// this TOM has an ordering consistent with the arc
@@ -567,12 +580,12 @@ public class TOM implements Cloneable
 			changes = 0;
 			// for each arc
 			for ( int i = 0; i < arcs.length; i++ ) {
-				for ( int j = 0; j < arcs[i].length(); j++ ) {
+				for ( int j = 0; j < arcs[i].length; j++ ) {
 
 					// if TOM ordering inconsistent with param
 					// ordering, swap ordering in TOM.
 					int nodeI = i;
-					int nodeJ = arcs[i].intAt(j);
+					int nodeJ = arcs[i][j];
 
 					if( before(nodeI,nodeJ) ) {
 						swapOrder(nodeI,nodeJ,true);
@@ -584,8 +597,8 @@ public class TOM implements Cloneable
 
 		// Add required arcs to TOM.
 		for ( int i = 0; i < arcs.length; i++ ) {
-			for ( int j = 0; j < arcs[i].length(); j++ ) {
-				this.addArc(i,arcs[i].intAt(j));
+			for ( int j = 0; j < arcs[i].length; j++ ) {
+				this.addArc(i,arcs[i][j]);
 			}
 		}
 		

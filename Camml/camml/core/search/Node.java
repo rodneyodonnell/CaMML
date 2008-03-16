@@ -70,6 +70,7 @@ public class Node implements Cloneable
 	protected int parent[];
 	
 	public int getNumParents() { return parent.length; }
+	public int[] getParentCopy() { return parent.clone(); }
 	
 	/** add a single parent to this node. If maxParents is already reached, throw an exception */
 	public void addParent( int node )
