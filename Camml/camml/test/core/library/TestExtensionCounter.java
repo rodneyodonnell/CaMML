@@ -20,8 +20,11 @@
 
 package camml.test.core.library;
 
-import camml.core.library.ExtensionCounter;
-
+import camml.core.library.extensionCounter.BruteForceExtensionCounter;
+import camml.core.library.extensionCounter.DynamicCounter;
+import camml.core.library.extensionCounter.ExtensionCounterLib;
+import camml.core.library.extensionCounter.UnlabelledGraph;
+import camml.core.library.extensionCounter.UnlabelledGraph64;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -39,7 +42,7 @@ public class TestExtensionCounter extends TestCase {
 	/** Test Adding arcs. */
 	public final void testUnlabeledGraph() {
 		
-		ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(5);
+		UnlabelledGraph64 g = new UnlabelledGraph64(5);
 		// Add 0->3, 3->2 and implied arc 0->2
 		g.addArc(0,3,true);
 		g.addArc(3,2,true);
@@ -49,8 +52,8 @@ public class TestExtensionCounter extends TestCase {
 		catch (RuntimeException e) {/* Ignore as this is correct behaviour */ }
 				
 		// Check leaf nodes are correct
-		assertEquals("Leaf Node mismatch",g.getLeafNodes(),0x0000000000000016l);
-		assertEquals("Root Node mismatcH",g.getRootNodes(),0x0000000000000013l);
+		assertEquals("Leaf Node mismatch",g.testOnly_getLeafNodes(),0x0000000000000016l);
+		assertEquals("Root Node mismatcH",g.testOnly_getRootNodes(),0x0000000000000013l);
 		
 		// Check connectedness is reported correctly
 		
@@ -58,7 +61,7 @@ public class TestExtensionCounter extends TestCase {
 		// Check parentList and childList are consistant.
 		long[] parentList = g.getParentList();
 		long[] childList = g.getChildList();
-		long[] mask = ExtensionCounter.UnlabelledGraph.nodeMask;
+		long[] mask = ExtensionCounterLib.nodeMask;
 						
 		for ( int i = 0; i < parentList.length; i++ ) {
 			for ( int j = 0; j < parentList.length; j++ ) {
@@ -67,18 +70,18 @@ public class TestExtensionCounter extends TestCase {
 			}
 		}	
 		
-		ExtensionCounter.UnlabelledGraph g2 = g.removeNode(0, false);
-		assertEquals(g2.getRootNodes(),0x0dl);
-		assertEquals(g2.getLeafNodes(),0x0bl);
+		UnlabelledGraph64 g2 = g.removeNode(0, false);
+		assertEquals(g2.testOnly_getRootNodes(),0x0dl);
+		assertEquals(g2.testOnly_getLeafNodes(),0x0bl);
 
 	}
 
 	/** Test Wallace Extension counter. */
 	public final void testWallaceExtensionCounter() {
 		
-		ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(6);
+		UnlabelledGraph64 g = new UnlabelledGraph64(6);
 			
-		ExtensionCounter.WallaceCounter count = new ExtensionCounter.WallaceCounter();
+		BruteForceExtensionCounter count = new BruteForceExtensionCounter();
 		assertEquals(720,count.lperms(g));
 		
 		g.addArc(0,1,true);
@@ -111,9 +114,9 @@ public class TestExtensionCounter extends TestCase {
 
 	public final void testDynamicExtensionCounter() {
 		
-		ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(6);
+		UnlabelledGraph g = new UnlabelledGraph64(6);
 			
-		ExtensionCounter.DynamicCounter count = new ExtensionCounter.DynamicCounter();
+		DynamicCounter count = new DynamicCounter();
 		assertEquals(720.0,count.countPerms(g));
 		
 		g.addArc(0,1,true);
@@ -148,8 +151,8 @@ public class TestExtensionCounter extends TestCase {
 	/** Generate random graphs to ensure Dynamic and Wallace produce the same answers. */
 	public final void testDynamicVsWallace() {
 				
-		ExtensionCounter.DynamicCounter dCount = new ExtensionCounter.DynamicCounter();
-		ExtensionCounter.WallaceCounter wCount = new ExtensionCounter.WallaceCounter();
+		DynamicCounter dCount = new DynamicCounter();
+		BruteForceExtensionCounter wCount = new BruteForceExtensionCounter();
 
 		final int numNodes = 10;
 		final double arcProb = (1.0*numNodes)/(numNodes*(numNodes-1)/2);
@@ -166,13 +169,13 @@ public class TestExtensionCounter extends TestCase {
 				System.out.print("i="+i+"\t");
 				int totalCalls = 0;
 				for (int ii = 0; ii < numNodes+1; ii++ ) {
-					totalCalls += ExtensionCounter.DynamicCounter.dCounterCalls[ii];
-					System.out.print( ExtensionCounter.DynamicCounter.dCounterCalls[ii] + " ");
+					totalCalls += DynamicCounter.dCounterCalls[ii];
+					System.out.print( DynamicCounter.dCounterCalls[ii] + " ");
 				}
 				System.out.println("\t"+totalCalls);
 			}
 			
-			ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(numNodes);
+			UnlabelledGraph64 g = new UnlabelledGraph64(numNodes);
 			for ( int ii = 0; ii < numNodes; ii++) {
 				int r = ii+rand.nextInt(numNodes-ii);
 				int temp = totalOrder[ii]; totalOrder[ii] = totalOrder[r]; totalOrder[r] = temp;
@@ -205,9 +208,9 @@ public class TestExtensionCounter extends TestCase {
 			System.out.println("dCounterCalls:");
 		
 			int totalCalls = 0;
-			for (int i = 0; i < ExtensionCounter.DynamicCounter.dCounterCalls.length; i++ ) {
-				totalCalls += ExtensionCounter.DynamicCounter.dCounterCalls[i];
-				System.out.print( ExtensionCounter.DynamicCounter.dCounterCalls[i] + " ");
+			for (int i = 0; i < DynamicCounter.dCounterCalls.length; i++ ) {
+				totalCalls += DynamicCounter.dCounterCalls[i];
+				System.out.print( DynamicCounter.dCounterCalls[i] + " ");
 			}
 			System.out.println("\n"+totalCalls);
 		}
@@ -224,10 +227,10 @@ public class TestExtensionCounter extends TestCase {
 	/** Test case used to find a bug in UnlabelledGraph.getSubgraphMask(). */
 	public final void testBrokenCase() {
 				
-		ExtensionCounter.DynamicCounter dCount = new ExtensionCounter.DynamicCounter();
-		ExtensionCounter.WallaceCounter wCount = new ExtensionCounter.WallaceCounter();
+		DynamicCounter dCount = new DynamicCounter();
+		BruteForceExtensionCounter wCount = new BruteForceExtensionCounter();
 
-		ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(5);
+		UnlabelledGraph64 g = new UnlabelledGraph64(5);
 
 		g.addArc(0,3,true);
 		g.addArc(1,3,true);
@@ -239,13 +242,13 @@ public class TestExtensionCounter extends TestCase {
 	
 	/** Test the interleave function in DynamicCounter. */
 	public final void testInterleave() {
-		assertEquals( ExtensionCounter.DynamicCounter.interleave(1,1), 2);
-		assertEquals( ExtensionCounter.DynamicCounter.interleave(10,10), 184756);
-		assertEquals( ExtensionCounter.DynamicCounter.interleave(99,1), 100);
-		assertEquals( ExtensionCounter.DynamicCounter.interleave(30,30), 118264581564861424l);
-		assertEquals( ExtensionCounter.DynamicCounter.interleave(43,26), 7023301266595310928L);
+		assertEquals( DynamicCounter.interleave(1,1), 2);
+		assertEquals( DynamicCounter.interleave(10,10), 184756);
+		assertEquals( DynamicCounter.interleave(99,1), 100);
+		assertEquals( DynamicCounter.interleave(30,30), 118264581564861424l);
+		assertEquals( DynamicCounter.interleave(43,26), 7023301266595310928L);
 		try{
-			ExtensionCounter.DynamicCounter.interleave(43,27);
+			DynamicCounter.interleave(43,27);
 			assertTrue("Exception not properly thrown",false);
 		} catch (Exception e) {/* Correct behaviour. >64 bits needed to pass this test.*/}
 	}	

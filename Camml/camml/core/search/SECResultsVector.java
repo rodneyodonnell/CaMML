@@ -12,7 +12,9 @@
 package camml.core.search;
 
 import cdms.core.*;
-import camml.core.library.ExtensionCounter;
+import camml.core.library.extensionCounter.BitSetBasedUnlabelledGraph;
+import camml.core.library.extensionCounter.DynamicCounter;
+import camml.core.library.extensionCounter.UnlabelledGraph;
 import camml.core.models.ModelLearner;
 import camml.core.models.ModelLearner.GetNumParams;
 
@@ -205,8 +207,8 @@ public class SECResultsVector extends Value.Vector {
 				TOM tom = sec.getTOM(tomIndex);
 				
 				if ( tom.getNumNodes() <= 15) {
-					ExtensionCounter.UnlabelledGraph ug = new ExtensionCounter.UnlabelledGraph(tom);
-					double perms = ExtensionCounter.dCounter.countPerms(ug);
+					UnlabelledGraph ug = new BitSetBasedUnlabelledGraph(tom);
+					double perms = DynamicCounter.dCounter.countPerms(ug);
 					return new Value.Continuous(Math.log(perms));
 				}
 				else { return new Value.Continuous(-1); }

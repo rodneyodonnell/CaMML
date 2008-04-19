@@ -89,4 +89,5 @@ public abstract class UnlabelledGraph {
 	public abstract UnlabelledGraph removeNode(int node, boolean overwrite);
 
 	public abstract int[] getSubgraphNodeArray(int node);
+	public abstract boolean isDirectedArc(int parent, int child);
 }

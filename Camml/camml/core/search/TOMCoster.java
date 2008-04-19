@@ -14,7 +14,10 @@ package camml.core.search;
 
 import java.io.Serializable;
 
-import camml.core.library.ExtensionCounter;
+import camml.core.library.extensionCounter.BitSetBasedUnlabelledGraph;
+import camml.core.library.extensionCounter.DynamicCounter;
+import camml.core.library.extensionCounter.ExtensionCounter;
+import camml.core.library.extensionCounter.UnlabelledGraph;
 import cdms.core.FN;
 
 /**
@@ -281,7 +284,7 @@ public interface TOMCoster extends Serializable {
 		
 		
 		// Linear extension caounter.
-		final static ExtensionCounter.DynamicCounter counter = ExtensionCounter.dCounter;
+		final static DynamicCounter counter = DynamicCounter.dCounter;
 		
 		/** Cache of last N tom hashes counted. */
 		private static final double[] countCache = new double[16];
@@ -307,7 +310,7 @@ public interface TOMCoster extends Serializable {
 			}
 			
 			// Create UnlabelledGraph of TOM
-			ExtensionCounter.UnlabelledGraph g = new ExtensionCounter.UnlabelledGraph(tom.node.length);
+			UnlabelledGraph g = new BitSetBasedUnlabelledGraph(tom.node.length);
 			for (int i = 0; i < tom.node.length; i++) {
 				for (int j = 0; j < tom.node[i].parent.length; j++) {
 					int a = tom.node[i].parent[j];
