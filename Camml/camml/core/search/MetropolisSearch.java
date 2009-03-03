@@ -164,6 +164,16 @@ public class MetropolisSearch extends BNetSearch
 			secList.get(i).updateReferenceWeight( multiplier );
 		}
 		
+		// Update arc portions
+		if (caseInfo.updateArcWeights) {		
+			double[][] arcWeights = caseInfo.arcWeights;
+			for (int i = 0; i < arcWeights.length; i++) {
+				for (int j = 0; j < arcWeights.length; j++) {
+					arcWeights[i][j] *= multiplier;
+				}				
+			}
+		}
+		
 		System.out.println("newReference = " + caseInfo.referenceWeight + "\t" + 
 				"totalWeight = " + caseInfo.totalWeight + "\t" + 
 				"multiplier = " + multiplier );
@@ -466,16 +476,31 @@ public class MetropolisSearch extends BNetSearch
 		return results;
 	}
 	
+	//
+	// Calculate the proportion of time arc[i][j] is set in the TOM being sampled
+	//
+	public double[][] getArcPortions() {
+		double arcWeights[][] = caseInfo.arcWeights;
+		double arcProbs[][] = new double[arcWeights.length][arcWeights.length];
+		for (int i = 0; i < arcWeights.length; i++) {
+			for (int j = 0; j < arcWeights.length; j++) {
+				arcProbs[i][j] = arcWeights[i][j];
+				if (tom.isDirectedArc(j,i)) { arcProbs[i][j] += caseInfo.totalWeight; }
+				arcProbs[i][j] /= caseInfo.totalWeight;
+			}
+		}
+		return arcProbs;
+	}
+	
 	public void printArcPortions() {		
-		double p[][] = caseInfo.arcWeights;
-		for (int i = 0; i < p.length; i++) {
+		double p[][] = getArcPortions();
+		for (int i = 0; i < p.length; i++)
+		{
 			for (int j = 0; j < p.length; j++) {
-				double x = p[i][j];
-				if (tom.isDirectedArc(j,i)) { x += caseInfo.totalWeight; }
-				System.out.print( caseInfo.posteriorFormat.format(x/caseInfo.totalWeight) + "\t");
+				System.out.print(caseInfo.posteriorFormat.format(p[i][j]) + "\t");
 			}
 			System.out.println();
-		}
+		}		
 	}
 
 	

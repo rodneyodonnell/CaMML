@@ -34,7 +34,7 @@ let
   CammlSearchPackage = install ("camml.core.search.SearchPackage",()),
   CammlModels = install ("camml.core.models.Models",()),
 
-  NeticaFN = install ("camml.plugin.netica.Netica", ()),
+  {NeticaFN = install ("camml.plugin.netica.Netica", ()),}
   Rodo = install ("camml.plugin.rodoCamml.RodoCamml",()),
   Weka = install ("camml.plugin.weka.Weka", ()),
   RMI = install ("camml.plugin.rmi.CDMSEngine$EngineModule",()),  
@@ -168,13 +168,14 @@ let
 			params = cmpnt 1 my
 		in CammlModels.visualiseInferenceBNet model params (),
 		"ShowNet", "Show the best representative tom of MMLEC, SEC or DAG"),
-	
+	{
 	f2 = addToEnvironment ( lambda x . let
 			my = CammlSearchPackage.getRepresentativeDAG x,
 			bNet = cmpnt 0 my,
 			params = cmpnt 1 my
 		in Netica.saveNet (Dialog.saveFileChooser [".dne",".dnet"],bNet,params),
 		"SaveNet", "Show the best representative tom of MMLEC, SEC or DAG as a netica file"),
+        }
 
 	{ -- ADD Shortcut options for running BNetLearner with various options --}
 	f4 = addToEnvironment (
