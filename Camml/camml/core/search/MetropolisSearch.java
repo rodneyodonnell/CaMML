@@ -271,7 +271,7 @@ public class MetropolisSearch extends BNetSearch
 		if ( epoch == max-1) { System.out.println(); }
 		
 		// Randomise TOM order in the current DAG.  Arc directions remain unchanged.		
-		if ( epoch == 0 && doAnnealOnFirstEpoch) {
+		if ( epoch == 0 && doAnnealOnFirstEpoch && caseInfo.regression) {
 			tom.buildOrder( rand );
 			// Ensure any TOM constraints are honoured.
 			caseInfo.tomCoster.repairTOM(tom);

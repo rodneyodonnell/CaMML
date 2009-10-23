@@ -34,7 +34,7 @@ let
   CammlSearchPackage = install ("camml.core.search.SearchPackage",()),
   CammlModels = install ("camml.core.models.Models",()),
 
-  NeticaFN = install ("camml.plugin.netica.Netica", ()),
+  {NeticaFN = install ("camml.plugin.netica.Netica", ()),}
   Rodo = install ("camml.plugin.rodoCamml.RodoCamml",()),
   Weka = install ("camml.plugin.weka.Weka", ()),
   RMI = install ("camml.plugin.rmi.CDMSEngine$EngineModule",()),  
