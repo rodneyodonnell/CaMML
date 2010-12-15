@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="DEFAULT_COMPILER" value="Javac" />
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DVizPanel.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DVisualizer.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DSubObj.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DAxis.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DVizPanelDemo.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DRGBAxis.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DObjMaker.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DSpaceAxis.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DScatterPlot.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DStarFieldPlot.java" />
+      <file url="file://$PROJECT_DIR$/CDMS/cdms/plugin/go3dviz/GO3DCubeMaker.java" />
+    </excludeFromCompile>
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="?*.properties" />
+      <entry name="?*.xml" />
+      <entry name="?*.gif" />
+      <entry name="?*.png" />
+      <entry name="?*.jpeg" />
+      <entry name="?*.jpg" />
+      <entry name="?*.html" />
+      <entry name="?*.dtd" />
+      <entry name="?*.tld" />
+      <entry name="?*.ftl" />
+    </wildcardResourcePatterns>
+    <annotationProcessing enabled="false" useClasspath="true" />
+  </component>
+</project>
+

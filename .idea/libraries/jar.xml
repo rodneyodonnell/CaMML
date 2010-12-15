@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/jar/weka.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jar/NeticaJ.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jar/tetrad4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jar/junit.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
