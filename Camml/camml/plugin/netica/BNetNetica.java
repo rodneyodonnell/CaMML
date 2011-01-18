@@ -496,8 +496,9 @@ public class BNetNetica extends BNet
 		Net net = buildNet( name, params );
 		net.setComment( comment );
 		java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
-				
-		Streamer stringStreamer = new Streamer( out, Netica.env );	    
+
+
+		Streamer stringStreamer = new Streamer( out, name, Netica.env );
 		net.write( stringStreamer );
 		stringStreamer.finalize(); // close file.
 				
