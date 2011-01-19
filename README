@@ -1,34 +1,33 @@
 
-Quick guide to getting CaMML started (updated 22-08-06) :
+Quick guide to getting CaMML started (updated 18-01-2011) :
 
-for a full guide see:
-http://bruce.csse.monash.edu.au:7777/CAMML/
-http://bruce.csse.monash.edu.au:7777/CAMML/wiki
+for the latest src see:
+    https://github.com/rodneyodonnell/CaMML
+for docs & discussion see:
+    http://groups.google.com/group/camml/
 
 ==============================
 == Installing/Running CaMML ==
 ==============================
-1. Checkout from CVS
-> export CVSROOT=:ext:$user@bruce.csse.monash.edu.au:/u/csse/public/bai/bepi/cvs
-> export CVS_RSH=ssh
-> mkdir ~/BAI; cd ~/BAI
-> cvs checkout CAMML   # You may be prompted for your bruce.csse password
+1. Checkout from Github
+> git clone git://github.com/rodneyodonnell/CaMML.git
 
 2. Get library/jar files
-- Download files from
+- For CaMML to compile cleanly, we need to download the Netica BNet inference library.
+  If running Linux, simply run get_libs.sh from the CAMML dir
+  Otherwise grab the libraries for you platform direct from http://norsys.com/downloads/
+  NOTE: If your platform is not supported (e.g., 64 bit linux) just grab the .jar file anyway so things compile.
+        Netica inference is disabled by default.
+
+- CaMML includes .jars from several open source packages, to get the latest versions try:
 	Tetrad : http://www.phil.cmu.edu/projects/tetrad_download/download/
 	Weka : http://www.cs.waikato.ac.nz/ml/weka/
-	Netica : http://www.norsys.com/
 	junit : http://www.junit.org/
-- Tetrad.jar, weka.jar, NeticaJ.jar and junit.jar must be in your classpath
-> export CLASSPATH=$CLASSPATH:Tetrad.jar:weka.jar:NeticaJ.jar:junit.jar
-- libNeticaJ.so must be in your $LD_LIBRARY_PATH
-> mkdir ~/lib; cp libNeticaJ.so ~/lib
-> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
 
-3. Compile CaMML
-> cd ~/BAI/CAMML
+3. Compile/test CaMML
+> cd CAMML
 > ant
+> ant test
 
 
 4. Run     
@@ -38,9 +37,26 @@ http://bruce.csse.monash.edu.au:7777/CAMML/wiki
 == Using CaMML ==
 =================
 
-There are two main ways to use the CaMML gui, clicking manually
-and writing scripts.  One or the other may be easiest depending
-on the task.
+There are several plausible ways to use CaMML, common approaches include:
+ - Using the weka wrapper
+ - Using the CDMS GUI
+   - Interacting Manually
+   - Writing CDMS .fp scripts
+ - (advanced) Using a JVM based scripting language (e.g., jython)
+
+One or the other may be easiest depending on the task.
+The 'weka wrapper' is probably the easiest place to start for most users.
+
+== Weka Wrapper
+CaMML can be used like a standard weka classifier from the command line.
+It can also be added to the weka GUI, but that's beyond the scope of this doc.
+
+- To get a list of options, use:
+  > ./camml_weka.sh
+
+- To train/test a model using weka's default x-fold validation, use:
+  > ./camml_weka.sh -t Camml/camml/test/iris.arff
+
 
 == Manual Tasks
 Loading Data: 
