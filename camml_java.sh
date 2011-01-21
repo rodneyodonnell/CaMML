@@ -1,0 +1,6 @@
+JVM_OPTS="-Xmx512m -Dnetica.reg=$NETICAREG"
+CAMML_HOME=`pwd`
+for JAR in $CAMML_HOME/jar/*.jar; do JARS=$JARS:$JAR; done
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CAMML_HOME/lib
+export CLASSPATH=$CAMML_HOME/Camml:$CAMML_HOME/CDMS:$JARS
+java $*
