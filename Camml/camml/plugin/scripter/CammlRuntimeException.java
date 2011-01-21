@@ -18,14 +18,14 @@ package camml.plugin.scripter;
  */
 public class CammlRuntimeException extends RuntimeException {
     /** Serial ID required to evolve class while maintaining serialisation compatibility. */
-	private static final long serialVersionUID = 3901348368810252494L;
+    private static final long serialVersionUID = 3901348368810252494L;
 
-	CammlRuntimeException( ) {
-	super ("Camml Runtime Exception");
+    CammlRuntimeException( ) {
+        super ("Camml Runtime Exception");
     }
     
     CammlRuntimeException( String s ) {
-	super ("Camml Runtime Exception : " + s);
+        super ("Camml Runtime Exception : " + s);
     }
 }
 

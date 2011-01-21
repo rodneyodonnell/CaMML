@@ -27,38 +27,38 @@ import cdms.core.*;
  */
 public class TestDTreeGenerator extends TestCase {
 
-	/** BNet model used in testing*/
-	protected static DTree model;
-	
-	/** Parameters corresponding to model */
-	protected static Value.Vector params;
+    /** BNet model used in testing*/
+    protected static DTree model;
+    
+    /** Parameters corresponding to model */
+    protected static Value.Vector params;
 
-	/** */
-	public TestDTreeGenerator() { super(); }
+    /** */
+    public TestDTreeGenerator() { super(); }
 
-	/**	 */
-	public TestDTreeGenerator(String name) { super(name); }
-	
-	public static Test suite() 
-	{
-		return new TestSuite( TestDTreeGenerator.class );		
-	}
+    /**     */
+    public TestDTreeGenerator(String name) { super(name); }
+    
+    public static Test suite() 
+    {
+        return new TestSuite( TestDTreeGenerator.class );        
+    }
 
-	
-	/** Initialise. */
-	protected void setUp() throws Exception { 
-	}
+    
+    /** Initialise. */
+    protected void setUp() throws Exception { 
+    }
 
-	/** Test KL function on Augmented networks */
-	public final void testHighArityGenerate() throws Exception {
-		Random rand = new Random(123);
-		int arity = 2;
-		double leafP = 0.25; 
-		int numParents = 18;
-		int parents[] = new int[numParents];
-		for (int i = 0; i < parents.length; i++) { parents[i] = arity; }
-		DTreeGenerator.generate(rand,arity,parents,leafP,true);
-		//System.out.println(my);
-	}
+    /** Test KL function on Augmented networks */
+    public final void testHighArityGenerate() throws Exception {
+        Random rand = new Random(123);
+        int arity = 2;
+        double leafP = 0.25; 
+        int numParents = 18;
+        int parents[] = new int[numParents];
+        for (int i = 0; i < parents.length; i++) { parents[i] = arity; }
+        DTreeGenerator.generate(rand,arity,parents,leafP,true);
+        //System.out.println(my);
+    }
 
 }

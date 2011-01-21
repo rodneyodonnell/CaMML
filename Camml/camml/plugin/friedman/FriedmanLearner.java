@@ -21,8 +21,8 @@ import java.io.*;
 public class FriedmanLearner extends ModelLearner.DefaultImplementation
 {
     /** Serial ID required to evolve class while maintaining serialisation compatibility. */
-	private static final long serialVersionUID = -3790372842332418408L;
-	public String getName() { return "FriedmanLearner"; }    
+    private static final long serialVersionUID = -3790372842332418408L;
+    public String getName() { return "FriedmanLearner"; }    
 
 
 
@@ -44,91 +44,91 @@ public class FriedmanLearner extends ModelLearner.DefaultImplementation
     /** Constuctor currently only specifies Type.MODEL, this needs to be fixed. */
     public FriedmanLearner( )
     {
-	super( Type.MODEL, Type.TRIV );
-	options = "";
+        super( Type.MODEL, Type.TRIV );
+        options = "";
     }
 
     /** Constuctor currently only specifies Type.MODEL, this needs to be fixed. */
     public FriedmanLearner( String options )
     {
-	super( Type.MODEL, Type.TRIV );
-	this.options = options;
+        super( Type.MODEL, Type.TRIV );
+        this.options = options;
     }
 
 
     /** Parameterize and return (m,s,y) */
     public Value.Structured parameterize( Value initialInfo, Value.Vector x, Value.Vector z )
     {
- 	if ( x.length() != z.length() ) {
- 	    throw new RuntimeException("Length mismatch in FriedmanLearner.parameterize");
- 	}
+        if ( x.length() != z.length() ) {
+            throw new RuntimeException("Length mismatch in FriedmanLearner.parameterize");
+        }
 
-	try {
-		java.util.Random rand = new java.util.Random();
-		String prefix = "temp" + rand.nextInt();
+        try {
+            java.util.Random rand = new java.util.Random();
+            String prefix = "temp" + rand.nextInt();
 
-	    // Create a temporary file in the current directory.
-	    FileWriter nameFile = new FileWriter( prefix+".names" );
-	    FileWriter dataFile = new FileWriter( prefix+".data" );	    
-	    FriedmanWrapper.writeCases( x, dataFile, nameFile );
-		
-	    System.out.println("-----------------------------------------------------------------");
-	    System.out.println("---      Running LearnBayes                                   ---");
-	    System.out.println("-----------------------------------------------------------------");
+            // Create a temporary file in the current directory.
+            FileWriter nameFile = new FileWriter( prefix+".names" );
+            FileWriter dataFile = new FileWriter( prefix+".data" );        
+            FriedmanWrapper.writeCases( x, dataFile, nameFile );
+        
+            System.out.println("-----------------------------------------------------------------");
+            System.out.println("---      Running LearnBayes                                   ---");
+            System.out.println("-----------------------------------------------------------------");
 
-	    Type.Structured dataType = (Type.Structured)((Type.Vector)x.t).elt;
-	    String[] names = dataType.labels;
+            Type.Structured dataType = (Type.Structured)((Type.Vector)x.t).elt;
+            String[] names = dataType.labels;
 
-	    // replace <class> with name of final variable in file.
-	    String options = this.options.replaceAll("<class>",names[names.length-1] );
+            // replace <class> with name of final variable in file.
+            String options = this.options.replaceAll("<class>",names[names.length-1] );
 
-	    // set up LearnBayes process
-	    String cmd = "LearnBayes " + options + " -o "+prefix+".net "+prefix;
-	    System.out.println("Running : " + cmd);
-	    final Process p = Runtime.getRuntime().exec( cmd );
-	    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	    BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            // set up LearnBayes process
+            String cmd = "LearnBayes " + options + " -o "+prefix+".net "+prefix;
+            System.out.println("Running : " + cmd);
+            final Process p = Runtime.getRuntime().exec( cmd );
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-	    // TODO: calling LearneBayes doesn't seem to terminate anymore?  Why?
-	    Thread t = new Thread() { public void run() { 
-		System.out.println("Running thread");
-		try {
-		    p.waitFor();
-		} catch ( Exception e ) { throw new RuntimeException(e); }
-	    } };
-	    t.start();
+            // TODO: calling LearneBayes doesn't seem to terminate anymore?  Why?
+            Thread t = new Thread() { public void run() { 
+                System.out.println("Running thread");
+                try {
+                    p.waitFor();
+                } catch ( Exception e ) { throw new RuntimeException(e); }
+            } };
+            t.start();
 
-	    while ( t.isAlive() ) {
-		while( in.ready() ) { System.out.println( in.readLine() ); }
-		while( err.ready() ) { System.err.println( err.readLine() ); }
-	    }
+            while ( t.isAlive() ) {
+                while( in.ready() ) { System.out.println( in.readLine() ); }
+                while( err.ready() ) { System.err.println( err.readLine() ); }
+            }
 
-	    // load netica network from file. returns (model,params)
-	    Value.Structured my = 
-		(Value.Structured)FriedmanWrapper.readNetwork( new FileReader(prefix+".net") );
+            // load netica network from file. returns (model,params)
+            Value.Structured my = 
+                (Value.Structured)FriedmanWrapper.readNetwork( new FileReader(prefix+".net") );
 
-		// Delete temporary files.
-		new File(prefix+".net").delete();
-		new File(prefix+".names").delete();
-		new File(prefix+".data").delete();
+            // Delete temporary files.
+            new File(prefix+".net").delete();
+            new File(prefix+".names").delete();
+            new File(prefix+".data").delete();
 
-	    // turn results into a MSY struct.
-	    Value.Model m = (Value.Model)my.cmpnt(0);
-	    Value s = m.getSufficient( x, z );
-	    Value y = my.cmpnt(1);
+            // turn results into a MSY struct.
+            Value.Model m = (Value.Model)my.cmpnt(0);
+            Value s = m.getSufficient( x, z );
+            Value y = my.cmpnt(1);
 
 
-		
-	    // Is this necesarry??
-	    //Value.Structured reorderedMYStruct = 
-		//NeticaFn.ReorderNet.apply( names, new Value.DefStructured( new Value[] {m,y} ) );
+        
+            // Is this necesarry??
+            //Value.Structured reorderedMYStruct = 
+            //NeticaFn.ReorderNet.apply( names, new Value.DefStructured( new Value[] {m,y} ) );
 
-	    return new Value.DefStructured( new Value[] {m, s, y,} );
+            return new Value.DefStructured( new Value[] {m, s, y,} );
 
-	}
-	catch ( Exception e ) {
-	    throw new RuntimeException(e);
-	}
+        }
+        catch ( Exception e ) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -136,15 +136,15 @@ public class FriedmanLearner extends ModelLearner.DefaultImplementation
     /** Parameterize and return (m,s,y) */
     public double parameterizeAndCost( Value initialInfo, Value.Vector x, Value.Vector z )
     {
-	throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented");
     }
 
     /** Parameterize and return (m,s,y) */
     public Value.Structured sParameterize( Value.Model model, Value s )
-    {	
-	return parameterize( Value.TRIV, 
-			     (Value.Vector)((Value.Structured)s).cmpnt(0), 
-			     (Value.Vector)((Value.Structured)s).cmpnt(1) );
+    {    
+        return parameterize( Value.TRIV, 
+                             (Value.Vector)((Value.Structured)s).cmpnt(0), 
+                             (Value.Vector)((Value.Structured)s).cmpnt(1) );
     }
 
 
@@ -154,8 +154,8 @@ public class FriedmanLearner extends ModelLearner.DefaultImplementation
      * using parameters and data as currently it entirely ignores data.
      */
     public double sCost(Value.Model m, Value s, Value y)
-    {	
-	throw new RuntimeException("Not implemented");
+    {    
+        throw new RuntimeException("Not implemented");
     } 
 
 

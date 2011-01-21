@@ -29,76 +29,76 @@ import java.util.List;
 public class TestTetrad4 extends TestCase
 {
 
-	public TestTetrad4(String name) 
-	{
-		super(name);
-	}
-	
-	protected void setUp() 
-	{
-	}
-	
-	public static Test suite() 
-	{
-		return new TestSuite(TestTetrad4.class);
-	}
-	
+    public TestTetrad4(String name) 
+    {
+        super(name);
+    }
+    
+    protected void setUp() 
+    {
+    }
+    
+    public static Test suite() 
+    {
+        return new TestSuite(TestTetrad4.class);
+    }
+    
 
-	/** Test SEC enumeration function. */
-	public static void testEnumerate() {
+    /** Test SEC enumeration function. */
+    public static void testEnumerate() {
 
-		// Create a test graph (a)---(b)---(c) 
-		Graph g = new EdgeListGraph();
-		GraphNode[] node = new GraphNode[6];
-		for ( int i = 0; i < node.length; i++ ) {
-			node[i] = new GraphNode("Node_"+i);
-			g.addNode( node[i] ); 
-		}
-		g.addUndirectedEdge( node[0], node[1] );
-		g.addUndirectedEdge( node[1], node[2] );
-
-
-		List list = null;
-
-		// There should be 3 dags in the equivelence class.
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 3 );
-
-		// Fully connected 3 node DAG
-		g.addUndirectedEdge( node[0], node[2] );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 6 );
-
-		// As above, with extra link to fourth node
-		g.addUndirectedEdge( node[0], node[3] );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 8 );
-
-		// As above with single disocnected pair added.
-		g.addUndirectedEdge( node[4], node[5] );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 16 );
+        // Create a test graph (a)---(b)---(c) 
+        Graph g = new EdgeListGraph();
+        GraphNode[] node = new GraphNode[6];
+        for ( int i = 0; i < node.length; i++ ) {
+            node[i] = new GraphNode("Node_"+i);
+            g.addNode( node[i] ); 
+        }
+        g.addUndirectedEdge( node[0], node[1] );
+        g.addUndirectedEdge( node[1], node[2] );
 
 
-		// Empty graph
-		g.removeEdges( g.getEdges() );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 1 );
+        List list = null;
 
-		// Invalid SEC.
-		// No combination of V structures could ever produce this undirected DAG.
-		g.addUndirectedEdge( node[0], node[1] );
-		g.addUndirectedEdge( node[0], node[2] );
-		g.addUndirectedEdge( node[1], node[3] );
-		g.addUndirectedEdge( node[2], node[3] );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 0 );
+        // There should be 3 dags in the equivelence class.
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 3 );
+
+        // Fully connected 3 node DAG
+        g.addUndirectedEdge( node[0], node[2] );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 6 );
+
+        // As above, with extra link to fourth node
+        g.addUndirectedEdge( node[0], node[3] );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 8 );
+
+        // As above with single disocnected pair added.
+        g.addUndirectedEdge( node[4], node[5] );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 16 );
 
 
-		// As above with v structures added.
-		g.addUndirectedEdge( node[1], node[2] );
-		list = Tetrad4.enumerate(g);
-		assertTrue( list.size() == 18 );
-	}
+        // Empty graph
+        g.removeEdges( g.getEdges() );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 1 );
+
+        // Invalid SEC.
+        // No combination of V structures could ever produce this undirected DAG.
+        g.addUndirectedEdge( node[0], node[1] );
+        g.addUndirectedEdge( node[0], node[2] );
+        g.addUndirectedEdge( node[1], node[3] );
+        g.addUndirectedEdge( node[2], node[3] );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 0 );
+
+
+        // As above with v structures added.
+        g.addUndirectedEdge( node[1], node[2] );
+        list = Tetrad4.enumerate(g);
+        assertTrue( list.size() == 18 );
+    }
 
 }

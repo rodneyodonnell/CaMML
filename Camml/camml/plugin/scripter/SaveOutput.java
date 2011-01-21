@@ -30,94 +30,94 @@ class SaveOutput extends PrintStream {
     private static boolean isOpen = false;  
 
     SaveOutput(PrintStream ps) {
-	super(ps);
+        super(ps);
     }
 
     /** Starts copying stdout, stderr and stdin to the file f. */
     public static void start(String f) throws IOException {
 
-	// If logfile currently open, close it and create a new logfile.
-	if (isOpen == true)
-	    stop();
+        // If logfile currently open, close it and create a new logfile.
+        if (isOpen == true)
+            stop();
 
-	// Create/Open logfile.
-	logfile = new PrintStream( new FileOutputStream(f) );
+        // Create/Open logfile.
+        logfile = new PrintStream( new FileOutputStream(f) );
 
-	// Start redirecting the output.
-	System.setOut( new SaveOutput(System.out) );
-	System.setErr( new SaveOutput(System.err) );
-	System.setIn( new SaveInput() );
-	
-	// Flag that the logfile is open.
-	isOpen = true;
+        // Start redirecting the output.
+        System.setOut( new SaveOutput(System.out) );
+        System.setErr( new SaveOutput(System.err) );
+        System.setIn( new SaveInput() );
+    
+        // Flag that the logfile is open.
+        isOpen = true;
     }
 
     /** Close logfile and restores the original settings of std streams */
     public static void stop() throws IOException{
-	if (isOpen == true) {
-	    System.setOut(oldStdout);  // restore old streams
-	    System.setErr(oldStderr);
-	    System.setIn (oldStdin);
+        if (isOpen == true) {
+            System.setOut(oldStdout);  // restore old streams
+            System.setErr(oldStderr);
+            System.setIn (oldStdin);
 
-	    logfile.close();           // Close logfile.
-	}
-	isOpen = false;
+            logfile.close();           // Close logfile.
+        }
+        isOpen = false;
     }
 
     /** PrintStream override. Forks input to logfile and super()*/
     public void write(int b) {
-	try {
-	    logfile.write(b);
-	    
-	} catch (IOException e) {            
+        try {
+            logfile.write(b);
+        
+        } catch (IOException e) {            
             setError();
-	    throw new CammlRuntimeException("Error writing to logfile\n" + e.toString());
+            throw new CammlRuntimeException("Error writing to logfile\n" + e.toString());
         } 
-	  
-	super.write(b);
+      
+        super.write(b);
     }
 
     /** PrintStream override. Forks input to logfile and super()*/
     public void write(byte buf[], int off, int len) {
         try {
-	    logfile.write(buf, off, len);
+            logfile.write(buf, off, len);
         } catch (IOException e) {            
             setError();
-	    throw new CammlRuntimeException("Error writing to logfile\n" + e.toString());
+            throw new CammlRuntimeException("Error writing to logfile\n" + e.toString());
         }
-	super.write(buf, off, len);
+        super.write(buf, off, len);
     }
 
 
     /** This class reads from stdin and outputs to a logfile. */
     static class SaveInput extends InputStream {
-	
-	/** Remember the old value of stdin */
-	private static InputStream oldStdin;
-	SaveInput() { oldStdin = System.in; }
+    
+        /** Remember the old value of stdin */
+        private static InputStream oldStdin;
+        SaveInput() { oldStdin = System.in; }
 
-	/** Read stdin normally, then write it to logfile.*/
-	public int read(byte[] b, int off, int len) throws IOException {
-	    
-	    int x = oldStdin.read(b,off,len);
-	    logfile.write(b, off, x);
+        /** Read stdin normally, then write it to logfile.*/
+        public int read(byte[] b, int off, int len) throws IOException {
+        
+            int x = oldStdin.read(b,off,len);
+            logfile.write(b, off, x);
 
-	    return x;
-	}
+            return x;
+        }
 
-	/** Read stdin normally, then write it to logfile.*/
-	public int read(byte[] b) throws IOException {
-	    
-	    int x = oldStdin.read(b);
-	    logfile.write(b);
+        /** Read stdin normally, then write it to logfile.*/
+        public int read(byte[] b) throws IOException {
+        
+            int x = oldStdin.read(b);
+            logfile.write(b);
 
-	    return x;
-	}
+            return x;
+        }
 
-	/** Read stdin normally, then write it to logfile.*/
-	public int read() throws IOException {
-	    return oldStdin.read();
-	}
+        /** Read stdin normally, then write it to logfile.*/
+        public int read() throws IOException {
+            return oldStdin.read();
+        }
 
 
     }

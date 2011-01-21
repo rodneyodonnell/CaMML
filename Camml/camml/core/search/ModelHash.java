@@ -17,13 +17,13 @@ import java.io.Serializable;
  *  Base class for TOMHash and SECHash.
  */
 public abstract class ModelHash implements Serializable {
-	
-	/** return hash signature of TOM  */
-	public abstract long hash(TOM tom, double logL);
-	
-	/** Accesor function so hash values can be calculated incrementally in NodeCache*/
-	public abstract long getRandom(int x, int y);
-	
-	/** List of useful external variables. */
-	public CaseInfo caseInfo;
+    
+    /** return hash signature of TOM  */
+    public abstract long hash(TOM tom, double logL);
+    
+    /** Accesor function so hash values can be calculated incrementally in NodeCache*/
+    public abstract long getRandom(int x, int y);
+    
+    /** List of useful external variables. */
+    public CaseInfo caseInfo;
 }

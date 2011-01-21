@@ -22,35 +22,35 @@ import cdms.core.*;
 public class WeightedVector2 extends VectorFN.WeightedVector
 {
     /** Serial ID required to evolve class while maintaining serialisation compatibility. */
-	private static final long serialVersionUID = -2815287981554489766L;
+    private static final long serialVersionUID = -2815287981554489766L;
 
-	boolean weightVectorUsed = false;
+    boolean weightVectorUsed = false;
 
     protected Value.Vector weightVector;
     public WeightedVector2( Value.Vector v, Value.Vector weightVector )
     {
-	super(v,null);
-	this.weightVector = weightVector;
-	weightVectorUsed = true;
+        super(v,null);
+        this.weightVector = weightVector;
+        weightVectorUsed = true;
     }
 
     public WeightedVector2( Value.Vector v, double[] weights )
     {
-	super(v,weights);
+        super(v,weights);
     }
 
     public double weight(int i)
     {
-	
-	if (weightVectorUsed == true)
-	    return weightVector.doubleAt(i);
-	else
-	    //  Had to do this as weights is private...
-	    //	    return weights[i];
-	    return super.weight(i);
+    
+        if (weightVectorUsed == true)
+            return weightVector.doubleAt(i);
+        else
+            //  Had to do this as weights is private...
+            //        return weights[i];
+            return super.weight(i);
     }
     
     public Value.Vector cmpnt(int i) {
-    	return new WeightedVector2( v.cmpnt(i), weights);
+        return new WeightedVector2( v.cmpnt(i), weights);
     }
 }

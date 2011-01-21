@@ -11,8 +11,8 @@ import cdms.core.Value;
 
 
 /**
-  * Class to load a .dne file and calculate the MML cost of a given dataset.
-  */
+ * Class to load a .dne file and calculate the MML cost of a given dataset.
+ */
 public class DataCoster {
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {

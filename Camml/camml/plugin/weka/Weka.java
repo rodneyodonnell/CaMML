@@ -33,11 +33,11 @@ public class Weka extends Module
     
     public void install(Value params) throws Exception
     {
- 	add("load", new Load(false,false), "Load a .arff file" );
- 	add("loadDiscretize", new Load(false,true), "Load and discretize continuous vars." );
- 	add("loadMissing", new Load(true,false),"Load and replace missing values");
-	add("loadMissingDiscretize", new Load(true,true), "Load, replace missing and discretize." );
-	add("wekaLogit", WekaLearner.wekaBNetLogitLearner.getFunctionStruct(),"Weka logit Bnet");
+        add("load", new Load(false,false), "Load a .arff file" );
+        add("loadDiscretize", new Load(false,true), "Load and discretize continuous vars." );
+        add("loadMissing", new Load(true,false),"Load and replace missing values");
+        add("loadMissingDiscretize", new Load(true,true), "Load, replace missing and discretize." );
+        add("wekaLogit", WekaLearner.wekaBNetLogitLearner.getFunctionStruct(),"Weka logit Bnet");
     }
     
 
@@ -45,27 +45,27 @@ public class Weka extends Module
      * values are discretized.
      */
     public static Value.Vector load( String filename, boolean replaceMissing, boolean discretize )
-	throws java.io.FileNotFoundException, java.io.IOException, Exception
+        throws java.io.FileNotFoundException, java.io.IOException, Exception
     {
-	Instances instances = new Instances( new java.io.FileReader(filename) );
+        Instances instances = new Instances( new java.io.FileReader(filename) );
 
-	    instances.setClassIndex(instances.numAttributes() - 1);
-	    // filter instances if required.
-	    if ( discretize ) {
-	    	Discretize df = new Discretize();
-		//DiscretizeFilter df = new DiscretizeFilter();
-		df.setUseBetterEncoding( true );
-		df.setInputFormat( instances );
-		instances = weka.filters.Filter.useFilter( instances, df );
-	    }
-	    if ( replaceMissing ) {
-	    	ReplaceMissingValues mf = new ReplaceMissingValues();
-	    	//ReplaceMissingValuesFilter mf = new ReplaceMissingValuesFilter();
-		mf.setInputFormat( instances );
-		instances = weka.filters.Filter.useFilter( instances, mf );
-	    }
+        instances.setClassIndex(instances.numAttributes() - 1);
+        // filter instances if required.
+        if ( discretize ) {
+            Discretize df = new Discretize();
+            //DiscretizeFilter df = new DiscretizeFilter();
+            df.setUseBetterEncoding( true );
+            df.setInputFormat( instances );
+            instances = weka.filters.Filter.useFilter( instances, df );
+        }
+        if ( replaceMissing ) {
+            ReplaceMissingValues mf = new ReplaceMissingValues();
+            //ReplaceMissingValuesFilter mf = new ReplaceMissingValuesFilter();
+            mf.setInputFormat( instances );
+            instances = weka.filters.Filter.useFilter( instances, mf );
+        }
 
-	    return Converter.instancesToVector( instances );
+        return Converter.instancesToVector( instances );
     }
 
     /**
@@ -75,32 +75,32 @@ public class Weka extends Module
      */
     protected static class Load extends Value.Function
     {
-	/** Serial ID required to evolve class while maintaining serialisation compatibility. */
-		private static final long serialVersionUID = 1931636431700914980L;
-	public final boolean discretize;
-	public final boolean replaceMissing;
+        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        private static final long serialVersionUID = 1931636431700914980L;
+        public final boolean discretize;
+        public final boolean replaceMissing;
 
-	public static final Type.Function tt = 
-	    new Type.Function( Type.STRING, new Type.Vector(Type.STRUCTURED) );
-	public Load( boolean replaceMissing, boolean discretize ) { 
-	    super(tt); 
-	    this.replaceMissing = replaceMissing;
-	    this.discretize = discretize;
-	}
+        public static final Type.Function tt = 
+            new Type.Function( Type.STRING, new Type.Vector(Type.STRUCTURED) );
+        public Load( boolean replaceMissing, boolean discretize ) { 
+            super(tt); 
+            this.replaceMissing = replaceMissing;
+            this.discretize = discretize;
+        }
 
-	public Value apply( Value v )
-	{
-	    Value.Vector vec;
-	    try {
-		vec = load( ((Value.Str)v).getString(), replaceMissing, discretize );
-	    }
-	    catch ( Exception e ) {
-		e.printStackTrace();
-		vec =  new VectorFN.EmptyVector();
-	    }
-	    
-	    return vec;
-	}
+        public Value apply( Value v )
+        {
+            Value.Vector vec;
+            try {
+                vec = load( ((Value.Str)v).getString(), replaceMissing, discretize );
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+                vec =  new VectorFN.EmptyVector();
+            }
+        
+            return vec;
+        }
     }
 
 }

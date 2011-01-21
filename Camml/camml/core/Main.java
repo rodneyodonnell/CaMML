@@ -18,49 +18,49 @@ import java.io.*;
 /** */
 public class Main
 {
-	public static void main(String args[]) throws Exception
-	{
-		try	{
-			// Load interpreted
-			Value.Function interpreter = new Fpli.Interpreter();
-				
-			String script = "/script/cammlBootstrap.fp";
-			if ( args.length > 0 ) {
-				script = args[0];
-			}
+    public static void main(String args[]) throws Exception
+    {
+        try    {
+            // Load interpreted
+            Value.Function interpreter = new Fpli.Interpreter();
+                
+            String script = "/script/cammlBootstrap.fp";
+            if ( args.length > 0 ) {
+                script = args[0];
+            }
 
-			// Attempt to open script in jarfile.
-			InputStream is = Main.class.getResourceAsStream(script);
-			
-			// If not in jarfile, look in the regular file system.
-			if ( is == null ) {
-				is = new FileInputStream( script );
-			}
+            // Attempt to open script in jarfile.
+            InputStream is = Main.class.getResourceAsStream(script);
+            
+            // If not in jarfile, look in the regular file system.
+            if ( is == null ) {
+                is = new FileInputStream( script );
+            }
 
-			// Read stream into sb.
-			StringBuffer sb = new StringBuffer();
-			int chr;
-			
+            // Read stream into sb.
+            StringBuffer sb = new StringBuffer();
+            int chr;
+            
 
-			while ((chr = is.read()) != -1) {				
-				sb.append((char) chr);
-			}
-			is.close();
+            while ((chr = is.read()) != -1) {                
+                sb.append((char) chr);
+            }
+            is.close();
       
-			// Interpret the script.
-			Value res = interpreter.apply(new Value.Str(sb.toString()));
-			System.out.println("\n" + res.toString() + "\n");
-	  
-		}
-		catch(Exception e)
-			{
-				if (true) throw new RuntimeException(e);
-				System.out.println("An error occured during startup.\n");
-				e.printStackTrace();
-				System.exit(1);
-			} 
-		
-	} 
-	
+            // Interpret the script.
+            Value res = interpreter.apply(new Value.Str(sb.toString()));
+            System.out.println("\n" + res.toString() + "\n");
+      
+        }
+        catch(Exception e)
+            {
+                if (true) throw new RuntimeException(e);
+                System.out.println("An error occured during startup.\n");
+                e.printStackTrace();
+                System.exit(1);
+            } 
+        
+    } 
+    
 }
 

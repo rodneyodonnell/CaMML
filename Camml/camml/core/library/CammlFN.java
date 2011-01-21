@@ -33,20 +33,20 @@ public class CammlFN
      */
     public static class View extends Value.Function
     {
-	/** Serial ID required to evolve class while maintaining serialisation compatibility. */
-		private static final long serialVersionUID = -9156289605705170006L;
-	public static Type.Function tt = 
-	    new Type.Function(new Type.Vector(Type.STRUCTURED), View2.tt);
+        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        private static final long serialVersionUID = -9156289605705170006L;
+        public static Type.Function tt = 
+            new Type.Function(new Type.Vector(Type.STRUCTURED), View2.tt);
 
-	public View() 
-	{
-	    super(tt);
-	}
+        public View() 
+        {
+            super(tt);
+        }
 
-	public Value apply( Value v )
-	{
-	    return new View2( (Value.Vector)v );
-	}
+        public Value apply( Value v )
+        {
+            return new View2( (Value.Vector)v );
+        }
     }
     
     /**
@@ -55,30 +55,30 @@ public class CammlFN
      * is required. <br>
      */
     public static class View2 extends Value.Function
-    {	
-	/** Serial ID required to evolve class while maintaining serialisation compatibility. */
-		private static final long serialVersionUID = -1625312507793423480L;
-	/** The original unprocessed data*/
-	protected Value.Vector fullData;
-	public static Type.Function tt = 
-	    new Type.Function(new Type.Vector(Type.DISCRETE), new Type.Vector(Type.STRUCTURED));
+    {    
+        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        private static final long serialVersionUID = -1625312507793423480L;
+        /** The original unprocessed data*/
+        protected Value.Vector fullData;
+        public static Type.Function tt = 
+            new Type.Function(new Type.Vector(Type.DISCRETE), new Type.Vector(Type.STRUCTURED));
 
-	public View2( Value.Vector fullData)
-	{
-	    super(tt);
-	    this.fullData = fullData;
-	}
+        public View2( Value.Vector fullData)
+        {
+            super(tt);
+            this.fullData = fullData;
+        }
 
-	/** Extract all columns and return them in a FixedLengthMultiCol vector*/
-	public Value apply( Value v )
-	{
-	    Value.Vector valueMask = (Value.Vector)v;
-	    int[] mask = new int[valueMask.length()];
-	    for ( int i = 0; i < mask.length; i++ ) {
-		mask[i] = valueMask.intAt(i);
-	    }
-	    return new SelectedVector( fullData, null, mask );
-	}
+        /** Extract all columns and return them in a FixedLengthMultiCol vector*/
+        public Value apply( Value v )
+        {
+            Value.Vector valueMask = (Value.Vector)v;
+            int[] mask = new int[valueMask.length()];
+            for ( int i = 0; i < mask.length; i++ ) {
+                mask[i] = valueMask.intAt(i);
+            }
+            return new SelectedVector( fullData, null, mask );
+        }
     }
     
     /** 
@@ -87,19 +87,19 @@ public class CammlFN
      */
     public static class FixedLengthMultiCol extends VectorFN.MultiCol
     {
-	/** Serial ID required to evolve class while maintaining serialisation compatibility. */
-		private static final long serialVersionUID = 763540375966316577L;
-	private int vectorLength;
-	public FixedLengthMultiCol( Value.Structured v, int vectorLength)
-	{
-	    super(v);
-	    this.vectorLength = vectorLength;
-	}
-	
-	public int length()
-	{
-	    return vectorLength;
-	}
+        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        private static final long serialVersionUID = 763540375966316577L;
+        private int vectorLength;
+        public FixedLengthMultiCol( Value.Structured v, int vectorLength)
+        {
+            super(v);
+            this.vectorLength = vectorLength;
+        }
+    
+        public int length()
+        {
+            return vectorLength;
+        }
     }
 
 

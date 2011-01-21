@@ -21,29 +21,29 @@ import junit.framework.*;
 
 /** Test functions associated with EnumerateDAGs.java */
 public class TestLibrary extends TestCase {
-	
-	public static Test suite() 
-	{
-		return new TestSuite(TestLibrary.class);
-	}
-	
-	
-	/** Test Library.weightedSummaryVec */
-	public final void testSummaryVec() throws Exception {
-		Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
-		Value.Vector summary = Library.makeWeightedSummaryVec(data);
-		
-		assertEquals( 37, summary.length() );
-	}
-	
+    
+    public static Test suite() 
+    {
+        return new TestSuite(TestLibrary.class);
+    }
+    
+    
+    /** Test Library.weightedSummaryVec */
+    public final void testSummaryVec() throws Exception {
+        Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
+        Value.Vector summary = Library.makeWeightedSummaryVec(data);
+        
+        assertEquals( 37, summary.length() );
+    }
+    
 
-	/** Test Library.weightedSummaryVec */
-	public final void testJoinVec() throws Exception {
-		Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
-		Value.Vector join = Library.joinVectors(data, data.cmpnt(7), "extra" );
-			
-		assertEquals( join.cmpnt(7), join.cmpnt(8) );
-		System.out.println("join.t = " + join.t);
-	}
+    /** Test Library.weightedSummaryVec */
+    public final void testJoinVec() throws Exception {
+        Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
+        Value.Vector join = Library.joinVectors(data, data.cmpnt(7), "extra" );
+            
+        assertEquals( join.cmpnt(7), join.cmpnt(8) );
+        System.out.println("join.t = " + join.t);
+    }
 
 }

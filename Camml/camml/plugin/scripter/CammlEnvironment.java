@@ -22,18 +22,18 @@ import cdms.plugin.fpli.*;
 public class CammlEnvironment extends cdms.plugin.fpli.Environment
 {
     /** Serial ID required to evolve class while maintaining serialisation compatibility. */
-	private static final long serialVersionUID = 3674001595169857739L;
+    private static final long serialVersionUID = 3674001595169857739L;
 
-	public CammlEnvironment() {
-	super (null);
+    public CammlEnvironment() {
+        super (null);
     }
 
     public CammlEnvironment(Environment parent)    {
-	super ( parent );
+        super ( parent );
     }
 
     /** Add object to hashtable */
     public void add(String name, Object o)    {
-	nameHash.put(name,o);
+        nameHash.put(name,o);
     }
 }

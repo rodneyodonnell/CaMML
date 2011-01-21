@@ -24,46 +24,46 @@ import cdms.core.Value.Vector;
  * To set structure, "currentTOM" option must be set.
  */
 public class FixedStructureSearch extends BNetSearch {
-	
-	/**
-	 * @param rand
-	 * @param caseInfo
-	 */
-	public FixedStructureSearch(Random rand, CaseInfo caseInfo) {
-		super(rand, caseInfo); 
-	}
-	
-	/**
-	 * @param rand
-	 * @param data
-	 * @param mlModelLearner
-	 * @param mmlModelLearner
-	 */
-	public FixedStructureSearch(Random rand, Vector data,
-			ModelLearner mlModelLearner, ModelLearner mmlModelLearner) {
-		super(rand, data, mlModelLearner, mmlModelLearner);
-	}
-	
-	/* (non-Javadoc)
-	 * @see cdms.plugin.search.Search.SearchObject#reset()
-	 */
-	public void reset() { }
-	
-	/* (non-Javadoc)
-	 * @see cdms.plugin.search.Search.SearchObject#doEpoch()
-	 */
-	public double doEpoch() {
-		searchDone = true;
-		bestTOM.setStructure( tom );
-		return 0;
-	}
-	
-	/* (non-Javadoc)
-	 * @see cdms.plugin.search.Search.SearchObject#getPercentage()
-	 */
-	public double getPercentage() {
-		if ( searchDone ) return 100;
-		else return 0;
-	}
-	
+    
+    /**
+     * @param rand
+     * @param caseInfo
+     */
+    public FixedStructureSearch(Random rand, CaseInfo caseInfo) {
+        super(rand, caseInfo); 
+    }
+    
+    /**
+     * @param rand
+     * @param data
+     * @param mlModelLearner
+     * @param mmlModelLearner
+     */
+    public FixedStructureSearch(Random rand, Vector data,
+                                ModelLearner mlModelLearner, ModelLearner mmlModelLearner) {
+        super(rand, data, mlModelLearner, mmlModelLearner);
+    }
+    
+    /* (non-Javadoc)
+     * @see cdms.plugin.search.Search.SearchObject#reset()
+     */
+    public void reset() { }
+    
+    /* (non-Javadoc)
+     * @see cdms.plugin.search.Search.SearchObject#doEpoch()
+     */
+    public double doEpoch() {
+        searchDone = true;
+        bestTOM.setStructure( tom );
+        return 0;
+    }
+    
+    /* (non-Javadoc)
+     * @see cdms.plugin.search.Search.SearchObject#getPercentage()
+     */
+    public double getPercentage() {
+        if ( searchDone ) return 100;
+        else return 0;
+    }
+    
 }
