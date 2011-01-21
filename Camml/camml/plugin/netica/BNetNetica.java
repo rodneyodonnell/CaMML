@@ -533,9 +533,9 @@ public class BNetNetica extends BNet
 		
 	// 	// Node.setConstructorClass ("norsys.neticaEx.aliases.Node");
 	// 	Environ env = new Environ (null);	
-		
-	synchronized ( Netica.env ) {
-	    Net net = new Net();
+
+
+        Net net = new Net();
 	    net.setName( networkName );
 			
 	    int numVars = params.length();
@@ -549,8 +549,8 @@ public class BNetNetica extends BNet
 		typeArray[i] = (Type.Discrete)dataType.cmpnts[i];
 	    }
 	    nameArray = NeticaFn.makeValidNeticaNames( dataType.labels, false );
-			
-			
+
+
 	    for ( int i = 0; i < nodeList.length; i++ ) {
 				
 		// put each state name into an array of strings
@@ -575,9 +575,9 @@ public class BNetNetica extends BNet
 		    // Make sure netica will accept these names.
 		    stateName = NeticaFn.makeValidNeticaNames( stateName, true );
 		}
-				
-				
-		// netica wants names in the formate "var1,var2,var3"
+
+
+		// netica wants names in the format "var1,var2,var3"
 		// ... not sure of the logic there.
 		StringBuffer buf = new StringBuffer();
 		for ( int j = 0; j < stateName.length; j++ ) {
@@ -664,7 +664,6 @@ public class BNetNetica extends BNet
 	    lastName = networkName;
 			
 	    return net;
-	}
     }
 	
 	
@@ -830,7 +829,7 @@ public class BNetNetica extends BNet
 		
 	double kl[] = new double[partialKL.length];
 	for (int i = 0; i < kl.length; i++) { kl[i] = partialKL[trueModel] - partialKL[i];}	
-		
+
 	return kl;
     }
 
