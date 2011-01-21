@@ -14,6 +14,7 @@ package camml.plugin.weka;
 import java.util.Random;
 
 import weka.classifiers.Classifier;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import camml.core.library.StructureFN;
@@ -74,10 +75,12 @@ public class WekaModel extends Model implements GetNumParams {
 		Type.Structured zType = (Type.Structured)z.t;
 		if (zType.cmpnts.length != 0) {
 			try {
-			Value.Vector zVec = new VectorFN.FatVector( new Value[] {z} );
-			Instances instances = Converter.vectorToInstances(zVec);
-			instances.setClassIndex(0);
-			inst = instances.instance(0);
+			    Value.Vector zVec = new VectorFN.FatVector( new Value[] {z} );
+			    Instances instances = Converter.vectorToInstances(zVec);
+			    int numAttribs = zType.cmpnts.length;
+                instances.insertAttributeAt(new Attribute("target"), numAttribs);
+                instances.setClassIndex(numAttribs);
+			    inst = instances.instance(0);
 			} catch (RuntimeException e) { System.out.println("z = " + z); throw e;}
 		} else {
 			inst = new Instance(0);
