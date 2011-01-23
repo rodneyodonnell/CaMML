@@ -5,6 +5,7 @@
       <root url="jar://$PROJECT_DIR$/jar/NeticaJ.jar!/" />
       <root url="jar://$PROJECT_DIR$/jar/tetrad4.jar!/" />
       <root url="jar://$PROJECT_DIR$/jar/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jar/cdms.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
