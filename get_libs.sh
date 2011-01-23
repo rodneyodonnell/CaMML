@@ -9,7 +9,10 @@ if [ ! -e NeticaJ_Linux.zip ]; then
 fi
 
 echo Copying Netica libs
-cp NeticaJ_*/bin/NeticaJ.jar ../jar
-cp NeticaJ_*/bin/lib* ../lib
-
-echo Copying Tetrad
+if [ `uname -m` == x86_64 ]; then
+    echo "Warning: amd64 platform not supported by netica. Exact inference not available."
+    cp NeticaJ_*/bin/NeticaJ.jar ../jar
+else
+    cp NeticaJ_*/bin/NeticaJ.jar ../jar
+    cp NeticaJ_*/bin/lib* ../lib
+fi

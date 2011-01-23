@@ -16,8 +16,8 @@ for docs & discussion see:
 - For CaMML to compile cleanly, we need to download the Netica BNet inference library.
   If running Linux, simply run get_libs.sh from the CAMML dir
   Otherwise grab the libraries for you platform direct from http://norsys.com/downloads/
-  NOTE: If your platform is not supported (e.g., 64 bit linux) just grab the .jar file anyway so things compile.
-        Netica inference is disabled by default.
+  NOTE: If your platform is not supported (x86_64 linux not currently supported by netica) just grab
+        the .jar file anyway so things compile.  Netica inference is disabled by default.
 
 - CaMML includes .jars from several open source packages, to get the latest versions try:
 	Tetrad : http://www.phil.cmu.edu/projects/tetrad_download/download/
@@ -25,9 +25,12 @@ for docs & discussion see:
 	junit : http://www.junit.org/
 
 3. Compile/test CaMML
-> cd CAMML
+> cd CaMML
 > ant
+> export LD_LIBRARY_PATH=`pwd`/lib      # Tell ant where to find the netica binaries
 > ant test
+
+# Note: A bunch of tests will fail if netica libs are not found.
 
 
 4. Run     
@@ -58,7 +61,7 @@ It can also be added to the weka GUI, but that's beyond the scope of this doc.
   > ./camml_weka.sh -t Camml/camml/test/iris.arff
 
 
-== Manual Tasks
+== CDMS GUI
 Loading Data: 
 	Click File->Load Data from the main menu.
 	This is fairly straightforward.  Choose a filename and tell
@@ -112,13 +115,8 @@ Results:
 	appropriate type.  If  you double click on its name it pops-up, and
 	you can also refer to it by name in scripts.
 
-== Scripting
+== CDMS Scripting
 	The CDMS scripting language is based on functional programming and
 	is quite powerful, though underdocumented.
 	Sample scripts can be found in CAMML/Camml/scripts
 	NOTE: The "{" and "}" characters are used for comments.
-
-
-== More documentation?
-	Sorry, this doesn't exist yet.  Hopefully it will.
-	For queries email rodo@csse.monash.edu.au
