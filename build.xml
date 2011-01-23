@@ -5,8 +5,8 @@
 <project basedir="." default="build" name="CDMS">
 
     <path id="project.classpath">
-        <pathelement location="CDMS"/>
         <pathelement location="Camml"/>
+        <pathelement location="jar/cdms.jar"/>
         <pathelement location="jar/junit.jar"/>
         <pathelement location="jar/NeticaJ.jar"/>
         <pathelement location="jar/weka.jar"/>
@@ -32,11 +32,6 @@
            use="true"
            windowtitle="Test API">
 
-	        <packageset dir="CDMS" defaultexcludes="yes">
-		        <include name="**"/>
-				<exclude name="cdms/plugin/go3dviz/"/>
-			</packageset>
-
 	        <packageset dir="Camml" defaultexcludes="yes">
 		        <include name="**"/>
 			</packageset>
@@ -45,19 +40,11 @@
         </javadoc>
 	</target>
 
-    <target depends="init,buildCDMS,buildCamml" name="build">
+    <target depends="init,buildCamml" name="build">
         <echo message="${ant.project.name}: ${ant.file}"/>
     </target>
 
-    <target depends="init" name="buildCDMS">
-        <javac destdir="CDMS">
-            <src path="CDMS"/>
-            <exclude name="cdms/plugin/go3dviz/"/>
-            <classpath refid="project.classpath"/>
-        </javac>
-    </target>
-
-    <target depends="init,buildCDMS" name="buildCamml">
+    <target depends="init" name="buildCamml">
         <javac destdir="Camml">
             <src path="Camml"/>
             <classpath refid="project.classpath"/>
@@ -79,13 +66,6 @@
 	<!-- Run complete test suite. Slow.
 	     NOTE: For this task to work junit.jar must be in ant/lib directory -->
     <target depends="build" name="test">
-
-        <junit fork="yes" printsummary="withOutAndErr" dir="CDMS">
-            <classpath refid="project.classpath"/>
-            <formatter type="plain"/>
-            <test name="test.cdms.TestCases"/>
-            <jvmarg value="-Xmx512m"/>
-        </junit>
 
         <junit fork="yes" printsummary="withOutAndErr" dir="Camml">
             <classpath refid="project.classpath"/>
@@ -120,24 +100,12 @@
 	</target>
 
 
-	<!-- Build jar of camml and cdms. -->
-	<target depends="build" name="cdmsjar">
-	    <jar destfile="cdms.jar"
-		     basedir="CDMS"
-			 manifest="CDMS/Manifest.txt"
-			 excludes="**/*.java" />
-	</target>
-
-	<target depends="build" name="cammljar">
+	<!-- Build jar of camml. -->
+	<target depends="build" name="jar">
 	    <jar destfile="camml.jar"
 		     basedir="Camml" 
 			 manifest="Camml/Manifest.txt"
 			 excludes="**/*.java"/>
 	</target>
-
-	<target depends="cdmsjar,cammljar" name="jar">
-	</target>
-
-
 
 </project>
