@@ -179,8 +179,8 @@ public class TestExtensionCounter extends TestCase {
         DynamicCounter dCount = new DynamicCounter();
         BruteForceExtensionCounter wCount = new BruteForceExtensionCounter();
 
-        final int numNodes = 10;
-        final double arcProb = (1.0*numNodes)/(numNodes*(numNodes-1)/2);
+        final int numNodes = 13;
+        final double arcProb = (2.0*numNodes)/(numNodes*(numNodes-1)/2);
         
         java.util.Random rand = new java.util.Random(123);
         int[] totalOrder = new int[numNodes];
