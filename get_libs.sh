@@ -10,8 +10,8 @@ fi
 
 echo Copying Netica libs
 if [ `uname -m` == x86_64 ]; then
-    echo "Warning: amd64 platform not supported by netica. Exact inference not available."
-    cp NeticaJ_*/bin/NeticaJ.jar ../jar
+    cp NeticaJ_*/bin/64_bit/NeticaJ.jar ../jar
+    cp NeticaJ_*/bin/64_bit/lib* ../lib
 else
     cp NeticaJ_*/bin/NeticaJ.jar ../jar
     cp NeticaJ_*/bin/lib* ../lib
