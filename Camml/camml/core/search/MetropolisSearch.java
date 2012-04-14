@@ -140,8 +140,7 @@ public class MetropolisSearch extends BNetSearch
     private void runAnnealSearch( ) {
         // create AnnealSearch object
         AnnealSearch annealSearch = new AnnealSearch( rand, caseInfo );
-        Search blockingSearch = new camml.core.library.BlockingSearch( annealSearch );
-        
+
         // fix arcProb if required.
         if ( fixedArcProb == true ) { 
             annealSearch.setArcProb(arcProb); 
@@ -150,9 +149,8 @@ public class MetropolisSearch extends BNetSearch
         }
         annealSearch.tomCoster = tomCoster;
         
-        // run the search.  A blocking search is used as we need the result before
-        //  metropolis may proceed.
-        blockingSearch.start();
+        // run the search.  A blocking search is used as we need the result before metropolis may proceed.
+        annealSearch.runUntilFinished();
         
         // Copy required values from AnnealSearch.
         if (fixedArcProb != true) { setArcProb( annealSearch.getBestArcProb() ); }
@@ -208,6 +206,9 @@ public class MetropolisSearch extends BNetSearch
         // If we always accept the first model we avoid some strange situations where
         // the optimum MML model is not samples.
         TOMTransformation transform;
+
+        // TEST: Put RNG out of sync to see which tests fail.
+        //rand.nextDouble();
 
         // Randomly choose class of transformation to attempt.
         double rnd = rand.nextDouble();

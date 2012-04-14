@@ -160,7 +160,7 @@ public class BNetLearner extends ModelLearner.DefaultImplementation
         }
         
         // Run the search.
-        new BlockingSearch ( s ).start();
+        s.runUntilFinished();
         
         if ( fullResults == true ) { 
             Value.Model tomModel = s.getBNet();

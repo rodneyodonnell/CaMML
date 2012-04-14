@@ -128,7 +128,7 @@ public class TestEnumerateDAGs extends TestCase {
             FixedStructureSearch fsSearch = new FixedStructureSearch(rand,data,
                                                                      CPTLearner.adaptiveCPTLearner, CPTLearner.mlMultinomialCPTLearner);
             fsSearch.setOption("currentTOM",elt);
-            new BlockingSearch(fsSearch).start();
+            fsSearch.runUntilFinished();
             tom[i] = fsSearch.getBestTOM();
             
             // tom[i] contains a reference to caseInfo for each search.

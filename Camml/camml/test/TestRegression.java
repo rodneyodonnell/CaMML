@@ -144,8 +144,7 @@ public class TestRegression extends TestCase {
                                   SearchPackage.mlCPTLearner, SearchPackage.mmlCPTLearner);
         met.setOption("regression",Value.TRUE);
         met.setOption("searchFactor", new Value.Continuous(searchFactor));
-        Search blockingSearch = new BlockingSearch( met );            
-        blockingSearch.start();
+        met.runUntilFinished();
         
         String resultString = getMetropolisResultString(met);
         
@@ -207,9 +206,9 @@ public class TestRegression extends TestCase {
                                   SearchPackage.mlCPTLearner, SearchPackage.dTreeLearner);
         met.setOption("regression",Value.TRUE);
         met.setOption("searchFactor", new Value.Continuous(searchFactor));
-        Search blockingSearch = new BlockingSearch( met );            
-        blockingSearch.start();
-        
+        //Search blockingSearch = new BlockingSearch( met );
+        //blockingSearch.start();
+        met.runUntilFinished();
         
         String resultString = getMetropolisResultString(met); 
         
@@ -238,8 +237,7 @@ public class TestRegression extends TestCase {
                                   SearchPackage.mlCPTLearner, DualLearner.dualCPTDTreeLogitLearner );
         met.setOption("regression",Value.TRUE);
         met.setOption("searchFactor", new Value.Continuous(searchFactor));
-        Search blockingSearch = new BlockingSearch( met );            
-        blockingSearch.start();
+        met.runUntilFinished();
         
         
         String resultString = getMetropolisResultString(met); 
@@ -272,8 +270,7 @@ public class TestRegression extends TestCase {
                                             SearchPackage.mlCPTLearner, SearchPackage.mmlCPTLearner);        
         ann.setOption("regression",Value.TRUE);
         ann.setOption("searchFactor", new Value.Continuous(searchFactor));
-        Search blockingSearch = new BlockingSearch( ann );            
-        blockingSearch.start();
+        ann.runUntilFinished();
         Value.Vector results = ann.getBestParams(SearchPackage.mmlCPTLearner);
         
         // Print MMLECs
@@ -326,8 +323,7 @@ public class TestRegression extends TestCase {
             ann[i].setOption("regression",Value.TRUE);
 
             time[i] -= System.currentTimeMillis(); 
-            Search blockingSearch = new BlockingSearch( ann[i] );            
-            blockingSearch.start();
+            ann[i].runUntilFinished();
             Value.Vector results = ann[i].getBestParams(SearchPackage.mmlCPTLearner);
             time[i] += System.currentTimeMillis();            
             

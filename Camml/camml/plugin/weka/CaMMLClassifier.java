@@ -81,14 +81,12 @@ public class CaMMLClassifier extends Classifier
      *  optimal binning.  If not a less intelligent method bins each attribute into 10 bins.
      */
     protected Discretize discreteFilter;
-    //protected DiscretizeFilter discreteFilter;
-    
+
     /**
      * missingFilter replaces each missing value with the mode likely value for that attribute.
      */
     protected ReplaceMissingValues missingFilter;
-    //protected ReplaceMissingValuesFilter missingFilter;
-    
+
     /**
      * A replacement for <code>/dev/null</code>
      *
@@ -153,7 +151,6 @@ public class CaMMLClassifier extends Classifier
     {
         // Initialise the discrete filter.
         discreteFilter = new Discretize();
-        //discreteFilter = new DiscretizeFilter();
         if ( (instances.classIndex() == -1) || (!instances.classAttribute().isNominal()) ) {
             //discreteFilter.setUseMDL(false);
         }
@@ -187,8 +184,7 @@ public class CaMMLClassifier extends Classifier
      * BNetSearch.setOption(java.lang.String option, Value v)
      */
     protected ModelLearner generateLearner() {
-        BNetLearner learner =
-            new BNetLearner( SearchPackage.mlCPTLearner, cpdLearner, weightedAverage, false);
+        BNetLearner learner = new BNetLearner(SearchPackage.mlCPTLearner, cpdLearner, weightedAverage, false);
 
         // rest of configuration here.    
         Vector options = new Vector(); // string
@@ -263,8 +259,9 @@ public class CaMMLClassifier extends Classifier
     public synchronized void buildClassifier(Instances instances) throws Exception {
 
         PrintStream stdOut = System.out;
-        if(!verbose) 
-            { System.setOut(new PrintStream(new DevNull(), true)); }
+        if(!verbose) {
+            System.setOut(new PrintStream(new DevNull(), true));
+        }
 
         // generate learner based on the options
         modelLearner = generateLearner();

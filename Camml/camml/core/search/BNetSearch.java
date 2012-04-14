@@ -49,7 +49,7 @@ import camml.plugin.tomCoster.ExpertElicitedTOMCoster;
  *  BNetSearch is designed as a base for BNet searched to be built upon.  Several commonly used
  *   functions are implemented.
  */
-public abstract class BNetSearch implements Search.SearchObject 
+public abstract class BNetSearch
 {
     /** Constructor */
     public BNetSearch( java.util.Random rand, CaseInfo caseInfo )
@@ -97,7 +97,24 @@ public abstract class BNetSearch implements Search.SearchObject
                                   new NodeCache( data, mmlModelLearner, mlModelLearner ) ));
         caseInfo.nodeCache.caseInfo = caseInfo;
     }
-    
+
+    public abstract void reset();
+    public abstract double doEpoch();        // Returns the error associated with the epoch.
+
+
+    /**
+     * Run BNetSearch without all the extra infrastructure.
+     */
+    public void runUntilFinished()
+    {
+	    reset();
+
+        while (!this.isFinished()) {
+            doEpoch();
+        }
+    }
+
+
     /** recalculate bestCost and currentCost, usually done after updating arcProb */
     public void recalculateCosts() {
         this.bestCost = bestTOM.getCost();
