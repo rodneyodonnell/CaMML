@@ -38,7 +38,6 @@ package camml.plugin.augment;
 
 import cdms.core.*;
 import camml.core.models.bNet.BNet;
-import camml.plugin.netica.BNetNetica;
 
 /**
  * AugmentFN4 augments uses true model as priors for augmented model. AugmentFN4
@@ -173,13 +172,7 @@ public class AugmentFN3 extends Value.Function {
         Type.Structured xType = (Type.Structured) ((Type.Model) orig_model.t).dataSpace;
         Type.Structured xType2 = augmentType(xType);
 
-        BNet bNetAugmented;
-        if (orig_model instanceof BNetNetica) {
-            bNetAugmented = new camml.plugin.netica.BNetNetica(xType2);
-        } else {
-            bNetAugmented = new camml.core.models.bNet.BNetStochastic(xType2);
-        }
-
+        BNet bNetAugmented = new camml.core.models.bNet.BNetStochastic(xType2);
         Value.Vector augmentedParams = augmentParams(paramsP, paramsQ, xType, xType2);
 
         return new Value.DefStructured(sTypeOut, new Value[] { bNetAugmented,

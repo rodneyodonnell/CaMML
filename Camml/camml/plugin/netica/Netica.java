@@ -42,7 +42,7 @@ import norsys.netica.*;
 /**
    Module to load Netica functions
 */
-public class Netica extends Module 
+public class Netica extends Module
 {
     public static java.net.URL helpURL = Module.createStandardURL(Netica.class);
     

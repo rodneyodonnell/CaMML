@@ -41,7 +41,6 @@ import camml.core.models.bNet.BNet;
 import camml.core.models.cpt.CPT;
 import camml.core.models.dTree.DTree; // dTree used in parameterisation
 import camml.core.library.StructureFN.FastContinuousStructure;
-import camml.plugin.netica.BNetNetica;
 
 /** AugmentFN2 augments uses true model as priors for augmented model. */
 public class AugmentFN2 extends Value.Function
@@ -317,34 +316,9 @@ public class AugmentFN2 extends Value.Function
         Type.Structured xType = (Type.Structured)((Type.Model)orig_model.t).dataSpace;
         Type.Structured xType2 = augmentType( xType );
         
-        BNet bNetAugmented;
-        if ( orig_model instanceof BNetNetica) {
-            bNetAugmented = new camml.plugin.netica.BNetNetica( xType2 );
-        }
-        else {
-            bNetAugmented = new camml.core.models.bNet.BNetStochastic( xType2 );
-        }
-        
-        
-        
-        
-        //     System.out.println("\nXType = " + xType);
-        //     System.out.println("\nXType2 = " + xType2);
-        //     System.out.println("\nbNetAug = " + bNetAugmented );
-        //     System.out.println("\n\n");
-        
-        //     System.out.println();
-        //     for ( int i = 0; i < params.length(); i++ ) {
-        //         System.out.println( params.elt(i) );
-        //     }
-        
-        //     System.out.println("\n-- original params --\n" + params + "\n");
-        
-        
+        BNet bNetAugmented = new camml.core.models.bNet.BNetStochastic( xType2 );
         Value.Vector augmentedParams = augmentParams( params, params2, xType, xType2 );
-        
-        //     System.out.println("\n-- augmented params --\n" + augmentedParams + "\n");
-        
+
         return new Value.DefStructured( sTypeOut, new Value[]{bNetAugmented,augmentedParams} );
     }
     

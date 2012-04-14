@@ -45,12 +45,9 @@ import camml.core.models.mixture.Mixture;
 import java.util.Hashtable;
 import java.util.ArrayList;
 
-import norsys.netica.NeticaException;
-
 import camml.core.models.ModelLearner;
 import camml.core.library.WallaceRandom;
 import camml.plugin.augment.AugmentFN3;
-import camml.plugin.netica.BNetNetica;
 
 /**
  * Metropolis search is based on the Metropolis search in the original version of CaMML by

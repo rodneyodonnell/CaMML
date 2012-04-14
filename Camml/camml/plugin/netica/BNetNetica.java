@@ -76,6 +76,7 @@ import norsys.netica.Streamer;
  */
 
 
+
 public class BNetNetica extends BNet
 {
 

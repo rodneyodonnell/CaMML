@@ -280,7 +280,7 @@ public class CaMMLClassifier extends Classifier
         this.model = (Value.Model)msy.cmpnt(0);
         
         // Netica does significantly faster/more accurate inference than my stochastic algorithm.
-        //  so if the model returnes is stochastic, convert it to Netica's exact method.
+        //  so if the model returns is stochastic, convert it to Netica's exact method.
         if ( this.model instanceof BNetStochastic ) {
             Type.Structured dataType = (Type.Structured)((Type.Model)this.model.t).dataSpace;
             this.model = new camml.plugin.netica.BNetNetica( dataType );
@@ -374,11 +374,7 @@ public class CaMMLClassifier extends Classifier
     
     public String toString()
     {
-        if ( model instanceof camml.plugin.netica.BNetNetica ) {
-            camml.plugin.netica.BNetNetica bNet = (camml.plugin.netica.BNetNetica)model;        
-            return bNet.toString( (Value.Vector)params, "NET_TITLE","COMMENT" );
-        }
-        else if ( model instanceof BNet ) {
+        if ( model instanceof BNet ) {
             return ((BNet)model).makeString( (Value.Vector)params );
         }
         else return "(" + model + "," + params + ")";

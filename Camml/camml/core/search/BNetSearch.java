@@ -43,8 +43,6 @@ import cdms.plugin.search.*;
 
 import camml.core.models.ModelLearner;
 import camml.core.models.bNet.BNet;
-import camml.core.models.bNet.BNetStochastic;
-import camml.plugin.netica.BNetNetica;
 import camml.plugin.tomCoster.ExpertElicitedTOMCoster;
 
 /**

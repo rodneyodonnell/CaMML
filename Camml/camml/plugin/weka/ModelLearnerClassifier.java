@@ -339,11 +339,7 @@ public class ModelLearnerClassifier extends Classifier //DistributionClassifier
     
     public String toString()
     {
-        if ( model instanceof camml.plugin.netica.BNetNetica ) {
-            camml.plugin.netica.BNetNetica bNet = (camml.plugin.netica.BNetNetica)model;        
-            return bNet.toString( (Value.Vector)params, "NET_TITLE","COMMENT" );
-        }
-        else if ( model instanceof BNet ) {
+        if ( model instanceof BNet ) {
             return ((BNet)model).makeString( (Value.Vector)params );
         }
         else return "(" + model + "," + params + ")";

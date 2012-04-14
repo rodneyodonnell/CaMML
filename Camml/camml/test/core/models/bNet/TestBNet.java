@@ -157,25 +157,6 @@ public class TestBNet extends TestCase {
         f.delete();
     }
 
-    /** Bugfix test: Ensure ordering from params & model are the same. */
-    public final void testAugment3() throws Exception {
-
-        // Original model with two sets of parameters
-        BNetNetica m = new BNetNetica( model.getDataType() );
-        
-        // Augment models.
-        Value.Structured augmy1 = AugmentFN3.augment3.apply(m,params1,params1);
-        Value.Vector augY1 = (Value.Vector)augmy1.cmpnt(1);
-        BNetNetica augM = (BNetNetica)augmy1.cmpnt(0);
-        
-        // Assert that model-type & net labels are the same.
-        Type.Structured sType1 = augM.getDataType();
-        Value.Vector labels = augY1.cmpnt(0);
-        for ( int i = 0; i < sType1.labels.length; i++) {
-            assertEquals( sType1.labels[i], ((Value.Str)labels.elt(i)).getString() );
-        }
-    }
-    
     /** Test exporting of augmented netica files (which use DTrees). */
     public final void testAugmentDatatype() throws Exception {
         
