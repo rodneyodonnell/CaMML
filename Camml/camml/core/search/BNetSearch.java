@@ -284,18 +284,10 @@ public abstract class BNetSearch implements Search.SearchObject
             double d = ((Value.Scalar)v).getContinuous();
             caseInfo.minTotalPosterior = d;
         }
-        else if ( option.equals("useNetica") ) {
-            caseInfo.useNetica = (((Value.Discrete)v).getDiscrete() == 0);
-            if (caseInfo.useNetica) 
-                { caseInfo.bNet = new BNetNetica(caseInfo.bNet.getDataType());}
-            else 
-                {caseInfo.bNet = new BNetStochastic(caseInfo.bNet.getDataType());}
-            System.out.println( "Using netica lib for inference: " + caseInfo.useNetica );
-        }
         else if ( option.equals("printArcWeights") ) {
             caseInfo.printArcWeights = (((Value.Discrete)v).getDiscrete() != 0);
             caseInfo.updateArcWeights = caseInfo.printArcWeights;
-            System.out.println( "Printing Arc Weights: " + caseInfo.useNetica );
+            System.out.println( "Printing Arc Weights: " + caseInfo.printArcWeights );
         }
 
         else if ( option.equals("cklJoinType") ) {

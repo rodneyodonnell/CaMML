@@ -92,7 +92,7 @@ public class MetropolisSearch extends BNetSearch
     public boolean doAnnealOnFirstEpoch = true;
 
     /** Update currentCost and cleanMLCost. 
-     * @param nodeChanged: list of nodes with parent changes since last call to updateCosts. 
+     * @param nodesChanged: list of nodes with parent changes since last call to updateCosts.
      * If (nodeChanges == null) all nodes are considered changed.
      */
     public void updateCosts( int[] nodesChanged )
@@ -684,25 +684,12 @@ public class MetropolisSearch extends BNetSearch
             if (caseInfo.cklJoinType != 0) {
                 throw new RuntimeException("exact CKL Joining not implemented.");
             }
-            
-            if ( caseInfo.useNetica) {
-                for ( int i = 0; i < params.length; i++) {
-                    try {
-                        System.out.print('X');
-                        klArray[i] = BNetNetica.exactKLNetica(bNet,params,i);
-                    } catch ( NeticaException e) {
-                        throw new RuntimeException(e);
-                    }
-                }                
-            }
-            else {
-                for (int i = 0; i < klArray.length; i++) {
-                    System.out.print("X");
-                
-                    for (int j = 0; j < klArray.length; j++) {
-                        klArray[i][j] = bNet.kl(params[i],params[j]) * caseInfo.data.length();
-                        //klArray[i][j] = bNet.ckl2(params[i],params[j]) * caseInfo.data.length();
-                    }
+
+            for (int i = 0; i < klArray.length; i++) {
+                System.out.print("X");
+
+                for (int j = 0; j < klArray.length; j++) {
+                    klArray[i][j] = bNet.kl(params[i],params[j]) * caseInfo.data.length();
                 }
             }
         }
@@ -753,11 +740,11 @@ public class MetropolisSearch extends BNetSearch
     
     /** Using values from getResults() return (m,y) for a mixture model. */
     public Value.Structured getMixResults( ) {
-        return getMixResults( getResults(), fullData, caseInfo.useNetica );
+        return getMixResults(getResults(), fullData);
     }
     
     /** Static function to turn a resultVec (as returned by getResults()) into a mixture model. */
-    public static Value.Structured getMixResults( Value.Vector resultVec, Value.Vector data, boolean useNetica )
+    public static Value.Structured getMixResults(Value.Vector resultVec, Value.Vector data)
     {
         // get result array
         //Value.Vector resultVec = getResults();
@@ -791,11 +778,7 @@ public class MetropolisSearch extends BNetSearch
                 (Value.Structured)(((Value.Vector)secStruct.cmpnt(0)).elt(0));
             
             // extract params from dagStruct
-            if (useNetica) {
-                model[i] = new camml.plugin.netica.BNetNetica( dataType );
-            } else {
-                model[i] = new camml.core.models.bNet.BNetStochastic( dataType );
-            }
+            model[i] = new camml.core.models.bNet.BNetStochastic( dataType );
             params[i] = dagStruct.cmpnt(1);
         }    
         

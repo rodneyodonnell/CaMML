@@ -134,10 +134,6 @@ public class CaseInfo implements Serializable {
     /** Calaulate KL distance exactly for merging. */
     public boolean useExactKL = false;
 
-    /** Use BNetNetica instead of BNetStochastic. */
-    public boolean useNetica = false;
-
-    
     /** If safeMode is true, the next model must have a better MML score than the current model. */
     public boolean safeMode = false;
     
