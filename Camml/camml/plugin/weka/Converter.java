@@ -360,22 +360,15 @@ public class Converter {
 
     /**
      * Works out file type by extension and saves data.
-     * Currently .cas -> RodoCamml, .data -> Friedman <br>
-     * .arff format not implemented.
+     * Currently .cas (RodoCamml) and .arff format not implemented.
      */
     public static void save(String fileName, Value.Vector data)
         throws java.io.IOException {
         // Now write the data out
         if (fileName.endsWith(".arff")) {
-            throw new RuntimeException(
-                                       "Conversion from Value.Vector to Instances not implemented");
+            throw new RuntimeException("Conversion from Value.Vector to Instances not implemented");
         } else if (fileName.endsWith(".cas")) {
             RodoCammlIO.store(fileName, data, false);
-        } else if (fileName.endsWith(".data")) { // This could be c5 or friedman... assume friedman
-            String stub = fileName.substring(0, fileName.length() - 5);
-            camml.plugin.friedman.FriedmanWrapper.writeCases(data,
-                                                             new java.io.FileWriter(stub + ".data"),
-                                                             new java.io.FileWriter(stub + ".names"));
         } else {
             System.err.println("Unknown file format : " + fileName);
         }

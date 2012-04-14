@@ -58,10 +58,8 @@ public class TestCases extends TestCase
     {
         TestSuite tSuite = new TestSuite(TestCases.class);
         
-        tSuite.addTest( camml.test.plugin.friedman.TestCases.suite() );
         tSuite.addTest( camml.test.plugin.netica.TestCases.suite() );
         tSuite.addTest( camml.test.plugin.rodoCamml.TestCases.suite() );
-        tSuite.addTest( camml.test.plugin.rmi.TestCases.suite() );
         tSuite.addTest( camml.test.plugin.weka.TestCases.suite() );
         tSuite.addTest( camml.test.plugin.tomCoster.TestCases.suite() );
         

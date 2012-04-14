@@ -73,17 +73,7 @@ public class ModelLearnerClassifier extends Classifier //DistributionClassifier
             super( camml.plugin.rodoCamml.RodoCammlLearner.modelLearner ); 
         } 
     }
-    
-    /** Static class with an empty constructor as required to link to weka */
-    public static class FriedmanCPT extends ModelLearnerClassifier {
-        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
-        private static final long serialVersionUID = -3643794503666892909L;
 
-        public FriedmanCPT() { 
-            super( camml.plugin.friedman.FriedmanLearner.modelLearner_BDE ); 
-        } 
-    }
-    
     /** Static class with an empty constructor as required to link to weka */
     public static class CPTMetropolis extends ModelLearnerClassifier {
         /** Serial ID required to evolve class while maintaining serialisation compatibility. */
