@@ -36,34 +36,37 @@
 
 package camml.test.core.models.cpt;
 
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * All Camml Tests
  */
-public class TestCases extends TestCase
-{
-    
-    public TestCases(String name) 
-    {
+public class TestCases extends TestCase {
+
+    public TestCases(String name) {
         super(name);
     }
-    
-    protected void setUp() 
-    {
+
+    protected void setUp() {
     }
-    
-    /** Add all subtests to the TestCases */
-    public static Test suite() 
-    {
+
+    /**
+     * Add all subtests to the TestCases
+     */
+    public static Test suite() {
         TestSuite tSuite = new TestSuite(TestCases.class);
         tSuite.addTest(TestBDECPTLearner.suite());
         tSuite.addTest(TestCPT.suite());
         return tSuite;
     }
-    
-    
-    /** Empty test in place as we require at least one test in a TestCase. */
-    public void testNothing() { }
-    
+
+
+    /**
+     * Empty test in place as we require at least one test in a TestCase.
+     */
+    public void testNothing() {
+    }
+
 }

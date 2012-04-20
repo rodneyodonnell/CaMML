@@ -42,43 +42,53 @@ import camml.core.models.ModelLearner;
 import cdms.core.Value;
 
 
-/** MakeAdaptiveCodeLearner returns a AdaptiveCodeLearner given a options. */
-public class MakeAdaptiveCodeLearner extends MakeModelLearner
-{
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+/**
+ * MakeAdaptiveCodeLearner returns a AdaptiveCodeLearner given a options.
+ */
+public class MakeAdaptiveCodeLearner extends MakeModelLearner {
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -2278791859853347308L;
-    /** Default implementation of makeAdaptiveCodeLearner */
-    public static final MakeAdaptiveCodeLearner makeAdaptiveCodeLearner = 
-        new MakeAdaptiveCodeLearner();
-    
-    
-    public MakeAdaptiveCodeLearner( ) { }
-    
-    /** Shortcut apply method */
-    public ModelLearner _apply( String[] option, Value[] optionVal ) {  
-        
+    /**
+     * Default implementation of makeAdaptiveCodeLearner
+     */
+    public static final MakeAdaptiveCodeLearner makeAdaptiveCodeLearner =
+            new MakeAdaptiveCodeLearner();
+
+
+    public MakeAdaptiveCodeLearner() {
+    }
+
+    /**
+     * Shortcut apply method
+     */
+    public ModelLearner _apply(String[] option, Value[] optionVal) {
+
         // Set default values.
         double bias = 1.0;
         boolean useMML = false;
-        
-        
+
+
         // Search options for overrides.
-        for ( int i = 0; i < option.length; i++ ) {
-            if ( option[i].equals("bias") ) {
-                bias = ((Value.Scalar)optionVal[i]).getContinuous();
+        for (int i = 0; i < option.length; i++) {
+            if (option[i].equals("bias")) {
+                bias = ((Value.Scalar) optionVal[i]).getContinuous();
+            } else if (option[i].equals("useMML")) {
+                useMML = (((Value.Discrete) optionVal[i]).getDiscrete() == 0);
+            } else {
+                throw new RuntimeException("Unknown option : " + option[i]);
             }
-            else if ( option[i].equals("useMML") ) {
-                useMML = (((Value.Discrete)optionVal[i]).getDiscrete() == 0);
-            }
-            else { throw new RuntimeException("Unknown option : " + option[i] );}
         }
-        
-        return new AdaptiveCodeLearner( bias, useMML );
+
+        return new AdaptiveCodeLearner(bias, useMML);
     }
-    
-    public String[] getOptions() { return new String[] {
-            "bias - p(i) = (n(i) + bias) / (sum(n(i)+bias))",
-            "useMML - add (|x|-1)!*log(Pi*e/6)/2 as an approximation to MML coding"
-        }; }
-    
+
+    public String[] getOptions() {
+        return new String[]{
+                "bias - p(i) = (n(i) + bias) / (sum(n(i)+bias))",
+                "useMML - add (|x|-1)!*log(Pi*e/6)/2 as an approximation to MML coding"
+        };
+    }
+
 }

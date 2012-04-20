@@ -37,15 +37,17 @@
 
 package camml.plugin.weka;
 
+import cdms.core.Type;
+import cdms.core.Value;
+import cdms.core.Value.Model;
+
 import java.util.Random;
-import cdms.core.*;
-import cdms.core.Value.*;
 
 
 /**
  * @author Rodney O'Donnell <rodo@dgs.monash.edu.au>
  * @version $Revision: 1.3 $ $Date: 2006/08/22 03:13:35 $
- * $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/DiscreteWekaClassifier.java,v $
+ *          $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/DiscreteWekaClassifier.java,v $
  */
 public class DiscreteWekaClassifier extends Model {
     /*
@@ -55,15 +57,21 @@ public class DiscreteWekaClassifier extends Model {
       System.out.println( rt.totalMemory()-rt.freeMemory());
       }
     */
-    
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -5839554896332542127L;
-    /** t = (DISCRETE,OBJ,STRUCTURED,STRUCTURED)*/
-    public static final Type.Model t = new Type.Model(Type.DISCRETE,Type.OBJECT,Type.STRUCTURED,Type.STRUCTURED);
-    
-    
-    public DiscreteWekaClassifier() { super(t); }
-    
+    /**
+     * t = (DISCRETE,OBJ,STRUCTURED,STRUCTURED)
+     */
+    public static final Type.Model t = new Type.Model(Type.DISCRETE, Type.OBJECT, Type.STRUCTURED, Type.STRUCTURED);
+
+
+    public DiscreteWekaClassifier() {
+        super(t);
+    }
+
     public double logP(Value x, Value y, Value z) {
         // TODO Auto-generated method stub
         return 0;

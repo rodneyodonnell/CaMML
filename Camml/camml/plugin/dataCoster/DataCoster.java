@@ -29,14 +29,14 @@
 
 package camml.plugin.dataCoster;
 
-import java.util.Random;
-
 import camml.core.search.AnnealSearch;
 import camml.core.search.SearchPackage;
 import camml.plugin.netica.NeticaFn;
 import camml.plugin.weka.Converter;
 import cdms.core.Type;
 import cdms.core.Value;
+
+import java.util.Random;
 
 
 /**
@@ -54,12 +54,12 @@ public class DataCoster {
 
         // Load data from .arff file
         Value.Vector data = Converter.load(datafile, true, true);
-        Type.Structured eltType = (Type.Structured)((Type.Vector)data.t).elt;
+        Type.Structured eltType = (Type.Structured) ((Type.Vector) data.t).elt;
         System.out.println(String.format("Loaded %d variables, %d elements from %s", eltType.labels.length, data.length(), datafile));
 
         // We need a BNetSearch object to do the costing.
         Random rand = new Random();
-        AnnealSearch annealSearch = new AnnealSearch(rand, data,  SearchPackage.mlCPTLearner, SearchPackage.mmlCPTLearner );
+        AnnealSearch annealSearch = new AnnealSearch(rand, data, SearchPackage.mlCPTLearner, SearchPackage.mmlCPTLearner);
 
         // BY default we end up with an empty TOM, let's calculate the MML cost.
         double emptyCost = annealSearch.costNetwork(SearchPackage.mmlCPTLearner, false);
@@ -70,7 +70,7 @@ public class DataCoster {
         // Hopefully this works ... I don't have the 64 bit version of netica set up on my machine to test it.
         try {
             Value.Structured my = NeticaFn.LoadNet._apply(modelfile);
-            Value.Vector params = (Value.Vector)my.cmpnt(1);
+            Value.Vector params = (Value.Vector) my.cmpnt(1);
             System.out.println("Setting TOM Structure");
             annealSearch.getTOM().setStructure(params);
         } catch (UnsatisfiedLinkError e) {
@@ -79,11 +79,11 @@ public class DataCoster {
         annealSearch.printDetailedCost(annealSearch.getTOM());
 
         // Otherwise we can just add/remove arcs and set the order manually.
-        annealSearch.getTOM().addArc(0,3);
-        annealSearch.getTOM().addArc(0,2);
+        annealSearch.getTOM().addArc(0, 3);
+        annealSearch.getTOM().addArc(0, 2);
         annealSearch.printDetailedCost(annealSearch.getTOM());
 
-        annealSearch.getTOM().swapOrder(0,3,true);
+        annealSearch.getTOM().swapOrder(0, 3, true);
         annealSearch.printDetailedCost(annealSearch.getTOM());
 
 

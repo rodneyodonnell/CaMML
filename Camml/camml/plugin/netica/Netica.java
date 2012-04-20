@@ -36,50 +36,63 @@
 
 package camml.plugin.netica;
 
-import cdms.core.*;
-import norsys.netica.*;
+import cdms.core.Module;
+import norsys.netica.Environ;
+import norsys.netica.NeticaException;
 
 /**
-   Module to load Netica functions
-*/
-public class Netica extends Module
-{
+ * Module to load Netica functions
+ */
+public class Netica extends Module {
     public static java.net.URL helpURL = Module.createStandardURL(Netica.class);
-    
-    public String getModuleName() { return "Netica"; }
-    public java.net.URL getHelp() { return helpURL; }
-    
-    public void install(cdms.core.Value params) throws Exception
-    {
-        add("loadNet", NeticaFn.loadNet, "load a netica network from a file" );
-        add("reorderNet", NeticaFn.reorderNet, "reorder a network" );
+
+    public String getModuleName() {
+        return "Netica";
+    }
+
+    public java.net.URL getHelp() {
+        return helpURL;
+    }
+
+    public void install(cdms.core.Value params) throws Exception {
+        add("loadNet", NeticaFn.loadNet, "load a netica network from a file");
+        add("reorderNet", NeticaFn.reorderNet, "reorder a network");
         //     add("cdmsPlot", cdms.plugin.twodplot.TestPlot.rodPlot, "Plot with a nice axis.");
         add("cdmsPlot", camml.core.library.CammlPlot.fancyPlot, "Plot with nice axis");
-        add("convertToNeticaNet", NeticaFn.convertToNeticaNet, 
-            "Convert from BNetStochastic to BNetNetica" );
+        add("convertToNeticaNet", NeticaFn.convertToNeticaNet,
+                "Convert from BNetStochastic to BNetNetica");
         add("saveNet", NeticaFn.saveNet, "Save a netica network to a file.");
-        add( "bNetClassify", NeticaFn.bNetClassify,
-             "Calculate log probability of each BNet element given all other elements.");
-        add( "classify", NeticaFn.classify, "Classify values for a single node of a BN.");
-        add( "classifyProb", NeticaFn.classifyProb, 
-             "Return classification probabilities for a single node of a BN.");
+        add("bNetClassify", NeticaFn.bNetClassify,
+                "Calculate log probability of each BNet element given all other elements.");
+        add("classify", NeticaFn.classify, "Classify values for a single node of a BN.");
+        add("classifyProb", NeticaFn.classifyProb,
+                "Return classification probabilities for a single node of a BN.");
 
     }
-    
-    /** Default netica environment. */
+
+    /**
+     * Default netica environment.
+     */
     protected static Environ env;
-    
+
     // set up Netica if necessary
     static {
         try {
             env = Environ.getDefaultEnviron();
-            if(env == null)
-                { env = new Environ(System.getProperty("netica.reg")); }
-        } catch(NeticaException ne)
-            { throw new RuntimeException(ne.toString()); }
+            if (env == null) {
+                env = new Environ(System.getProperty("netica.reg"));
+            }
+        } catch (NeticaException ne) {
+            throw new RuntimeException(ne.toString());
+        }
     }
-    /** accessor for Netica.env */
-    public static Environ getEnv() { return env; }
+
+    /**
+     * accessor for Netica.env
+     */
+    public static Environ getEnv() {
+        return env;
+    }
 
 }
 

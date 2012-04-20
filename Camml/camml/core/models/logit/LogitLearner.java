@@ -50,58 +50,71 @@ import cdms.core.Value.Vector;
  *
  * @author Rodney O'Donnell <rodo@dgs.monash.edu.au>
  * @version $Revision: 1.4 $ $Date: 2006/08/22 03:13:30 $
- * $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/core/models/logit/LogitLearner.java,v $
+ *          $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/core/models/logit/LogitLearner.java,v $
  */
 
 public class LogitLearner extends DefaultImplementation {
 
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = 8756964567398266052L;
     final public static LogitLearner logitLearner = new LogitLearner();
-    public final static BNetLearner logitBNetLearner = new BNetLearner(CPTLearner.mlMultinomialCPTLearner, logitLearner,false,true);
-    
+    public final static BNetLearner logitBNetLearner = new BNetLearner(CPTLearner.mlMultinomialCPTLearner, logitLearner, false, true);
+
     /**
      * @param modelType
      * @param iType
      */
-    public LogitLearner() {    super(Type.MODEL, Type.TRIV); }
+    public LogitLearner() {
+        super(Type.MODEL, Type.TRIV);
+    }
 
-    /** Parameterize and cost data all in one hit.   */
-    public double parameterizeAndCost( Value i, Value.Vector x, Value.Vector z )
-        throws LearnerException
-    {        
+    /**
+     * Parameterize and cost data all in one hit.
+     */
+    public double parameterizeAndCost(Value i, Value.Vector x, Value.Vector z)
+            throws LearnerException {
         // Shortcut: If x.arity == 1, then the model/data cost nothing to state.
-        Type.Discrete xType = (Type.Discrete)((Type.Vector)x.t).elt;
-        if ( xType.UPB == xType.LWB ) { return 0; }
+        Type.Discrete xType = (Type.Discrete) ((Type.Vector) x.t).elt;
+        if (xType.UPB == xType.LWB) {
+            return 0;
+        }
 
         JulesLogit logit = new JulesLogit();
-        logit.nodeCost(x,z);        
+        logit.nodeCost(x, z);
         return logit.getMMLCost();
     }
 
-    
-    /** Use JulesLogit to parameterize model. */
+
+    /**
+     * Use JulesLogit to parameterize model.
+     */
     public Structured parameterize(Value i, Vector x, Vector z)
-        throws LearnerException {
-        
+            throws LearnerException {
+
         JulesLogit logit = new JulesLogit();
-        logit.nodeCost(x,z);
+        logit.nodeCost(x, z);
         Value.Structured y = logit.getParams();
         Value.Model m = Logit.logit;
-        Value s = m.getSufficient(x,z);
-        return new Value.DefStructured(new Value[] {m,s,y} );
-    }
-    
-    /** calls parameterize(i,x,z) */
-    public Structured sParameterize(Model m, Value stats)
-        throws LearnerException {
-        Value.Vector s = (Value.Vector)stats;
-        return parameterize(Value.TRIV,(Value.Vector)s.cmpnt(0),(Value.Vector)s.cmpnt(1));
+        Value s = m.getSufficient(x, z);
+        return new Value.DefStructured(new Value[]{m, s, y});
     }
 
-    /** Not implemented */
+    /**
+     * calls parameterize(i,x,z)
+     */
+    public Structured sParameterize(Model m, Value stats)
+            throws LearnerException {
+        Value.Vector s = (Value.Vector) stats;
+        return parameterize(Value.TRIV, (Value.Vector) s.cmpnt(0), (Value.Vector) s.cmpnt(1));
+    }
+
+    /**
+     * Not implemented
+     */
     public double sCost(Model m, Value stats, Value params)
-        throws LearnerException {
+            throws LearnerException {
         throw new RuntimeException("Not implemented");
     }
 

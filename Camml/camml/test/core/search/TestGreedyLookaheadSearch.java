@@ -37,54 +37,42 @@
 
 package camml.test.core.search;
 
-import junit.framework.*;
-
-import cdms.core.*;
-import cdms.plugin.search.*;
-import camml.core.search.*;
-import camml.core.models.bNet.*;
-import camml.core.models.ModelLearner;
-import camml.core.library.BlockingSearch;
-
+import camml.core.search.GreedyLookaheadSearch;
+import camml.core.search.SearchDataCreator;
+import cdms.core.Value;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 //import camml.models.*;
 //import cdms.plugin.model.*;
 //import camml.SearchPackage.*;
 
 
-import javax.swing.*;
-
-
-
-public class TestGreedyLookaheadSearch extends TestCase
-{
+public class TestGreedyLookaheadSearch extends TestCase {
     protected static Value.Model binaryMultistateModel;
-    
-    public TestGreedyLookaheadSearch(String name) 
-    {
+
+    public TestGreedyLookaheadSearch(String name) {
         super(name);
     }
-    
+
     // Create some data sets to test with.
-    protected void setUp() 
-    {
-        binaryMultistateModel = new cdms.plugin.model.Multinomial(0,1);
+    protected void setUp() {
+        binaryMultistateModel = new cdms.plugin.model.Multinomial(0, 1);
     }
-    
-    public static Test suite() 
-    {
+
+    public static Test suite() {
         return new TestSuite(TestGreedyLookaheadSearch.class);
     }
-    
-    
-    public void testBlockingSearch()
-    {
-        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem() );
 
-        Value.Vector dataset = 
-            SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123),1000,1,2,2);
-        
-        GreedyLookaheadSearch search = new GreedyLookaheadSearch( new java.util.Random(12345), dataset, 1 );
+
+    public void testBlockingSearch() {
+        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem());
+
+        Value.Vector dataset =
+                SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123), 1000, 1, 2, 2);
+
+        GreedyLookaheadSearch search = new GreedyLookaheadSearch(new java.util.Random(12345), dataset, 1);
         search.runUntilFinished();
     }
 

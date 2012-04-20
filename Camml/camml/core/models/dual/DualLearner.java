@@ -36,136 +36,157 @@
 
 package camml.core.models.dual;
 
-import cdms.core.*;
 import camml.core.models.ModelLearner;
-import camml.core.models.cpt.*;
-import camml.core.models.dTree.*;
+import camml.core.models.cpt.CPTLearner;
+import camml.core.models.dTree.ForcedSplitDTreeLearner;
 import camml.core.models.logit.LogitLearner;
-import camml.core.models.multinomial.*;
+import camml.core.models.multinomial.AdaptiveCodeLearner;
+import cdms.core.Type;
+import cdms.core.Value;
 
 /**
  * DualLearner chooses between a Decision Tree and a CPT (possibly more in future) and returns the
  * model which best fits the data. <br>
- *
+ * <p/>
  * To do this is requires two ModelLearner instances (passed in constructor). To choose a model
  * Dual parameterizes and costs the data with both ModelLearner functions and selects the model
  * with the lower cost.  <br>
- *
+ * <p/>
  * To get a true MML cost we need to add ln(2) nits to the final cost to represent the selection
  * between the two competing models (uniform prior assumed).  In the case where there are no parent
  * variables there is no need to add this constant as a CPT and DTree are identical for this case.
  */
-public class DualLearner extends ModelLearner.DefaultImplementation
-{
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+public class DualLearner extends ModelLearner.DefaultImplementation {
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -5173499146899569056L;
 
-    /** 'Dual' learner using CPT, DTree and Logit. */
+    /**
+     * 'Dual' learner using CPT, DTree and Logit.
+     */
     public final static ModelLearner dualCPTDTreeLogitLearner = new DualLearner(
-                                                                                new ModelLearner[] {AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
-                                                                                new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner},
-                                                                                new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner,
-                                                                                                    ForcedSplitDTreeLearner.multinomialDTreeLearner,
-                                                                                                    LogitLearner.logitLearner} );
-    
-    /** 'Dual' learner using CPT and DTree */
+            new ModelLearner[]{AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner,
+                    ForcedSplitDTreeLearner.multinomialDTreeLearner,
+                    LogitLearner.logitLearner});
+
+    /**
+     * 'Dual' learner using CPT and DTree
+     */
     public final static ModelLearner dualCPTDTreeLearner = new DualLearner(
-                                                                           new ModelLearner[] {AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
-                                                                           new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner},
-                                                                           new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner,
-                                                                                               ForcedSplitDTreeLearner.multinomialDTreeLearner} );
+            new ModelLearner[]{AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner,
+                    ForcedSplitDTreeLearner.multinomialDTreeLearner});
 
-    /** 'Dual' learner using DTree and Logit. */
+    /**
+     * 'Dual' learner using DTree and Logit.
+     */
     public final static ModelLearner dualCPTLogitLearner = new DualLearner(
-                                                                           new ModelLearner[] {AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
-                                                                           new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner},
-                                                                           new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner,
-                                                                                               LogitLearner.logitLearner} );
+            new ModelLearner[]{AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner,
+                    LogitLearner.logitLearner});
 
-    /** 'Dual' learner using DTree and Logit. */
+    /**
+     * 'Dual' learner using DTree and Logit.
+     */
     public final static ModelLearner dualDTreeLogitLearner = new DualLearner(
-                                                                             new ModelLearner[] {AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
-                                                                             new ModelLearner[] {CPTLearner.mmlAdaptiveCPTLearner},
-                                                                             new ModelLearner[] {ForcedSplitDTreeLearner.multinomialDTreeLearner,
-                                                                                                 LogitLearner.logitLearner} );
-        
-    /** standard 'Dual' learner using CPT and DTree */
+            new ModelLearner[]{AdaptiveCodeLearner.mmlAdaptiveCodeLearner},
+            new ModelLearner[]{CPTLearner.mmlAdaptiveCPTLearner},
+            new ModelLearner[]{ForcedSplitDTreeLearner.multinomialDTreeLearner,
+                    LogitLearner.logitLearner});
+
+    /**
+     * standard 'Dual' learner using CPT and DTree
+     */
     public final static ModelLearner dualLearner = dualCPTDTreeLearner;
-    
-    public String getName() { return "DualLearner"; }    
-    
-    /** a list of all the different modelLearner used in the dual model. */
+
+    public String getName() {
+        return "DualLearner";
+    }
+
+    /**
+     * a list of all the different modelLearner used in the dual model.
+     */
     //ModelLearner[] modelLearnerList;
-    
+
     final ModelLearner[] zeroParentLearner;
     final ModelLearner[] singleParentLearner;
     final ModelLearner[] multiParentLearner;
-    
-    
+
+
     public DualLearner(ModelLearner[] zeroParentLearner,
                        ModelLearner[] singleParentLearner,
                        ModelLearner[] multiParentLearner) {
-        super(makeModelType(), Type.TRIV );
+        super(makeModelType(), Type.TRIV);
         this.zeroParentLearner = zeroParentLearner;
         this.singleParentLearner = singleParentLearner;
         this.multiParentLearner = multiParentLearner;
     }
-    
-    /** Defualt constructor, same as DualLearner( CPTLearner.mmlAdaptiveCPTLearner,
-     *                                         DTreeLearner.multinomialDTreeLearner );
+
+    /**
+     * Defualt constructor, same as DualLearner( CPTLearner.mmlAdaptiveCPTLearner,
+     * DTreeLearner.multinomialDTreeLearner );
      */
-    public DualLearner( )
-    {
-        this( CPTLearner.mmlAdaptiveCPTLearner, 
-              ForcedSplitDTreeLearner.multinomialDTreeLearner,
-              AdaptiveCodeLearner.mmlAdaptiveCodeLearner );
+    public DualLearner() {
+        this(CPTLearner.mmlAdaptiveCPTLearner,
+                ForcedSplitDTreeLearner.multinomialDTreeLearner,
+                AdaptiveCodeLearner.mmlAdaptiveCodeLearner);
         //super( makeModelType(), Type.TRIV );
         //this.modelLearnerList = new ModelLearner[] { CPTLearner.mmlAdaptiveCPTLearner,
         //        ForcedSplitDTreeLearner.multinomialDTreeLearner, 
         //        AdaptiveCodeLearner.mmlAdaptiveCodeLearner };
 
     }
-    
-    
-    /** Create a dual (CPT DTree*/
-    public DualLearner( ModelLearner cptLearner, ModelLearner dTreeLearner, ModelLearner leafModelLearner )
-    {        
-        this(    new ModelLearner[] {leafModelLearner},
-                 new ModelLearner[] {cptLearner},
-                 new ModelLearner[] {cptLearner,dTreeLearner} );
+
+
+    /**
+     * Create a dual (CPT DTree
+     */
+    public DualLearner(ModelLearner cptLearner, ModelLearner dTreeLearner, ModelLearner leafModelLearner) {
+        this(new ModelLearner[]{leafModelLearner},
+                new ModelLearner[]{cptLearner},
+                new ModelLearner[]{cptLearner, dTreeLearner});
         //super( makeModelType(), Type.TRIV );
         //this.modelLearnerList = new ModelLearner[] { cptLearner, dTreeLearner, leafModelLearner };
-        
+
     }
-    
-    protected static Type.Model makeModelType( )
-    {
+
+    protected static Type.Model makeModelType() {
         //Type.Model subModelType = Type.MODEL;
         Type dataSpace = Type.DISCRETE;
         Type paramSpace = Type.VECTOR;
         Type sharedSpace = Type.STRUCTURED;
-        Type sufficientSpace = new Type.Structured( new Type[] {dataSpace, sharedSpace} );
-        
+        Type sufficientSpace = new Type.Structured(new Type[]{dataSpace, sharedSpace});
+
         return new Type.Model(dataSpace, paramSpace, sharedSpace, sufficientSpace);
-        
+
     }
-    
-    /** Parameterize and return (m,s,y) */
-    public Value.Structured parameterize( Value initialInfo, Value.Vector x, Value.Vector z )
-        throws LearnerException
-    {
+
+    /**
+     * Parameterize and return (m,s,y)
+     */
+    public Value.Structured parameterize(Value initialInfo, Value.Vector x, Value.Vector z)
+            throws LearnerException {
         Value.Structured bestParameterization = null;
         double bestCost = Double.POSITIVE_INFINITY;
-        
-        Type.Structured inputType = (Type.Structured)((Type.Vector)z.t).elt;
+
+        Type.Structured inputType = (Type.Structured) ((Type.Vector) z.t).elt;
         int numInputs = inputType.cmpnts.length;
-        
+
         ModelLearner[] modelLearnerList;
-        
-        if (numInputs == 0) { modelLearnerList = zeroParentLearner; }
-        else if (numInputs == 1) { modelLearnerList = singleParentLearner; }
-        else { modelLearnerList = multiParentLearner; }
-        
+
+        if (numInputs == 0) {
+            modelLearnerList = zeroParentLearner;
+        } else if (numInputs == 1) {
+            modelLearnerList = singleParentLearner;
+        } else {
+            modelLearnerList = multiParentLearner;
+        }
+
         /*
           if ( numInputs == 0 ) {
           // If there are no inputs, always use multinomialModelLearner.
@@ -179,49 +200,53 @@ public class DualLearner extends ModelLearner.DefaultImplementation
         */
         // loop through modelLearnerList and return the parameters with the best cost.
         // do not attempt to cost as a multinomial is numInputs > 0
-        for ( int i = 0; i < modelLearnerList.length; i++ ) {
+        for (int i = 0; i < modelLearnerList.length; i++) {
             Value.Structured params;
             double cost;
-                
+
             // If one parameterization method fails (excessive CPT combinations, etc) then simply
             // try the other methods instead.
             try {
-                params = modelLearnerList[i].parameterize( initialInfo, x, z );
+                params = modelLearnerList[i].parameterize(initialInfo, x, z);
                 //cost =  modelLearnerList[i].msyCost( params );
-                cost = modelLearnerList[i].parameterizeAndCost(initialInfo,x,z);
-            }
-            catch ( LearnerException e ) {
+                cost = modelLearnerList[i].parameterizeAndCost(initialInfo, x, z);
+            } catch (LearnerException e) {
                 params = null;
                 cost = Double.POSITIVE_INFINITY;
             }
-                
-            if ( cost < bestCost ) {
+
+            if (cost < bestCost) {
                 bestParameterization = params;
                 bestCost = cost;
             }
-        }    
-            
+        }
+
         //}    
-        if ( bestParameterization == null ) {
+        if (bestParameterization == null) {
             throw new LearnerException("All parameterization attempts failed.");
         }
-        
+
         return bestParameterization;
     }
-    
-    /** Parameterize and return (m,s,y) */
-    public double parameterizeAndCost( Value initialInfo, Value.Vector x, Value.Vector z )
-        throws LearnerException
-    {
+
+    /**
+     * Parameterize and return (m,s,y)
+     */
+    public double parameterizeAndCost(Value initialInfo, Value.Vector x, Value.Vector z)
+            throws LearnerException {
         double bestCost = Double.POSITIVE_INFINITY;
-        
-        Type.Structured inputType = (Type.Structured)((Type.Vector)z.t).elt;
+
+        Type.Structured inputType = (Type.Structured) ((Type.Vector) z.t).elt;
         int numInputs = inputType.cmpnts.length;
-        
+
         ModelLearner[] modelLearnerList;
-        if (numInputs == 0) { modelLearnerList = zeroParentLearner; }
-        else if (numInputs == 1) { modelLearnerList = singleParentLearner; }
-        else { modelLearnerList = multiParentLearner; }
+        if (numInputs == 0) {
+            modelLearnerList = zeroParentLearner;
+        } else if (numInputs == 1) {
+            modelLearnerList = singleParentLearner;
+        } else {
+            modelLearnerList = multiParentLearner;
+        }
 
         /*
           if ( numInputs == 0 ) {
@@ -233,53 +258,53 @@ public class DualLearner extends ModelLearner.DefaultImplementation
           bestCost = modelLearnerList[0].parameterizeAndCost( initialInfo, x, z );
           }
           else {
-        */    
+        */
         // loop through modelLearnerList and return the parameters with the best cost.
         // do not attempt to cost as a multinomial is numInputs > 0
-        for ( int i = 0; i < modelLearnerList.length; i++ ) {
+        for (int i = 0; i < modelLearnerList.length; i++) {
             double cost;
-                
+
             // If one parameterization method fails (excessive CPT combinations, etc) then 
             // simply try the other methods instead.
             try {
-                cost = modelLearnerList[i].parameterizeAndCost(initialInfo,x,z);
-            }
-            catch ( LearnerException e ) {
+                cost = modelLearnerList[i].parameterizeAndCost(initialInfo, x, z);
+            } catch (LearnerException e) {
                 cost = Double.POSITIVE_INFINITY;
             }
-                
-            if ( cost < bestCost ) {
+
+            if (cost < bestCost) {
                 bestCost = cost;
             }
-        }            
+        }
         //}    
         return bestCost + Math.log(modelLearnerList.length);
     }
-    
-    
-    /** Parameterize and return (m,s,y) */
-    public Value.Structured sParameterize( Value.Model model, Value s )
-        throws LearnerException
-    {    
+
+
+    /**
+     * Parameterize and return (m,s,y)
+     */
+    public Value.Structured sParameterize(Value.Model model, Value s)
+            throws LearnerException {
         // What is the best way to do this?
         throw new RuntimeException("Not Implemented");
     }
-    
-    /** return cost */
-    public double cost(Value.Model m, Value initialInfo, Value.Vector x, Value.Vector z, Value y)
-        throws LearnerException
-    {
-        return sCost(m, m.getSufficient(x,z), y);
-    } 
-    
+
     /**
-     * sCost uses the Value.Model m to determine which costing metric needs to be used.  
+     * return cost
+     */
+    public double cost(Value.Model m, Value initialInfo, Value.Vector x, Value.Vector z, Value y)
+            throws LearnerException {
+        return sCost(m, m.getSufficient(x, z), y);
+    }
+
+    /**
+     * sCost uses the Value.Model m to determine which costing metric needs to be used.
      * ie. if m is a CPT, then CPTLearner is used, if m is a DTree then DTreeLearner is used.
      * if m is neither, an exception is thrown.
      */
-    public double sCost( Value.Model m, Value s, Value y )
-        throws LearnerException
-    {
+    public double sCost(Value.Model m, Value s, Value y)
+            throws LearnerException {
         throw new RuntimeException("sCost not implemented.");
         /*
           double cost;
@@ -310,19 +335,21 @@ public class DualLearner extends ModelLearner.DefaultImplementation
           return cost;
         */
     }
-    
-    /** DualLearner( [modelLearner[i].toString()] )*/
+
+    /**
+     * DualLearner( [modelLearner[i].toString()] )
+     */
     public String toString() {
         ModelLearner modelLearnerList[] = multiParentLearner;
         String s = "DualLearner(";
-        for ( int i = 0; i < modelLearnerList.length; i++ ) {
-            if ( i != 0 ) 
+        for (int i = 0; i < modelLearnerList.length; i++) {
+            if (i != 0)
                 s += modelLearnerList[i].toString();
             else
                 s += ", " + modelLearnerList[i].toString();
-        } 
+        }
         s += ")";
         return s;
-    }    
+    }
 }
 

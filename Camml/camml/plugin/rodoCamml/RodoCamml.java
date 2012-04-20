@@ -36,27 +36,31 @@
 
 package camml.plugin.rodoCamml;
 
-import cdms.core.*;
+import cdms.core.Module;
+import cdms.core.Value;
 
 /**
  * Module to interface with the "rodo" version of camml. (this mainly exists for regression testing
- *  but may also be used if faster execution times are required.)
- *  Note: This plugin requires a compiled version of Camml to be present.
+ * but may also be used if faster execution times are required.)
+ * Note: This plugin requires a compiled version of Camml to be present.
  */
-public class RodoCamml extends Module 
-{
+public class RodoCamml extends Module {
     public static java.net.URL helpURL = Module.createStandardURL(RodoCamml.class);
-    
-    public String getModuleName() { return "RodoCamml"; }
-    public java.net.URL getHelp() { return helpURL; }
-    
-    public void install(Value params) throws Exception
-    {
-        add("load", RodoCammlIO.load, "load a .cas file" );
-        add("store", RodoCammlIO.store, "store a .cas file" );
-        add("storeOld", RodoCammlIO.storeInOldFormat, "store a .cas file, compatible with oldCamml" );
+
+    public String getModuleName() {
+        return "RodoCamml";
+    }
+
+    public java.net.URL getHelp() {
+        return helpURL;
+    }
+
+    public void install(Value params) throws Exception {
+        add("load", RodoCammlIO.load, "load a .cas file");
+        add("store", RodoCammlIO.store, "store a .cas file");
+        add("storeOld", RodoCammlIO.storeInOldFormat, "store a .cas file, compatible with oldCamml");
         add("makeRodoCammlLearner", RodoCammlLearner.makeRodoCammlLearner,
-            "return a bNet Learner Struct given options [(\"option\", optionVal)]");
+                "return a bNet Learner Struct given options [(\"option\", optionVal)]");
         add("rodoParameterize", RodoCammlLearner.modelLearner.getFunctionStruct(), "RodoCammlLearner");
         add("julesCPT", RodoCammlLearner.julesCPTLearner.getFunctionStruct(), "Julian Neil CPT Learner");
         add("julesLogit", RodoCammlLearner.julesLogitLearner.getFunctionStruct(), "Julian Neil Logit learner");

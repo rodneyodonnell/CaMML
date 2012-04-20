@@ -37,10 +37,6 @@
 package camml.plugin.weka;
 
 
-import weka.classifiers.Classifier;
-import weka.classifiers.functions.Logistic;
-//import weka.classifiers.trees.J48;
-import weka.core.Instances;
 import camml.core.models.ModelLearner;
 import camml.core.models.bNet.BNetLearner;
 import camml.core.models.cpt.CPTLearner;
@@ -49,21 +45,30 @@ import cdms.core.Value;
 import cdms.core.Value.Model;
 import cdms.core.Value.Structured;
 import cdms.core.Value.Vector;
+import weka.classifiers.Classifier;
+import weka.classifiers.functions.Logistic;
+import weka.core.Instances;
+
+//import weka.classifiers.trees.J48;
 
 /**
  * TODO: Multi line description of WekaLearner.java
  *
  * @author Rodney O'Donnell <rodo@dgs.monash.edu.au>
  * @version $Revision: 1.8 $ $Date: 2006/08/22 03:13:36 $
- * $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/WekaLearner.java,v $
+ *          $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/WekaLearner.java,v $
  */
 public class WekaLearner extends ModelLearner.DefaultImplementation {
 
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -6079870257596106360L;
-    /** Weka classifier used for learning model*/
+    /**
+     * Weka classifier used for learning model
+     */
     protected final Classifier classifier;
-    
+
     /**
      * Create a WekaLearner which parameterizes using the given classifier.
      */
@@ -76,79 +81,106 @@ public class WekaLearner extends ModelLearner.DefaultImplementation {
      * @see camml.core.models.ModelLearner#parameterize(cdms.core.Value, cdms.core.Value.Vector, cdms.core.Value.Vector)
      */
     public Structured parameterize(Value i, Vector x, Vector z) throws LearnerException {
-        
+
         // Convert data
-        Instances instances = Converter.vectorToInstances(x,z);
+        Instances instances = Converter.vectorToInstances(x, z);
         Classifier c2;
-        try {c2 = Classifier.makeCopy(classifier);}
-        catch (Exception e){ throw new LearnerException("Could not make copy of Weka classifier.",e); }
-        
+        try {
+            c2 = Classifier.makeCopy(classifier);
+        } catch (Exception e) {
+            throw new LearnerException("Could not make copy of Weka classifier.", e);
+        }
+
         // Attempt to perform classification
-        try { c2.buildClassifier(instances); } 
-        catch (Exception e) { throw new LearnerException("Weka classification failed.", e); }
-        
+        try {
+            c2.buildClassifier(instances);
+        } catch (Exception e) {
+            throw new LearnerException("Weka classification failed.", e);
+        }
+
         Value.Obj y = new Value.Obj(c2);
-        Value.Model m = new WekaModel((Type.Discrete)((Type.Vector)x.t).elt);
-        Value s = m.getSufficient(x,z);
-        return new Value.DefStructured(new Value[] {m,s,y});
-        
+        Value.Model m = new WekaModel((Type.Discrete) ((Type.Vector) x.t).elt);
+        Value s = m.getSufficient(x, z);
+        return new Value.DefStructured(new Value[]{m, s, y});
+
     }
 
-    /** @see camml.core.models.ModelLearner#sParameterize(cdms.core.Value.Model, cdms.core.Value) */
+    /**
+     * @see camml.core.models.ModelLearner#sParameterize(cdms.core.Value.Model, cdms.core.Value)
+     */
     public Structured sParameterize(Model m, Value stats) throws LearnerException {
         Value.Structured struct = (Value.Structured) stats;
-        return parameterize(Value.TRIV,(Value.Vector)struct.cmpnt(0),(Value.Vector)struct.cmpnt(1));
+        return parameterize(Value.TRIV, (Value.Vector) struct.cmpnt(0), (Value.Vector) struct.cmpnt(1));
     }
 
-    /** 
+    /**
      * Default costing function for WekaLearner is -LogLikelihood of data given the
      * learned model.  This is obviously bad as there is no mechanism to stop
      * overfitting.  As such this method should be overridden for any serious models
      * using this class.
-     *  
+     *
      * @see camml.core.models.ModelLearner#sCost(cdms.core.Value.Model, cdms.core.Value, cdms.core.Value)
      */
     public double sCost(Model m, Value stats, Value params) throws LearnerException {
-        return -m.logPSufficient(stats,params);
+        return -m.logPSufficient(stats, params);
     }
 
-    /** @see camml.core.models.ModelLearner#getName() */
-    public String getName() { return "WekaLearner"; } 
+    /**
+     * @see camml.core.models.ModelLearner#getName()
+     */
+    public String getName() {
+        return "WekaLearner";
+    }
 
 
     public static WekaLogitLearner wekaLogitLearner = new WekaLogitLearner();
-    /** Weka logit learner with sCost function overwritten. */
+
+    /**
+     * Weka logit learner with sCost function overwritten.
+     */
     public static class WekaLogitLearner extends WekaLearner {
 
-        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        /**
+         * Serial ID required to evolve class while maintaining serialisation compatibility.
+         */
         private static final long serialVersionUID = 8315350008915847383L;
-        /** Create ModelLearner using weka Logistic model*/
-        public WekaLogitLearner() {    super(new Logistic2()); }
+
+        /**
+         * Create ModelLearner using weka Logistic model
+         */
+        public WekaLogitLearner() {
+            super(new Logistic2());
+        }
         //public WekaLogitLearner() {    super(new Logistic()); }
         //public WekaLogitLearner() {    super(new J48()); }
-        
-        
-        /** TODO: Fix sCost, currently nasty hack of log(numCases) * numParams
-         *  where numParams is estimated by the number of lines output by toString()
-         *  TODO: FIX! FIX! FIX!
-         *  */
+
+
+        /**
+         * TODO: Fix sCost, currently nasty hack of log(numCases) * numParams
+         * where numParams is estimated by the number of lines output by toString()
+         * TODO: FIX! FIX! FIX!
+         */
         public double sCost(Model m, Value stats, Value params) throws LearnerException {
 
-            Object logistic = ((Value.Obj)params).getObj();
-            if (logistic instanceof GetMMLScore) { return ((GetMMLScore)logistic).getMMLScore(m,stats,params); }
-            
+            Object logistic = ((Value.Obj) params).getObj();
+            if (logistic instanceof GetMMLScore) {
+                return ((GetMMLScore) logistic).getMMLScore(m, stats, params);
+            }
+
             System.out.println("GetMMLScore not implemented in " + m.getClass());
-            
-            int numCases = ((Value.Vector)((Value.Structured)stats).cmpnt(0)).length();
-                        
+
+            int numCases = ((Value.Vector) ((Value.Structured) stats).cmpnt(0)).length();
+
             //System.out.println("zType = " + zType);
             //System.out.println("numCases = " + numCases);
-            
+
             //Logistic logistic = (Logistic)((Value.Obj)params).getObj();
             String logisticString = logistic.toString();
             int count = 0;
             for (int i = 0; i < logisticString.length(); i++) {
-                if (logisticString.charAt(i) == '\n') {count ++;}
+                if (logisticString.charAt(i) == '\n') {
+                    count++;
+                }
             }
             /*
               System.out.println("<------------------------------------------------");
@@ -156,34 +188,44 @@ public class WekaLearner extends ModelLearner.DefaultImplementation {
               System.out.println("------------------------------------------------>");
               System.out.println("count = " + count);
             */
-            return -m.logPSufficient(stats,params) + Math.log(numCases)*count;
+            return -m.logPSufficient(stats, params) + Math.log(numCases) * count;
         }
 
     }
-    
-    /** Interface for weka classifiers to implement so MML score can be retrieved. */
+
+    /**
+     * Interface for weka classifiers to implement so MML score can be retrieved.
+     */
     public static interface GetMMLScore {
         public double getMMLScore(Value.Model m, Value stats, Value params);
     }
-    
-    /** Weka Logistic classifier with getMMLScore() and getNumParams() implemented */
+
+    /**
+     * Weka Logistic classifier with getMMLScore() and getNumParams() implemented
+     */
     public static class Logistic2 extends Logistic implements GetNumParams, GetMMLScore {
-        /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+        /**
+         * Serial ID required to evolve class while maintaining serialisation compatibility.
+         */
         private static final long serialVersionUID = 5227316370198101334L;
 
-        /** Return number of free parameters in model*/
+        /**
+         * Return number of free parameters in model
+         */
         public int getNumParams(Value params) {
-            return m_Par.length*m_Par[0].length;
+            return m_Par.length * m_Par[0].length;
         }
 
-        /** Calculate MML score of model given parameters. */
+        /**
+         * Calculate MML score of model given parameters.
+         */
         public double getMMLScore(Value.Model m, Value stats, Value params) {
-            Value.Vector x = (Value.Vector)((Value.Structured)stats).cmpnt(0);
-            return -m_LL + Math.log(x.length())*getNumParams(null);
+            Value.Vector x = (Value.Vector) ((Value.Structured) stats).cmpnt(0);
+            return -m_LL + Math.log(x.length()) * getNumParams(null);
         }
-        
+
     }
-    
+
     //    public static class WekaLogitModel extends WekaModel implements ModelLearner.GetNumParams {
     //
     //        public WekaLogitModel( Type.Discrete xType) { super(xType); }
@@ -199,6 +241,6 @@ public class WekaLearner extends ModelLearner.DefaultImplementation {
     //        }
     //        
     //    }
-    
-    public final static BNetLearner wekaBNetLogitLearner = new BNetLearner(CPTLearner.mlMultinomialCPTLearner, wekaLogitLearner,false,true);
+
+    public final static BNetLearner wekaBNetLogitLearner = new BNetLearner(CPTLearner.mlMultinomialCPTLearner, wekaLogitLearner, false, true);
 }

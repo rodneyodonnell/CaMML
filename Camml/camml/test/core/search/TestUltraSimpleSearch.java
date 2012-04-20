@@ -37,73 +37,70 @@
 
 package camml.test.core.search;
 
-import junit.framework.*;
-
-import cdms.core.*;
-import cdms.plugin.search.*;
 import camml.core.library.BlockingSearch;
-import camml.core.search.*;
+import camml.core.search.SearchDataCreator;
+import camml.core.search.UltraSimpleSearch;
+import cdms.core.Value;
+import cdms.plugin.search.Search;
+import cdms.plugin.search.SearchControl;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import javax.swing.*;
 
 
-
-public class TestUltraSimpleSearch extends TestCase
-{
+public class TestUltraSimpleSearch extends TestCase {
     protected Value.Vector commonCauseDataset;
-    
-    public TestUltraSimpleSearch(String name) 
-    {
+
+    public TestUltraSimpleSearch(String name) {
         super(name);
     }
-    
+
     // Create some data sets to test with.
-    protected void setUp() 
-    {
-        commonCauseDataset = 
-            SearchDataCreator.generateCommonCauseDataset( new java.util.Random(123), 200 );
+    protected void setUp() {
+        commonCauseDataset =
+                SearchDataCreator.generateCommonCauseDataset(new java.util.Random(123), 200);
     }
-    
-    public static Test suite() 
-    {
+
+    public static Test suite() {
         return new TestSuite(TestUltraSimpleSearch.class);
     }
-    
-    public void testSearchInterface()
-    {
-        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem() );
+
+    public void testSearchInterface() {
+        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem());
 
         JFrame f = new JFrame("Simple Search Object");
-        Value.Vector dataset = 
-            SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123),100,2,2,3);
-        Search s = new BlockingSearch( new UltraSimpleSearch( new java.util.Random(12345), dataset ));
-        f.getContentPane().add(new SearchControl(s,new JLabel("UltraSimpleSearch")));
+        Value.Vector dataset =
+                SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123), 100, 2, 2, 3);
+        Search s = new BlockingSearch(new UltraSimpleSearch(new java.util.Random(12345), dataset));
+        f.getContentPane().add(new SearchControl(s, new JLabel("UltraSimpleSearch")));
         f.pack();
         //f.setVisible(true);
-        
+
         s.start();
     }
-    
-    
-    
-    /** Test main function. */
-    public static void main( String args[] )
-    {
+
+
+    /**
+     * Test main function.
+     */
+    public static void main(String args[]) {
         if (args.length != 2)
             throw new IllegalArgumentException("Correct Syntax java <prog> seed samples");
-        
-        java.util.Random rand = new java.util.Random( (Integer.parseInt(args[0])+1)*777 );
+
+        java.util.Random rand = new java.util.Random((Integer.parseInt(args[0]) + 1) * 777);
         Value.Vector data = SearchDataCreator.generateCommonCauseDataset(
-                                                                         new java.util.Random(Integer.parseInt(args[0])),
-                                                                         Integer.parseInt(args[1]));
-        
-        
+                new java.util.Random(Integer.parseInt(args[0])),
+                Integer.parseInt(args[1]));
+
+
         JFrame f = new JFrame("Sample Search Object");
-        Search s = new Search(new UltraSimpleSearch( rand, data ));
-        f.getContentPane().add(new SearchControl(s,new JLabel("Hello")));
+        Search s = new Search(new UltraSimpleSearch(rand, data));
+        f.getContentPane().add(new SearchControl(s, new JLabel("Hello")));
         f.pack();
         f.setVisible(true);
     }
-    
-    
+
+
 }

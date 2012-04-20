@@ -44,34 +44,45 @@ import camml.core.models.multinomial.AdaptiveCodeLearner;
 import cdms.core.Value;
 
 
-/** MakeCPTLearner returns a CPTLearner given a "leafLearner" in its options. */
-public class MakeCPTLearner extends MakeModelLearner
-{
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+/**
+ * MakeCPTLearner returns a CPTLearner given a "leafLearner" in its options.
+ */
+public class MakeCPTLearner extends MakeModelLearner {
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -5513660850923106236L;
-    /** Default implementation of makeCPTLearner */
+    /**
+     * Default implementation of makeCPTLearner
+     */
     public static final MakeCPTLearner makeCPTLearner = new MakeCPTLearner();
 
-    public MakeCPTLearner( ) { }
-    
-    /** Shortcut apply method */
-    public ModelLearner _apply( String[] option, Value[] optionVal ) {  
-        
+    public MakeCPTLearner() {
+    }
+
+    /**
+     * Shortcut apply method
+     */
+    public ModelLearner _apply(String[] option, Value[] optionVal) {
+
         // Set default values.
         ModelLearner leafLearner = AdaptiveCodeLearner.adaptiveCodeLearner2;
-        
+
         // Search options for overrides.
-        for ( int i = 0; i < option.length; i++ ) {
-            if ( option[i].equals("leafLearner") ) {
-                leafLearner = ((FunctionStruct)optionVal[i]).getLearner();
+        for (int i = 0; i < option.length; i++) {
+            if (option[i].equals("leafLearner")) {
+                leafLearner = ((FunctionStruct) optionVal[i]).getLearner();
+            } else {
+                throw new RuntimeException("Unknown option : " + option[i]);
             }
-            else { throw new RuntimeException("Unknown option : " + option[i] );}
         }
-        
-        return new CPTLearner( leafLearner );
+
+        return new CPTLearner(leafLearner);
     }
-    
-    public String[] getOptions() { return new String[] {
-            "leafLearner -- Learner used for each subModel.  Default is AdaptiveCode"
-        }; }
+
+    public String[] getOptions() {
+        return new String[]{
+                "leafLearner -- Learner used for each subModel.  Default is AdaptiveCode"
+        };
+    }
 }

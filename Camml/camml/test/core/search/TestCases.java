@@ -36,49 +36,52 @@
 
 package camml.test.core.search;
 
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * All Camml Tests
  */
-public class TestCases extends TestCase
-{
-    
-    public TestCases(String name) 
-    {
+public class TestCases extends TestCase {
+
+    public TestCases(String name) {
         super(name);
     }
-    
-    protected void setUp() 
-    {
+
+    protected void setUp() {
     }
-    
-    /** Add all subtests to the TestCases */
-    public static Test suite() 
-    {
+
+    /**
+     * Add all subtests to the TestCases
+     */
+    public static Test suite() {
         TestSuite tSuite = new TestSuite(TestCases.class);
-        
-        tSuite.addTest( TestUltraSimpleSearch.suite() );
-        tSuite.addTest( TestMetropolisSearch.suite() );
-        tSuite.addTest( TestQuickSearch.suite() );
-        
-        tSuite.addTest( TestGreedyLookaheadSearch.suite() );
-        tSuite.addTest( TestAnnealSearch.suite() );
-        
-        
-        tSuite.addTest( TestTOM.suite() );
-        
+
+        tSuite.addTest(TestUltraSimpleSearch.suite());
+        tSuite.addTest(TestMetropolisSearch.suite());
+        tSuite.addTest(TestQuickSearch.suite());
+
+        tSuite.addTest(TestGreedyLookaheadSearch.suite());
+        tSuite.addTest(TestAnnealSearch.suite());
+
+
+        tSuite.addTest(TestTOM.suite());
+
         return tSuite;
     }
-    
+
     public static long mem() {
         Runtime r = Runtime.getRuntime();
         System.gc();
-        return r.totalMemory()-r.freeMemory();
-        
+        return r.totalMemory() - r.freeMemory();
+
     }
-    
-    /** Empty test in place as we require at least one test in a TestCase. */
-    public void testNothing() { }
-    
+
+    /**
+     * Empty test in place as we require at least one test in a TestCase.
+     */
+    public void testNothing() {
+    }
+
 }

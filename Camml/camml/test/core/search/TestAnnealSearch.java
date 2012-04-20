@@ -37,56 +37,42 @@
 
 package camml.test.core.search;
 
-import junit.framework.*;
-
-import cdms.core.*;
-import camml.core.search.*;
-import camml.core.models.bNet.*;
-import camml.core.library.BlockingSearch;
-
-import camml.core.models.ModelLearner;
-
-
-import camml.plugin.rodoCamml.RodoCammlIO;
-import cdms.plugin.search.*;
+import camml.core.search.AnnealSearch;
+import camml.core.search.SearchDataCreator;
+import camml.core.search.SearchPackage;
+import cdms.core.Value;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
-import javax.swing.*;
-
-
-
-public class TestAnnealSearch extends TestCase
-{
-    public TestAnnealSearch(String name) 
-    {
+public class TestAnnealSearch extends TestCase {
+    public TestAnnealSearch(String name) {
         super(name);
     }
-    
+
     // Create some data sets to test with.
-    protected void setUp() 
-    {
+    protected void setUp() {
     }
-    
-    public static Test suite() 
-    {
+
+    public static Test suite() {
         return new TestSuite(TestAnnealSearch.class);
     }
-    
-    /** 
+
+    /**
      * Test Anneal search.  This must be done in a blocking way, as a non-blocking search
      * will spawn a new thread and JUnit will think everything is fine (even if it is not).
      */
-    public void testBlockingSearch()
-    {
-        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem() );
+    public void testBlockingSearch() {
+        System.out.println("Mem : " + getClass() + "\t" + camml.test.core.search.TestCases.mem());
 
         java.util.Random rand = new java.util.Random(123);
-        
-        Value.Vector dataset = 
-            SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123),100,2,2,3);
-        AnnealSearch quickSearchObject = new AnnealSearch( rand, dataset,
-                                                           SearchPackage.mlCPTLearner,
-                                                           SearchPackage.mmlCPTLearner );
+
+        Value.Vector dataset =
+                SearchDataCreator.generateWallaceKorbStyleDataset(new java.util.Random(123), 100, 2, 2, 3);
+        AnnealSearch quickSearchObject = new AnnealSearch(rand, dataset,
+                SearchPackage.mlCPTLearner,
+                SearchPackage.mmlCPTLearner);
 
         quickSearchObject.runUntilFinished();
     }

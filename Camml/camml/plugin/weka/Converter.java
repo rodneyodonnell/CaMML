@@ -36,15 +36,18 @@
 
 package camml.plugin.weka;
 
-import java.io.StringReader;
-
-import weka.core.*;
-import cdms.core.*;
 import camml.plugin.netica.NeticaFn;
 import camml.plugin.rodoCamml.RodoCammlIO;
-
+import cdms.core.Type;
+import cdms.core.Value;
+import cdms.core.VectorFN;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.filters.supervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.io.StringReader;
 
 
 /**
@@ -52,37 +55,38 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *
  * @author Rodney O'Donnell <rodo@dgs.monash.edu.au>
  * @version $Revision: 1.9 $ $Date: 2006/08/22 03:13:35 $
- * $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/Converter.java,v $
- *
+ *          $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/plugin/weka/Converter.java,v $
  */
 public class Converter {
 
-    /** Create an Instances containing a multicol vector z and a single col vector x.
-     *  'x' is set as the class variable. */
+    /**
+     * Create an Instances containing a multicol vector z and a single col vector x.
+     * 'x' is set as the class variable.
+     */
     public static Instances vectorToInstances(Value.Vector x, Value.Vector z) {
-        Type.Structured zType = (Type.Structured)((Type.Vector)z.t).elt;
-        
-        Value.Vector subVecs[] = new Value.Vector[zType.cmpnts.length+1];
-        for (int i = 0; i < subVecs.length-1; i++) {
+        Type.Structured zType = (Type.Structured) ((Type.Vector) z.t).elt;
+
+        Value.Vector subVecs[] = new Value.Vector[zType.cmpnts.length + 1];
+        for (int i = 0; i < subVecs.length - 1; i++) {
             subVecs[i] = z.cmpnt(i);
         }
-        subVecs[subVecs.length-1] = x;
-        
-        Value.Vector multiVec = new VectorFN.MultiCol(new Value.DefStructured(subVecs)); 
+        subVecs[subVecs.length - 1] = x;
+
+        Value.Vector multiVec = new VectorFN.MultiCol(new Value.DefStructured(subVecs));
         Instances instances = vectorToInstances(multiVec);
-        instances.setClassIndex(subVecs.length-1);
+        instances.setClassIndex(subVecs.length - 1);
         return instances;
     }
-    
+
     /**
-     *  convert from CDMS Vector to weka instances.
-     *  Vector is reordered so target attribute appears last. <br>
-     *  
-     *   weka attribute | cdms type        <br>
-     *   ---------------|----------        <br>
-     *   string         | Type.String      <br>
-     *   numeric        | Type.Continuous  <br>
-     *   nominal        | Type.Symbolic    <br>
+     * convert from CDMS Vector to weka instances.
+     * Vector is reordered so target attribute appears last. <br>
+     * <p/>
+     * weka attribute | cdms type        <br>
+     * ---------------|----------        <br>
+     * string         | Type.String      <br>
+     * numeric        | Type.Continuous  <br>
+     * nominal        | Type.Symbolic    <br>
      */
     public static Instances vectorToInstances(Value.Vector vec) {
 
@@ -92,22 +96,22 @@ public class Converter {
 
         // Extract variable names fron data.
         Type.Structured sType = ((Type.Structured) ((Type.Vector) vec.t).elt);
-        
+
         // TODO: Creating labels here is a nasty hack and should be fixed elsewhere. 
         if (sType.labels == null) {
             sType.labels = new String[sType.cmpnts.length];
         }
         for (int i = 0; i < sType.labels.length; i++) {
-            sType.labels[i] = "v_"+i;
+            sType.labels[i] = "v_" + i;
         }
-        
+
         String[] labels = NeticaFn.makeValidNeticaNames(sType.labels, false);
 
         // TODO: Fix
         if (labels.length == 0) {
             throw new RuntimeException("Cannot create instance with no variables (fix this).");
         }
-        
+
         // Print out attributes & values.
         sb.append("@relation temp\n");
         for (int i = 0; i < labels.length; i++) {
@@ -123,8 +127,7 @@ public class Converter {
                     }
                 }
                 sb.append(" }\n");
-            }
-            else if (sType.cmpnts[i] instanceof Type.Discrete) {
+            } else if (sType.cmpnts[i] instanceof Type.Discrete) {
                 Type.Discrete dType = (Type.Discrete) sType.cmpnts[i];
                 sb.append("{ ");
                 for (int j = (int) dType.LWB; j < (int) dType.UPB + 1; j++) {
@@ -134,9 +137,9 @@ public class Converter {
                     }
                 }
                 sb.append(" }\n");
+            } else {
+                throw new RuntimeException("Type not handled: " + sType.cmpnts[i]);
             }
-
-            else {throw new RuntimeException("Type not handled: " + sType.cmpnts[i]); }
         }
 
         // Print out data
@@ -163,32 +166,32 @@ public class Converter {
             Value.Structured elt = (Value.Structured) vec.elt(0);
             System.out.println("elt = " + elt);
             for (int j = 0; j < labels.length - 1; j++) {
-                System.out.println("elt.cmpnt(j) = " + elt.cmpnt(j));                
+                System.out.println("elt.cmpnt(j) = " + elt.cmpnt(j));
             }
             System.out.println("vec.t = " + vec.t);
             System.out.println("vec.cmpnt(0).t = " + vec.cmpnt(0).t);
             System.out.println("elt.t = " + elt.t);
             System.out.println("elt.cmpnt(0).t = " + elt.cmpnt(0).t);
             System.out.println();
-            
+
             System.out.println("vec.getClass() = " + vec.getClass());
             System.out.println("vec.cmpnt(0).getClass() = " + vec.cmpnt(0).getClass());
             System.out.println("elt.getClass() = " + elt.getClass());
             System.out.println("elt.cmpnt(0).getClass() = " + elt.cmpnt(0).getClass());
             throw new RuntimeException(e);
         }
-        
+
 
         return instances;
     }
 
     /**
-     *  convert from weka instances to a CDMS Vector  <br>
-     *   weka attribute | cdms type        <br>
-     *   ---------------|----------        <br>
-     *   string         | Type.String      <br>
-     *   numeric        | Type.Continuous  <br>
-     *   nominal        | Type.Symbolic    <br>
+     * convert from weka instances to a CDMS Vector  <br>
+     * weka attribute | cdms type        <br>
+     * ---------------|----------        <br>
+     * string         | Type.String      <br>
+     * numeric        | Type.Continuous  <br>
+     * nominal        | Type.Symbolic    <br>
      */
     public static Value.Vector instancesToVector(Instances instances) {
 
@@ -205,10 +208,10 @@ public class Converter {
 
             if (current.isString()) { // weka string -> cdms Type.String
                 Value.Str[] stringArray = new Value.Str[instances
-                                                        .numInstances()];
+                        .numInstances()];
                 for (int j = 0; j < stringArray.length; j++) {
                     stringArray[j] = new Value.Str(instances.instance(j)
-                                                   .toString(current));
+                            .toString(current));
                 }
                 vecArray[i] = new VectorFN.FatVector(stringArray);
 
@@ -227,10 +230,10 @@ public class Converter {
                 }
 
                 stateArray = camml.plugin.netica.NeticaFn.makeValidNeticaNames(
-                                                                               stateArray, true);
+                        stateArray, true);
                 // create cdms Type.Symbolic
                 Type.Symbolic type = new Type.Symbolic(false, false, false,
-                                                       false, stateArray);
+                        false, stateArray);
 
                 // Create the array of ints required to specify data.
                 double[] doubleArray = instances.attributeToDoubleArray(i);
@@ -239,12 +242,12 @@ public class Converter {
                     intArray[j] = (int) doubleArray[j];
                     if (Double.isNaN(doubleArray[j])) {
                         throw new RuntimeException(
-                                                   "Missing values not handled properly");
+                                "Missing values not handled properly");
                     }
                 }
 
                 // combine type and value together to form a vector of symbolic values.
-                vecArray[i] = new VectorFN.FastDiscreteVector(intArray, type );
+                vecArray[i] = new VectorFN.FastDiscreteVector(intArray, type);
 
             } else { // This should never occur.
                 throw new RuntimeException("Unknown type.");
@@ -252,21 +255,21 @@ public class Converter {
         }
 
         nameArray = camml.plugin.netica.NeticaFn.makeValidNeticaNames(
-                                                                      nameArray, true);
+                nameArray, true);
         Value.Structured vecStruct = new Value.DefStructured(vecArray,
-                                                             nameArray);
+                nameArray);
         Value.Vector vec = new VectorFN.MultiCol(vecStruct);
 
         return vec;
     }
 
     /**
-     *  convert a single weka instance to a CDMS Structure  <br>
-     *   weka attribute | cdms type        <br>
-     *   ---------------|----------        <br>
-     *   string         | Type.String      <br>
-     *   numeric        | Type.Continuous  <br>
-     *   nominal        | Type.Symbolic    <br>
+     * convert a single weka instance to a CDMS Structure  <br>
+     * weka attribute | cdms type        <br>
+     * ---------------|----------        <br>
+     * string         | Type.String      <br>
+     * numeric        | Type.Continuous  <br>
+     * nominal        | Type.Symbolic    <br>
      */
     public static Value.Structured instanceToStruct(Instance instance) {
 
@@ -286,7 +289,7 @@ public class Converter {
 
             } else if (current.isNumeric()) { // weka numeric -> cdms Type.Continuous
                 valArray[i] = new Value.Continuous(
-                                                   (instance.toDoubleArray())[i]);
+                        (instance.toDoubleArray())[i]);
             } else if (current.isNominal()) { // weka nominal -> cdms Type.Symbolic
 
                 // find the names of each symbolic state and create a type from them.
@@ -300,7 +303,7 @@ public class Converter {
 
                 // create cdms Type.Symbolic
                 Type.Symbolic type = new Type.Symbolic(false, false, false,
-                                                       false, stateArray);
+                        false, stateArray);
 
                 // Create the array of ints required to specify data.
                 int val = (int) instance.toDoubleArray()[i];
@@ -311,27 +314,27 @@ public class Converter {
         }
 
         Value.Structured valStruct = new Value.DefStructured(valArray,
-                                                             nameArray);
+                nameArray);
 
         return valStruct;
     }
 
     /**
-     * load works out from the file extansion which type of file to try to load. 
+     * load works out from the file extansion which type of file to try to load.
      * Files loaded in the .arff format can automatically be discretized and have missing values
-     *  replaced.  This is done through weka and something similar should be implemented in CDMS.
+     * replaced.  This is done through weka and something similar should be implemented in CDMS.
      * <br>
-     * Currently .arff -> weka, .cas -> RodoCamml <br>     
+     * Currently .arff -> weka, .cas -> RodoCamml <br>
      * Friedman format not implemented.
      */
     public static Value.Vector load(String fileName, boolean discretize,
                                     boolean fixMissing) throws java.io.FileNotFoundException,
-                                                               java.io.IOException, Exception {
+            java.io.IOException, Exception {
         // Load data from appropriately file type.
         final Value.Vector data;
         if (fileName.endsWith(".arff")) {
             Instances instances = new Instances(
-                                                new java.io.FileReader(fileName));
+                    new java.io.FileReader(fileName));
 
             instances.setClassIndex(instances.numAttributes() - 1);
             // filter instances if required.
@@ -363,7 +366,7 @@ public class Converter {
      * Currently .cas (RodoCamml) and .arff format not implemented.
      */
     public static void save(String fileName, Value.Vector data)
-        throws java.io.IOException {
+            throws java.io.IOException {
         // Now write the data out
         if (fileName.endsWith(".arff")) {
             throw new RuntimeException("Conversion from Value.Vector to Instances not implemented");

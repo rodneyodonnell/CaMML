@@ -36,23 +36,27 @@
 
 package camml.plugin.augment;
 
-import cdms.core.*;
+import cdms.core.Module;
+import cdms.core.Value;
 
 /**
-   Module to load Augment functions
-*/
-public class Augment extends Module 
-{
+ * Module to load Augment functions
+ */
+public class Augment extends Module {
     public static java.net.URL helpURL = Module.createStandardURL(Augment.class);
-    
-    public String getModuleName() { return "Augment"; }
-    public java.net.URL getHelp() { return helpURL; }
-    
-    public void install(Value params) throws Exception
-    {
-        add("augment", AugmentFN.augment, "augment a network" );
-        add("augment2", AugmentFN2.augment2, "augment a network" );
-        add("augment3", AugmentFN3.augment3, "augment a network" );
+
+    public String getModuleName() {
+        return "Augment";
+    }
+
+    public java.net.URL getHelp() {
+        return helpURL;
+    }
+
+    public void install(Value params) throws Exception {
+        add("augment", AugmentFN.augment, "augment a network");
+        add("augment2", AugmentFN2.augment2, "augment a network");
+        add("augment3", AugmentFN3.augment3, "augment a network");
     }
 }
 

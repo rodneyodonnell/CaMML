@@ -37,52 +37,67 @@
 
 package camml.test.core.models.dTree;
 
+import camml.core.models.dTree.DTree;
+import camml.core.models.dTree.DTreeGenerator;
+import cdms.core.Value;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import java.util.Random;
-
-import junit.framework.*;
-
-import camml.core.models.dTree.*;
-import cdms.core.*;
 
 /**
  * @author rodo
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ *         <p/>
+ *         TODO To change the template for this generated type comment go to
+ *         Window - Preferences - Java - Code Style - Code Templates
  */
 public class TestDTreeGenerator extends TestCase {
 
-    /** BNet model used in testing*/
+    /**
+     * BNet model used in testing
+     */
     protected static DTree model;
-    
-    /** Parameters corresponding to model */
+
+    /**
+     * Parameters corresponding to model
+     */
     protected static Value.Vector params;
 
     /** */
-    public TestDTreeGenerator() { super(); }
+    public TestDTreeGenerator() {
+        super();
+    }
 
     /**     */
-    public TestDTreeGenerator(String name) { super(name); }
-    
-    public static Test suite() 
-    {
-        return new TestSuite( TestDTreeGenerator.class );        
+    public TestDTreeGenerator(String name) {
+        super(name);
     }
 
-    
-    /** Initialise. */
-    protected void setUp() throws Exception { 
+    public static Test suite() {
+        return new TestSuite(TestDTreeGenerator.class);
     }
 
-    /** Test KL function on Augmented networks */
+
+    /**
+     * Initialise.
+     */
+    protected void setUp() throws Exception {
+    }
+
+    /**
+     * Test KL function on Augmented networks
+     */
     public final void testHighArityGenerate() throws Exception {
         Random rand = new Random(123);
         int arity = 2;
-        double leafP = 0.25; 
+        double leafP = 0.25;
         int numParents = 18;
         int parents[] = new int[numParents];
-        for (int i = 0; i < parents.length; i++) { parents[i] = arity; }
-        DTreeGenerator.generate(rand,arity,parents,leafP,true);
+        for (int i = 0; i < parents.length; i++) {
+            parents[i] = arity;
+        }
+        DTreeGenerator.generate(rand, arity, parents, leafP, true);
         //System.out.println(my);
     }
 

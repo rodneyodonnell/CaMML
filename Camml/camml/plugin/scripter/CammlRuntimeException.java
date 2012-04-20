@@ -41,20 +41,23 @@
 
 package camml.plugin.scripter;
 
-/** This exception should be thrown in the apply method of a Value.Function.  It is required as
- *  a apply cannot throw non checked Exceptions (IE. mainly Exceptions which are not 
- *  RuntimeExceptions) this fixes that problem by throwing them as a RuntimeException.
+/**
+ * This exception should be thrown in the apply method of a Value.Function.  It is required as
+ * a apply cannot throw non checked Exceptions (IE. mainly Exceptions which are not
+ * RuntimeExceptions) this fixes that problem by throwing them as a RuntimeException.
  */
 public class CammlRuntimeException extends RuntimeException {
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = 3901348368810252494L;
 
-    CammlRuntimeException( ) {
-        super ("Camml Runtime Exception");
+    CammlRuntimeException() {
+        super("Camml Runtime Exception");
     }
-    
-    CammlRuntimeException( String s ) {
-        super ("Camml Runtime Exception : " + s);
+
+    CammlRuntimeException(String s) {
+        super("Camml Runtime Exception : " + s);
     }
 }
 

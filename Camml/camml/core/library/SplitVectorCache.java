@@ -36,40 +36,56 @@
 // Created on 11/02/2005
 
 package camml.core.library;
-import java.lang.ref.SoftReference;
+
 import cdms.core.Value;
+
+import java.lang.ref.SoftReference;
 
 /**
  * This class uses SoftReferences to cache a partially split vector.
  */
 public class SplitVectorCache extends ArrayIndexedHashTable {
 
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = -7738286380935470396L;
-    /** Full vector all split vectors are based on. */
+    /**
+     * Full vector all split vectors are based on.
+     */
     final SelectedVector fullVec;
-    
-    /** Constructor accepting Vector */
-    public SplitVectorCache( Value.Vector vec ) {    
-        super();  
-        if ( vec instanceof SelectedVector ) fullVec = (SelectedVector)vec;
-        else fullVec = new SelectedVector(vec,null,null);
+
+    /**
+     * Constructor accepting Vector
+     */
+    public SplitVectorCache(Value.Vector vec) {
+        super();
+        if (vec instanceof SelectedVector) fullVec = (SelectedVector) vec;
+        else fullVec = new SelectedVector(vec, null, null);
     }
 
-    /** Return Vector from hashTable. */
-    public SelectedVector[] getVec( int[] split ) {
+    /**
+     * Return Vector from hashTable.
+     */
+    public SelectedVector[] getVec(int[] split) {
         // If no reference exists, return null
-        SoftReference ref = (SoftReference)get2( split );
-        if ( ref == null ) { return null; }
+        SoftReference ref = (SoftReference) get2(split);
+        if (ref == null) {
+            return null;
+        }
         // If vector has already been deleted, delete reference and return null.
-        SelectedVector[] vec = (SelectedVector[])ref.get();
-        if ( vec == null ) { this.remove2( split ); }
+        SelectedVector[] vec = (SelectedVector[]) ref.get();
+        if (vec == null) {
+            this.remove2(split);
+        }
         // Return vector.
         return vec;
     }
-    
-    /** Add SelectedVector to hashTablt */
-    public void putVec( int[] split, SelectedVector[] vec ) {
-        put2( split, new SoftReference(vec) );
+
+    /**
+     * Add SelectedVector to hashTablt
+     */
+    public void putVec(int[] split, SelectedVector[] vec) {
+        put2(split, new SoftReference(vec));
     }
 }

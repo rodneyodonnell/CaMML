@@ -36,47 +36,63 @@
 
 package camml.core.models.logit;
 
-import java.io.PrintStream;
-import java.util.Arrays;
-
 import camml.core.models.ModelLearner;
 import camml.core.models.ModelLearner.LearnerException;
-import cdms.core.*;
+import cdms.core.Type;
+import cdms.core.Value;
+import cdms.core.VectorFN;
+
+import java.io.PrintStream;
+import java.util.Arrays;
 
 /**
  * Logistic Regression model, code largely borrowed from Julian Neil's C
  * implementation.
- * 
+ *
  * @author Rodney O'Donnell <rodo@dgs.monash.edu.au>
- * @version $Revision: 1.14 $ $Date: 2006/08/22 03:13:29 $ 
- * $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/core/models/logit/JulesLogit.java,v $
+ * @version $Revision: 1.14 $ $Date: 2006/08/22 03:13:29 $
+ *          $Source: /u/csse/public/bai/bepi/cvs/CAMML/Camml/camml/core/models/logit/JulesLogit.java,v $
  */
 public class JulesLogit {
 
-    /** half * log(pi)*/
+    /**
+     * half * log(pi)
+     */
     final static double hlg2pi = 0.5 * Math.log(2.0 * Math.PI);
 
-    /** log(PI) */
+    /**
+     * log(PI)
+     */
     final static double lgpi = Math.log(Math.PI);
 
     /* current parameters c_k and d_{kix_i} */
-    /** indexed by [xVal] */
-    public double c[]; 
+    /**
+     * indexed by [xVal]
+     */
+    public double c[];
 
-    /** parameter d indexed by [xVal][parent][parenVal] */
+    /**
+     * parameter d indexed by [xVal][parent][parenVal]
+     */
     public double d[][][];
 
-    /** Maximum arity in dataset. */
+    /**
+     * Maximum arity in dataset.
+     */
     int maxArity = 0;
-    
-    /** Maxumum number of parameters */
+
+    /**
+     * Maxumum number of parameters
+     */
     int maxParams = 0;
-    
+
     int numParents = 0;
-    
+
     private static boolean noOptimizationWarningPrinted = false;
-    
-    /** Setup everything as required by the given dataset.*/
+
+    /**
+     * Setup everything as required by the given dataset.
+     */
     private void setup(Value.Vector xz) throws ModelLearner.LearnerException {
 
         // Calculate variable arities.
@@ -84,25 +100,27 @@ public class JulesLogit {
         arity = new int[xzType.cmpnts.length];
         for (int i = 0; i < xzType.cmpnts.length; i++) {
             arity[i] = (int) ((Type.Discrete) xzType.cmpnts[i]).UPB
-                - (int) ((Type.Discrete) xzType.cmpnts[i]).LWB + 1;
-            if (arity[i] > maxArity) {maxArity = arity[i];}
+                    - (int) ((Type.Discrete) xzType.cmpnts[i]).LWB + 1;
+            if (arity[i] > maxArity) {
+                maxArity = arity[i];
+            }
         }
-        
-        numParents = arity.length-1;
-        
+
+        numParents = arity.length - 1;
+
         // Final node is the target node.
         // Total params = sum(parentArities-1) * (targetArity-1) + targetAtiry(-1)
         maxParams = 0;
-        for ( int i = 0; i < numParents; i++) {
+        for (int i = 0; i < numParents; i++) {
             maxParams += arity[i] - 1;
-        }        
-        maxParams = (maxParams+1) * (arity[arity.length-1]-1);
-        
-        
+        }
+        maxParams = (maxParams + 1) * (arity[arity.length - 1] - 1);
+
+
         // number of variables.
         int numVars = arity.length;
         int numCases = xz.length();
-        
+
         //        If we flatten all variable values into a single list, then
         // rN[i] contains the index of the first value of variable i in
         // that list.  rN[nv] contains the total number of variable values 
@@ -126,25 +144,24 @@ public class JulesLogit {
         // NOTE: This is mildly dangerous and we must ensure that xzArray[i][j] is
         //       not modified!! (if it is, our original datasource is polluted.)
         int xzArray[][] = new int[arity.length][];
-        for ( int i = 0; i < xzArray.length; i++) {
+        for (int i = 0; i < xzArray.length; i++) {
             Value.Vector tempVec = xz.cmpnt(i);
-            if ( tempVec instanceof VectorFN.FastDiscreteVector ) { 
-                xzArray[i] = ((VectorFN.FastDiscreteVector)tempVec).getData(false);
-            }
-            else {
-                if ( !noOptimizationWarningPrinted ) {
+            if (tempVec instanceof VectorFN.FastDiscreteVector) {
+                xzArray[i] = ((VectorFN.FastDiscreteVector) tempVec).getData(false);
+            } else {
+                if (!noOptimizationWarningPrinted) {
                     System.out.println("WARNING: No optimisation possible in JulesLogit : " + tempVec.getClass());
                     noOptimizationWarningPrinted = true;
                 }
-                xzArray[i] = new int[ tempVec.length() ];
-                for ( int j = 0; j < xzArray[i].length; j++ ) {
+                xzArray[i] = new int[tempVec.length()];
+                for (int j = 0; j < xzArray[i].length; j++) {
                     xzArray[i][j] = tempVec.intAt(j);
                 }
             }
-            
+
         }
-        
-        
+
+
         // This method took 47.85 sec on test data.
         //        for (int n = 0; n < numCases; n++) {
         //            for (int i = 0; i < numVars; i++) {
@@ -195,7 +212,6 @@ public class JulesLogit {
         //        }
 
 
-
         // 38.54 seconds.
         // Rearange loop so n is in the middle & move indirections out of inner loop
         // make vN a local variable so it's on the stack.
@@ -240,7 +256,7 @@ public class JulesLogit {
         // Changing this code took the total run time from 213s
         // to 142s for my test cast (CaMML, logit model, kr-vs-kp.arff)
         ////////////////////////////////////////////////////////
-        final int vN[][] = this.vN; 
+        final int vN[][] = this.vN;
         for (int i = 0; i < numVars; i++) {
             final int rN_i = rN[i];
             final int[] xz_i = xzArray[i];
@@ -248,9 +264,9 @@ public class JulesLogit {
                 final int rN_j = rN[j];
                 final int[] xz_j = xzArray[j];
                 for (int n = 0; n < numCases; n++) {
-                    vN[rN_i + xz_i[n]][rN_j + xz_j[n]]++;                    
+                    vN[rN_i + xz_i[n]][rN_j + xz_j[n]]++;
                 }
-            }            
+            }
         }
         // Copy top half of matrix to bottom.
         for (int i = 0; i < vN.length; i++) {
@@ -261,32 +277,32 @@ public class JulesLogit {
         ////////////////////////////////////////////////////////
         // End of nasty illegible code (hopefully)
         ////////////////////////////////////////////////////////
-        
-        
+
 
         if (maxArity > 20) {
             throw new ModelLearner.LearnerException("Arity too high for Logit Learner.");
         }
-        
+
         Ndot = new int[Maxcell];
         Nyl = new int[Maxcell];
-        
-        kN = new int[maxArity+1];
+
+        kN = new int[maxArity + 1];
         //pN = new int[maxArity+1];
-        pN = new int[numParents+1];
+        pN = new int[numParents + 1];
 
         Sy = new double[maxArity];
-        S = new double[maxArity*maxParams*maxArity];
-        
-        
-        
+        S = new double[maxArity * maxParams * maxArity];
+
+
         id = new double[maxParams];
         S2yz = new double[maxArity][maxArity];
 
         F = new double[maxParams][maxParams];
     }
 
-    /** reciprocal of diagonal elements */
+    /**
+     * reciprocal of diagonal elements
+     */
     double id[];// = new double[Maxparm];
     double Sy[];// = new double[Maxs];
     double S[];// = new double[Maxs * Maxp * Maxs];
@@ -294,13 +310,15 @@ public class JulesLogit {
     // TODO: Allocate more efficiently.
     double F[][]; // = new double[Maxparm][Maxparm]; /* to store Fisher */
 
-    
+
     // Global vars used by camml.
     //final int &Maxp = 7;
 
     //final int &Maxs = 100;//5; // TODO: Defalut should be ~ 20
 
-    /** Max number of params     */
+    /**
+     * Max number of params
+     */
     //final int &Maxparm = ((Maxs - 1) * (1 + Maxp * (Maxs - 1)));
 
     final int Maxcell = 65000;
@@ -336,10 +354,14 @@ public class JulesLogit {
 
     int numbadcoms;
 
-    /** Number of states of each var */
-    int[] arity; 
+    /**
+     * Number of states of each var
+     */
+    int[] arity;
 
-    /** For variable Y, to index a value */
+    /**
+     * For variable Y, to index a value
+     */
     int kN[];// = new int[Maxs + 1]; 
 
     int pN[]; //= new int[Maxs + 1]; 
@@ -359,7 +381,9 @@ public class JulesLogit {
 
     int vN[][];
 
-    /** rN[i]+xi = indx of Xi=xi in vN[][] */
+    /**
+     * rN[i]+xi = indx of Xi=xi in vN[][]
+     */
     int rN[];
 
 
@@ -420,34 +444,34 @@ public class JulesLogit {
      * Function to calculate message cost of a node. Assumes var has parents as
      * shewn in dads. Cost includes prior cost of coefficients, Fisher, but not
      * linear-extensions count.
-     * 
+     * <p/>
      * To find message lengths maximises the likelihood * parameter prior.
-     * 
+     * <p/>
      * It also uses and maintains a cache of node info in vcache. The above
      * describes action if code < 0. If code >=0, it looks at the parents stored
      * for the node and removes those which are less than significant, as shewn
      * by mml. It then computes max liklihood estimates for the remainder and
      * computes node signatures based on them and fixes the global skig1 etc.
-     * 
+     * <p/>
      * Note action is the same for codes 0 and 1.
      */
     //public double nodeCost(Node node, Value.Vector xz) throws LearnerException {
     //    return nodeCost(LogitFN.getX(node,xz),LogitFN.getZ(node,xz));
     //}
-        
     public double nodeCost(Value.Vector x, Value.Vector z) throws LearnerException {
-        Value.Vector xz = LogitFN.combineXZ(x,z);                
+        Value.Vector xz = LogitFN.combineXZ(x, z);
         setup(xz);
-        
-        Type.Structured zType = (Type.Structured)((Type.Vector)z.t).elt;
+
+        Type.Structured zType = (Type.Structured) ((Type.Vector) z.t).elt;
         Node node = new Node();
         node.ndad = zType.cmpnts.length;
         node.nd = zType.cmpnts.length;   // This works as xz.cmpnt(node.nd) == x
         node.dads = new int[node.ndad];
-        for (int i = 0; i < node.dads.length; i++) {node.dads[i] = i;}
-        
-        
-        
+        for (int i = 0; i < node.dads.length; i++) {
+            node.dads[i] = i;
+        }
+
+
         int i, k, xi;
 
         int y, ry;
@@ -462,7 +486,7 @@ public class JulesLogit {
 
         y = node.nd; // Node #
         ry = arity[y]; // arity of y        
-        
+
         dad = node.dads; // Parents of y
         ndad = node.ndad; // dads.length
 
@@ -547,12 +571,13 @@ public class JulesLogit {
             }
         }
 
-        if ( nfreeparms == 0) { mmlcost = 0;}
-        else {
+        if (nfreeparms == 0) {
+            mmlcost = 0;
+        } else {
             mmlcost = nfreeparms * (hlg2pi + lgsig)
-                + 0.5 * (-log(ry) * (1 + pN[ndad] - ndad) - (ry - 1) * sumlogri + sumpsq * invsigsq + ldetF[0]) 
-                + emlcost 
-                - nfreeparms * hlg2pi + 0.5 * (log(nfreeparms) + lgpi);
+                    + 0.5 * (-log(ry) * (1 + pN[ndad] - ndad) - (ry - 1) * sumlogri + sumpsq * invsigsq + ldetF[0])
+                    + emlcost
+                    - nfreeparms * hlg2pi + 0.5 * (log(nfreeparms) + lgpi);
         }
 
         return mmlcost;
@@ -606,17 +631,18 @@ public class JulesLogit {
 
         conservative = false;
         maxiters = 500;
-        
-        eststart: do {
-            
+
+        eststart:
+        do {
+
             y = node.nd;
             ndad = node.ndad;
             dad = node.dads;
-            
-            /* Initialize parameters */        
+
+            /* Initialize parameters */
             c = new double[arity[y]];
             d = new double[arity[y]][ndad][];
-            
+
             for (k = 0; k < arity[y]; k++) {
                 c[k] = 0.0;
                 for (i = 0; i < ndad; i++) {
@@ -627,13 +653,13 @@ public class JulesLogit {
                     }
                 }
             }
-            
+
             /*
-             * Now use the gereralized Newton method to adjust the parameters until
-             * they settle on a value that gives zeroes partial first derivatives
-             * for the likelihood.
-             */
-            
+            * Now use the gereralized Newton method to adjust the parameters until
+            * they settle on a value that gives zeroes partial first derivatives
+            * for the likelihood.
+            */
+
             ry = arity[y] - 1;
             iters = 0;
             delLL = -1.0;
@@ -646,10 +672,10 @@ public class JulesLogit {
             } else {
                 scale = 0.2;
             }
-            
+
             do {
                 iters++;
-                
+
                 NLLold = emlcost;
                 calcsums(node, 2);
                 calcfisher(node);
@@ -673,11 +699,11 @@ public class JulesLogit {
                     } else if (delLL > 0.0) {
                         scale *= 0.5;
                     }
-                    
+
                 }
-                
+
                 /* Find the first derivatives */
-                
+
                 Fi = ry;
                 // delta = 0.0;
                 yry = rN[y] + ry;
@@ -698,22 +724,22 @@ public class JulesLogit {
                         for (xi = 0; xi < ri; xi++, Fi++) {
                             pxi = rN[p] + xi;
                             dLL[Fi] = Nyk[pxi] - Nyry[pxi] - S[kN[k] + pN[i] + xi]
-                                - Nyk[pri] + Nyry[pri] + S[kN[k] + pN[i] + ri];
+                                    - Nyk[pri] + Nyry[pri] + S[kN[k] + pN[i] + ri];
                             if (mapest) {
                                 dLL[Fi] -= (d[k][i][xi] + d[ry][i][ri]
-                                            - d[ry][i][xi] - d[k][i][ri])
-                                    * invsigsq;
+                                        - d[ry][i][xi] - d[k][i][ri])
+                                        * invsigsq;
                             }
                             // delta += fabs(dLL[Fi]);
                         }
                     }
                 }
-                
+
                 /*
-                 * now solve the equation F * h = dLL to get the parameter
-                 * increments
-                 */
-                
+                * now solve the equation F * h = dLL to get the parameter
+                * increments
+                */
+
                 if (!cholesky(Fi, F)) {
                     fprintf(stderr,
                             "estimateparams() error:  Fisher nearly singular.\n");
@@ -723,7 +749,7 @@ public class JulesLogit {
                     return false;
                 }
                 chsolve(Fi, h, dLL);
-                
+
                 for (i = 0; i < ndad; i++) {
                     ri = arity[dad[i]] - 1;
                     d[ry][i][ri] = 0.0;
@@ -731,9 +757,9 @@ public class JulesLogit {
                         d[ry][i][xi] = 0.0;
                     }
                 }
-                
+
                 /* add increments to parameters */
-                
+
                 Fi = ry;
                 c[ry] = 0;
                 // dp = 0.0;
@@ -772,28 +798,28 @@ public class JulesLogit {
                         d[ry][i][ri] -= d[k][i][ri];
                     }
                 }
-                
+
                 if (Double.isNaN(emlcost)) {
                     break;
                 }
                 if (olddelLL < 0.00001 && delLL > -0.01 && delLL < 0.00001) {
                     converged = true;
                 }
-                
+
                 /*
-                 * printf("%d: -LL %9.4f dll %8.4f sc %8.4f\n", iters, emlcost,
-                 * delLL, scale);
-                 */
-                
+                * printf("%d: -LL %9.4f dll %8.4f sc %8.4f\n", iters, emlcost,
+                * delLL, scale);
+                */
+
             } while (!converged && iters < maxiters);
-            
+
             /*
-             * printf("iters %3d params %3d\n\n", iters, Fi); for (k=0; k<=ry; k++) {
-             * printf("c[%2d] = %8.4f\n" , k, c[k]); for (i=0; i<ndad; i++) { ri =
-             * states[dad[i]]-1; for (xi=0; xi<=ri; xi++) {
-             * printf("d[%2d][%2d][%2d] = %8.4f\n", k, i, xi, d[k][i][xi]); } } }
-             */
-            
+            * printf("iters %3d params %3d\n\n", iters, Fi); for (k=0; k<=ry; k++) {
+            * printf("c[%2d] = %8.4f\n" , k, c[k]); for (i=0; i<ndad; i++) { ri =
+            * states[dad[i]]-1; for (xi=0; xi<=ri; xi++) {
+            * printf("d[%2d][%2d][%2d] = %8.4f\n", k, i, xi, d[k][i][xi]); } } }
+            */
+
             if (!converged) {
                 if (!conservative) {
                     numconvfails++;
@@ -815,7 +841,7 @@ public class JulesLogit {
             } else {
                 return true;
             }
-        } while(true);
+        } while (true);
     }
 
     void display(int n, /*const*/double A[][]) {
@@ -854,7 +880,7 @@ public class JulesLogit {
         int ps, kps;
         int n, ndad, dad[];
         int y;
-        
+
         y = node.nd;
         ndad = node.ndad;
         dad = node.dads;
@@ -905,7 +931,7 @@ public class JulesLogit {
             Nyl[kps]++;
             Ndot[ps]++;
         }
-        
+
         return true;
     }
 
@@ -980,11 +1006,13 @@ public class JulesLogit {
         }
     }
 
-    /** logP returns the probability of data given parent data. */
+    /**
+     * logP returns the probability of data given parent data.
+     */
     public double[] logP(Node node, int[] parentVal) {
 
         //int ry = arity[node.nd] - 1;
-        int ry = c.length-1;
+        int ry = c.length - 1;
         double prob[] = new double[ry + 1];
         double total = 0.0;
 
@@ -1007,13 +1035,15 @@ public class JulesLogit {
     }
 
 
-    /** Return (c,d) parameter structure */
+    /**
+     * Return (c,d) parameter structure
+     */
     public Value.Structured getParams() {
         Value.Vector cVec = LogitFN.makeVec(c);
         Value.Vector dVec = LogitFN.makeVec(d);
-        return new Value.DefStructured(new Value[] {cVec,dVec});
+        return new Value.DefStructured(new Value[]{cVec, dVec});
     }
-    
+
     /*        ----------------  FUN void calcsums (node, diag) ------*/
 
     /*        Find the data sums necessary for calculation of the first and/or second
@@ -1085,11 +1115,11 @@ public class JulesLogit {
 
         ry = arity[y] - 1;
 
-        kix = kN[ry + 1]; /* number of combos of Y with one parent */        
+        kix = kN[ry + 1]; /* number of combos of Y with one parent */
         //System.out.println("allocating S2ij[" + (kix+1)+"]["+(kix+1)+"]");
-        S2ij = new double[kix+1][kix+1];
-        
-        
+        S2ij = new double[kix + 1][kix + 1];
+
+
         if (diag == 1) {
             for (k = 0; k < ry; k++) {
                 Sy[k] = 0.0;
@@ -1358,7 +1388,7 @@ public class JulesLogit {
                             ljr = lj + rj;
                             for (xj = 0; xj < rj; xj++, Fj++, lj++) {
                                 F[Fi][Fj] = S2ij[ki][lj] + S2ij[kir][ljr]
-                                    - S2ij[kir][lj] - S2ij[ki][ljr];
+                                        - S2ij[kir][lj] - S2ij[ki][ljr];
                             }
                         }
 
@@ -1403,7 +1433,7 @@ public class JulesLogit {
                             kjr = kj + rj;
                             for (xj = 0; xj < rj; xj++, Fj++, kj++) {
                                 F[Fi][Fj] = S2ij[kj][lj] + S2ij[kjr][ljr]
-                                    - S2ij[kjr][lj] - S2ij[kj][ljr];
+                                        - S2ij[kjr][lj] - S2ij[kj][ljr];
                             }
                         }
                     }

@@ -40,34 +40,40 @@ package camml.test.core.library;
 import camml.core.library.Library;
 import camml.plugin.rodoCamml.RodoCammlIO;
 import cdms.core.Value;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
-
-/** Test functions associated with EnumerateDAGs.java */
+/**
+ * Test functions associated with EnumerateDAGs.java
+ */
 public class TestLibrary extends TestCase {
-    
-    public static Test suite() 
-    {
+
+    public static Test suite() {
         return new TestSuite(TestLibrary.class);
     }
-    
-    
-    /** Test Library.weightedSummaryVec */
+
+
+    /**
+     * Test Library.weightedSummaryVec
+     */
     public final void testSummaryVec() throws Exception {
         Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
         Value.Vector summary = Library.makeWeightedSummaryVec(data);
-        
-        assertEquals( 37, summary.length() );
-    }
-    
 
-    /** Test Library.weightedSummaryVec */
+        assertEquals(37, summary.length());
+    }
+
+
+    /**
+     * Test Library.weightedSummaryVec
+     */
     public final void testJoinVec() throws Exception {
         Value.Vector data = RodoCammlIO.load("camml/test/AsiaCases.1000.cas");
-        Value.Vector join = Library.joinVectors(data, data.cmpnt(7), "extra" );
-            
-        assertEquals( join.cmpnt(7), join.cmpnt(8) );
+        Value.Vector join = Library.joinVectors(data, data.cmpnt(7), "extra");
+
+        assertEquals(join.cmpnt(7), join.cmpnt(8));
         System.out.println("join.t = " + join.t);
     }
 

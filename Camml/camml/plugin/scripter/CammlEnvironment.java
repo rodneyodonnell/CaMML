@@ -39,25 +39,30 @@
 //package camml.cdmsPlugin.scripter;
 package camml.plugin.scripter;
 
-import cdms.plugin.fpli.*;
+import cdms.plugin.fpli.Environment;
 
 
-/** Defines the CammlEnvironment in which all variables related to Camml are stored. */
-public class CammlEnvironment extends cdms.plugin.fpli.Environment
-{
-    /** Serial ID required to evolve class while maintaining serialisation compatibility. */
+/**
+ * Defines the CammlEnvironment in which all variables related to Camml are stored.
+ */
+public class CammlEnvironment extends cdms.plugin.fpli.Environment {
+    /**
+     * Serial ID required to evolve class while maintaining serialisation compatibility.
+     */
     private static final long serialVersionUID = 3674001595169857739L;
 
     public CammlEnvironment() {
-        super (null);
+        super(null);
     }
 
-    public CammlEnvironment(Environment parent)    {
-        super ( parent );
+    public CammlEnvironment(Environment parent) {
+        super(parent);
     }
 
-    /** Add object to hashtable */
-    public void add(String name, Object o)    {
-        nameHash.put(name,o);
+    /**
+     * Add object to hashtable
+     */
+    public void add(String name, Object o) {
+        nameHash.put(name, o);
     }
 }
