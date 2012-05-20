@@ -51,15 +51,15 @@ public abstract class TOMTransformation {
      */
     final protected java.util.Random rand;
 
-    /**
-     * Final cost from previous transformation
-     */
-    protected double cost;
-
-    /**
-     * Initial cost from previous transformation
-     */
-    protected double oldCost;
+//    /**
+//     * Final cost from previous transformation
+//     */
+//    protected double cost;
+//
+//    /**
+//     * Initial cost from previous transformation
+//     */
+//    protected double oldCost;
 
     /**
      * The nodes who's parents were changed by the last mutation.
@@ -84,47 +84,41 @@ public abstract class TOMTransformation {
     /**
      * Perform mutation, return true if mutation was successful
      */
-    public abstract boolean transform(TOM tom, double ljp);
-
-    /**
-     * Accesor for cost
-     */
-    public double getLastCost() {
-        return cost;
-    }
-
+    public abstract boolean transform(TOM tom);
 
     /**
      * if ( Math.log(generator.nextDouble()) < (oldCost - cost) / temperature ), accept = true.
+     *
+     * @param delta = oldCode - newCost
+     * @return true if mutation is accepted
      */
-    protected final boolean accept() {
+    protected final boolean accept(double delta) {
 
-        double diff = cost - oldCost;
-        final boolean result;
+        final boolean acceptMutation;
 
         // When doing regression testing (and attempting to keep random generator in line)
         //  differences are less likely to occur if we always generate a number.    
         // We also check for INFINITY as oldCamml does not increment generator in these cases.
         if (caseInfo.regression) {
-            if (diff != Double.POSITIVE_INFINITY) {
-                result = (-Math.log(rand.nextDouble()) > diff / temperature);
+            if (delta != Double.POSITIVE_INFINITY) {
+                acceptMutation = (-Math.log(rand.nextDouble()) > delta / temperature);
             } else {
-                result = false;
+                acceptMutation = false;
             }
         } else {
-            if (diff <= 0.0) {
-                result = true;
+            if (delta <= 0.0) {
+                acceptMutation = true;
             } else if (caseInfo.safeMode) {
-                result = false;
+                acceptMutation = false;
             } else {
-                result = (-Math.log(rand.nextDouble()) > diff / temperature);
+                acceptMutation = (-Math.log(rand.nextDouble()) > delta / temperature);
             }
         }
 
         // update stats
-        if (result == true) accepted++;
+        if (acceptMutation) accepted++;
         else rejected++;
-        return result;
+        return acceptMutation;
     }
 
     int accepted = 0;

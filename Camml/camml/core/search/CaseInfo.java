@@ -126,7 +126,7 @@ public class CaseInfo implements Serializable {
     public double referenceWeight;
 
     /**
-     * Total weight acumulated in all SECs
+     * Total weight accumulated in all SECs
      */
     public double totalWeight = 0;
 
@@ -143,7 +143,7 @@ public class CaseInfo implements Serializable {
     /**
      * How long should the search go for? 1.0 is default Value, Setting to 0.5 halves search time, 2.0 doubles it, etc.
      */
-    public double searchFactor = 1.0; //0.00001;
+    public double searchFactor = 1.0;
 
 
     ////////////////////
@@ -176,7 +176,7 @@ public class CaseInfo implements Serializable {
     public boolean joinSECs = true;
 
     /**
-     * Calaulate KL distance exactly for merging.
+     * Calculate KL distance exactly for merging.
      */
     public boolean useExactKL = false;
 
@@ -257,9 +257,9 @@ public class CaseInfo implements Serializable {
     /**
      * Initialise Caseinfo
      */
-    public CaseInfo(TOMHash tomHash, SECHash secHash, Value.Vector data, ModelLearner mmlModelLearner,
+    public CaseInfo(DAGHash DAGHash, SECHash secHash, Value.Vector data, ModelLearner mmlModelLearner,
                     ModelLearner mlModelLearner, double referenceWeight, NodeCache nodeCache) {
-        this.tomHash = tomHash;
+        this.tomHash = DAGHash;
         this.secHash = secHash;
         this.data = data;
         this.mmlModelLearner = mmlModelLearner;

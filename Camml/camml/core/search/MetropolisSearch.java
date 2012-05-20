@@ -258,7 +258,7 @@ public class MetropolisSearch extends BNetSearch {
         }
 
         // was it successful?
-        boolean accepted = transform.transform(tom, currentCost);
+        boolean accepted = transform.transform(tom);
 
         // Recalculate the cost of the network if modified.    
         if (accepted == true) {
@@ -907,7 +907,7 @@ public class MetropolisSearch extends BNetSearch {
         System.out.println("Metropolis search : TomCoster = " + caseInfo.tomCoster);
 
         // create hashing functions.
-        caseInfo.tomHash = new TOMHash(rand, numNodes);
+        caseInfo.tomHash = new DAGHash(rand, numNodes);
         caseInfo.secHash = new SECHash(rand, numNodes);
         caseInfo.arcWeights = new double[numNodes][numNodes];
 

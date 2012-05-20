@@ -40,6 +40,7 @@ package camml.test.core.library;
 import camml.core.library.EnumerateDAGs;
 import camml.core.models.bNet.FixedStructureSearch;
 import camml.core.models.cpt.CPTLearner;
+import camml.core.search.CoreTOM;
 import camml.core.search.SearchDataCreator;
 import camml.core.search.TOM;
 import cdms.core.Value;
@@ -104,7 +105,7 @@ public class TestEnumerateDAGs extends TestCase {
      */
     public final void testEnumerateDAGs() {
         enumDag = new EnumerateDAGs();
-        TOM[] dag = enumDag.enumerateDAGs(4);
+        CoreTOM[] dag = enumDag.enumerateDAGs(4);
 
         for (int i = 0; i < dag.length; i++) {
             for (int j = 0; j < dag.length; j++) {
@@ -145,7 +146,7 @@ public class TestEnumerateDAGs extends TestCase {
             // tom[i] contains a reference to caseInfo for each search.
             // This created n instances of NodeCache which is an bib memory hog.
             // By copying the structure we allow this to be garbage collected.
-            TOM tempTOM = new TOM(data);
+            TOM tempTOM = TOM.builder().setData(data).build();
             tempTOM.setStructure(tom[i]);
             tom[i] = tempTOM;
 

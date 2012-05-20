@@ -52,10 +52,22 @@ import cdms.core.Value;
  * Initial time taken to perform these operations will vary depending on the modelLearner used, but
  * should be (fairly) quick to extract from the cache once these initial calculations are done.
  *
- * @see Node.cleanNode
+ * @see {Node.cleanNode}
  */
 public class Node implements Cloneable {
+    /**
+     * which node is this in a TOM
+     */
+    public int getVar() {
+        return coreNode.getChildNode();
+    }
 
+    /**
+     * List of Parents of this node.
+     */
+    public int[] getParent() {
+        return coreNode.getParents();
+    }
 
     /**
      * RuntimeException for when maxNumParents exceeded.
@@ -67,7 +79,7 @@ public class Node implements Cloneable {
         private static final long serialVersionUID = 4454810752701023416L;
 
         /**
-         * Standard construcotr
+         * Standard constructor
          */
         public ExcessiveArcsException(String message) {
             super(message);
@@ -78,81 +90,45 @@ public class Node implements Cloneable {
      * Make a deep copy of the current node.
      */
     public Object clone() {
-        return new Node(var, (int[]) parent.clone());
+        return new Node(getVar(), (int[]) getParent().clone());
     }
 
     /**
      * Constructor sets dependant variable to var, and parents to empty.
      */
     public Node(int var) {
-        this.var = var;
-        parent = new int[0];
+        this(var, new int[0]);
     }
 
     /**
      * Constructor sets current variable and its parents.
      */
     protected Node(int var, int[] parent) {
-        this.var = var;
-        this.parent = parent;
+        this.coreNode = new CoreNode(var, parent);
     }
 
-    /**
-     * which node is this in a TOM
-     */
-    public final int var;
+    protected Node(CoreNode coreNode) {
+        this.coreNode = coreNode;
+    }
 
-    /**
-     * List of Parents of this node.
-     */
-    protected int parent[];
+    private final CoreNode coreNode;
 
     public int getNumParents() {
-        return parent.length;
-    }
-
-    public int[] getParentCopy() {
-        return parent.clone();
+        return coreNode.getParents().length;
     }
 
     /**
      * add a single parent to this node. If maxParents is already reached, throw an exception
      */
     public void addParent(int node) {
-        //        if ( parent.length >= maxNumParents ) {
-        //            throw new ExcessiveArcsException("MaxParents already reached, cannot add another.");
-        //        }
-        int[] newParent = new int[parent.length + 1];
-        //boolean inserted = false;
-        int i = 0;
-        while (i < parent.length && parent[i] < node) {
-            newParent[i] = parent[i];
-            i++;
-        }
-        newParent[i] = node;
-        i++;
-        while (i < newParent.length) {
-            newParent[i] = parent[i - 1];
-            i++;
-        }
-        parent = newParent;
+        coreNode.addParent(node);
     }
 
     /**
      * remove a single parent from this node.
      */
     public void removeParent(int node) {
-        int[] newParent = new int[parent.length - 1];
-        int i = 0;
-        while (parent[i] != node) {
-            newParent[i] = parent[i];
-            i++;
-        }
-        while (i < newParent.length) {
-            newParent[i] = parent[i + 1];
-            i++;
-        }
-        parent = newParent;
+        coreNode.removeParent(node);
     }
 
     /**
@@ -209,7 +185,7 @@ public class Node implements Cloneable {
      * This returns a vector of just the dependant variable.
      */
     protected Value.Vector dependentVector(Value.Vector data) {
-        return data.cmpnt(var);
+        return data.cmpnt(getVar());
     }
 
     /**
@@ -219,17 +195,13 @@ public class Node implements Cloneable {
         //        Value.Function dataView = (Value.Function)CammlFN.view.apply( data );
         //        Value.Vector parentVector = new VectorFN.FastDiscreteVector( parent );
         //        return (Value.Vector)dataView.apply( parentVector );
-        return new SelectedVector(data, null, parent);
+        return new SelectedVector(data, null, getParent());
     }
 
     /**
      * Print a little ascii version of a node's connections.   Looks like  : "1  : <- 2 <- 3"
      */
     public String toString() {
-        String s = "" + var + " : ";
-        for (int i = 0; i < parent.length; i++)
-            s += " <- " + parent[i];
-
-        return s;
+        return coreNode.toString();
     }
-};
+}

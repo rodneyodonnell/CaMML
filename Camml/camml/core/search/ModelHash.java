@@ -39,7 +39,7 @@ package camml.core.search;
 import java.io.Serializable;
 
 /**
- * Base class for TOMHash and SECHash.
+ * Base class for DAGHash and SECHash.
  */
 public abstract class ModelHash implements Serializable {
 

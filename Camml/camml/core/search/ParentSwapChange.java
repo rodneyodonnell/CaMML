@@ -75,7 +75,7 @@ public class ParentSwapChange extends TOMTransformation {
         return nodesChanged;
     }
 
-    public boolean transform(TOM tom, double ljp) {
+    public boolean transform(TOM tom) {
 
         // At least 3 nodes are required to do a double skeletal change.
         if (tom.getNumNodes() < 3) {
@@ -90,7 +90,7 @@ public class ParentSwapChange extends TOMTransformation {
         // get the jth node in the total ordering.
         int nj = (int) ((tom.getNumNodes() - 2) * moveran);
         Node nodeJ = tom.getNode(tom.nodeAt(nj + 2));
-        int numParents = nodeJ.parent.length;
+        int numParents = nodeJ.getParent().length;
 
 
         // If there are zero parents or all parents, we cannot do a swap.
@@ -103,13 +103,13 @@ public class ParentSwapChange extends TOMTransformation {
 
         // Randomly select a parent from nodeJ
         // int ni = nodeJ.parent[ generator.nextInt(numParents) ];
-        Node nodeI = tom.getNode(nodeJ.parent[(int) (rand.nextDouble() * numParents)]);
+        Node nodeI = tom.getNode(nodeJ.getParent()[(int) (rand.nextDouble() * numParents)]);
 
         // Choose a non-parent which appears before nodeJ in the total ordering.
         int temp = (int) (rand.nextDouble() * (nj - numParents));
         int nk = 0;
         for (int i = 0; i <= nj; i++) {
-            if (!tom.isArc(tom.nodeAt(i), nodeJ.var)) {
+            if (!tom.isArc(tom.nodeAt(i), nodeJ.getVar())) {
                 if (temp == 0) {
                     nk = i;
                     break;
@@ -129,25 +129,24 @@ public class ParentSwapChange extends TOMTransformation {
         // The cost of node1 and node2 cannot be changed (as thier parents remain constant).
         // The modification of the parents of node3 means that it may change.
         // so we must find it's original cost before changing it.    
-        int[] originalParents = nodeJ.parent;
         double oldJCost = caseInfo.nodeCache.getMMLCost(nodeJ);
 
         // Links I--J & K--J are toggled.
-        nodesToggled[0][0] = nodeJ.var;
-        nodesToggled[0][1] = nodeJ.var;
-        nodesToggled[1][0] = nodeI.var;
-        nodesToggled[1][1] = nodeK.var;
+        nodesToggled[0][0] = nodeJ.getVar();
+        nodesToggled[0][1] = nodeJ.getVar();
+        nodesToggled[1][0] = nodeI.getVar();
+        nodesToggled[1][1] = nodeK.getVar();
 
         // Calculate change in TOM (structure) cost caused by toggle.
         double toggleCost =
                 caseInfo.tomCoster.costToToggleArcs(tom, nodesToggled[0], nodesToggled[1]);
 
 
-        nodesChanged[0] = nodeJ.var;
+        nodesChanged[0] = nodeJ.getVar();
 
         // toggle node1 -> node3 and node2 -> node3
         // doubleMutate( tom, tom.nodeAt(nj), tom.nodeAt(ni), tom.nodeAt(nk));
-        doubleMutate(tom, nodeI.var, nodeK.var, nodeJ.var);
+        doubleMutate(tom, nodeI.getVar(), nodeK.getVar(), nodeJ.getVar());
 
         // update the parents of node3 and find the cost.
         double newJCost = caseInfo.nodeCache.getMMLCost(nodeJ);
@@ -155,14 +154,11 @@ public class ParentSwapChange extends TOMTransformation {
 
         // Calculate the new cost.  As the number of arcs remains constant, we do not have to
         // take arcs into account.
-        oldCost = 0;
-        cost = newJCost - oldJCost + toggleCost;
-
-        if (accept()) {
+        if (accept(newJCost - oldJCost + toggleCost)) {
             if (caseInfo.updateArcWeights) {
-                int childVar = nodeJ.var;
-                int parentVar1 = nodeK.var;
-                int parentVar2 = nodeI.var;
+                int childVar = nodeJ.getVar();
+                int parentVar1 = nodeK.getVar();
+                int parentVar2 = nodeI.getVar();
 
                 if (tom.isArc(childVar, parentVar1)) {
                     caseInfo.arcWeights[childVar][parentVar1] -= caseInfo.totalWeight;
@@ -180,8 +176,7 @@ public class ParentSwapChange extends TOMTransformation {
             return true;
         } else {
             // toggle node1 -> node3 and node2 -> node3 back to their original state.
-            doubleMutate(tom, nodeI.var, nodeK.var, nodeJ.var);
-            nodeJ.parent = originalParents;
+            doubleMutate(tom, nodeI.getVar(), nodeK.getVar(), nodeJ.getVar());
             return false;
         }
     }

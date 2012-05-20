@@ -110,7 +110,7 @@ public class AnnealSearch extends BNetSearch {
         } else {                     // 1/3 chance
             transform = temporalChange;
         }
-        accepted = transform.transform(tom, currentCost);
+        accepted = transform.transform(tom);
 
         if (caseInfo.annealLogging) {
             try {
@@ -242,7 +242,7 @@ public class AnnealSearch extends BNetSearch {
         else if (epoch <= fillEpochs && caseInfo.searchFactor != 0) {
             tom.clearArcs();
             tom.randomOrder(rand);
-            tom.fillArcs(tom.maxNumParents); // fill arcs (max of 7 parents per node)
+            tom.fillArcs(tom.coreTOM.getMaxNumParents()); // fill arcs (max of 7 parents per node)
             caseInfo.tomCoster.repairTOM(tom);
 
             // This line does nothing (apart from advancing random number seed) 
@@ -324,7 +324,7 @@ public class AnnealSearch extends BNetSearch {
         java.util.Random rand2 = new java.util.Random(123);
 
         // create hashing functions.
-        caseInfo.tomHash = new TOMHash(rand2, numNodes);
+        caseInfo.tomHash = new DAGHash(rand2, numNodes);
         caseInfo.secHash = new SECHash(rand2, numNodes);
 
         // we have to manually set caseInfo 

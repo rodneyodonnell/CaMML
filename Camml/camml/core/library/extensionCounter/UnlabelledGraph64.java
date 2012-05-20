@@ -29,7 +29,7 @@
 
 package camml.core.library.extensionCounter;
 
-import camml.core.search.TOM;
+import camml.core.search.CoreTOM;
 
 /**
  * Basic data structure used in extension counting, can contain up to 64 nodes
@@ -102,7 +102,7 @@ public class UnlabelledGraph64 extends UnlabelledGraph {
     /**
      * Initialise UnlabelledGraph from a TOM
      */
-    public UnlabelledGraph64(TOM tom) {
+    public UnlabelledGraph64(CoreTOM tom) {
         this(tom.getNumNodes());
         initFromTOM(tom);
     }

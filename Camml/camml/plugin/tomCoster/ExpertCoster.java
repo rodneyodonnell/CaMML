@@ -218,7 +218,7 @@ public class ExpertCoster {
                 if (tom.isArc(0, prev)) {
                     tom.removeArc(0, prev);
                 }
-                tom.swapOrder(0, prev, true);
+                tom.swapOrder(0, prev);
                 pos = tom.getNodePos(0);
             }
 
@@ -230,7 +230,7 @@ public class ExpertCoster {
                 if (tom.isArc(1, next)) {
                     tom.removeArc(1, next);
                 }
-                tom.swapOrder(1, next, true);
+                tom.swapOrder(1, next);
                 pos = tom.getNodePos(1);
             }
 

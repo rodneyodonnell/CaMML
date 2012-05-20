@@ -304,7 +304,7 @@ public class SECResultsVector extends Value.Vector {
                 TOM tom = sec.getTOM(tomIndex);
 
                 if (tom.getNumNodes() <= 15) {
-                    UnlabelledGraph ug = new BitSetBasedUnlabelledGraph(tom);
+                    UnlabelledGraph ug = new BitSetBasedUnlabelledGraph(tom.coreTOM);
                     double perms = DynamicCounter.dCounter.countPerms(ug);
                     return new Value.Continuous(Math.log(perms));
                 } else {

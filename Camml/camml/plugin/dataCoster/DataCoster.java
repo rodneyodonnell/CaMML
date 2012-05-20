@@ -31,6 +31,7 @@ package camml.plugin.dataCoster;
 
 import camml.core.search.AnnealSearch;
 import camml.core.search.SearchPackage;
+import camml.core.search.TomUtil;
 import camml.plugin.netica.NeticaFn;
 import camml.plugin.weka.Converter;
 import cdms.core.Type;
@@ -72,7 +73,7 @@ public class DataCoster {
             Value.Structured my = NeticaFn.LoadNet._apply(modelfile);
             Value.Vector params = (Value.Vector) my.cmpnt(1);
             System.out.println("Setting TOM Structure");
-            annealSearch.getTOM().setStructure(params);
+            annealSearch.getTOM().setStructure(TomUtil.getParentArrays(params));
         } catch (UnsatisfiedLinkError e) {
             System.out.println("## ERROR: Couldn't load Netica libs.  Retaining original structure.");
         }
@@ -83,7 +84,7 @@ public class DataCoster {
         annealSearch.getTOM().addArc(0, 2);
         annealSearch.printDetailedCost(annealSearch.getTOM());
 
-        annealSearch.getTOM().swapOrder(0, 3, true);
+        annealSearch.getTOM().swapOrder(0, 3);
         annealSearch.printDetailedCost(annealSearch.getTOM());
 
 

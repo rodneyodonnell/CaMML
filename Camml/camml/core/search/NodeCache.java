@@ -347,9 +347,9 @@ public class NodeCache implements Serializable {
         // create hash for node.  hash is a random 63 bit value representing each parent[]->child
         // combinations.  It is possible (though remarkably unlikely) for two nodes to hash to the
         // same value.  No checks are in place as this will probably never happen.
-        long nodeHash = childHashArray[node.var];
-        for (int i = 0; i < node.parent.length; i++) {
-            nodeHash += parentHashArray[node.parent[i]];
+        long nodeHash = childHashArray[node.getVar()];
+        for (int i = 0; i < node.getParent().length; i++) {
+            nodeHash += parentHashArray[node.getParent()[i]];
         }
         // we use a 63 bit value so nodeHash is always positive.
         nodeHash &= 0x7FFFFFFFFFFFFFFFl;
@@ -411,7 +411,7 @@ public class NodeCache implements Serializable {
         if (mmlCost[index] == -1) {
             mmlCost[index] = node.cost(mmlLearner, data);
 
-            learnings[node.parent.length]++;
+            learnings[node.getParent().length]++;
             totalLearnings++;
 
             if (Double.isInfinite(mmlCost[index])) {
@@ -419,7 +419,7 @@ public class NodeCache implements Serializable {
             }
         }
 
-        costings[node.parent.length]++;
+        costings[node.getParent().length]++;
         totalCostings++;
 
         if (Double.isInfinite(mmlCost[index])) {

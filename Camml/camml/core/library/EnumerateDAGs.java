@@ -38,10 +38,7 @@
 package camml.core.library;
 
 import camml.core.models.dTree.CatlanTable;
-import camml.core.search.NodeCache;
-import camml.core.search.SearchDataCreator;
-import camml.core.search.TOM;
-import camml.core.search.TOMHash;
+import camml.core.search.CoreTOM;
 import cdms.core.Type;
 import cdms.core.Value;
 import cdms.core.Value.Function;
@@ -50,7 +47,6 @@ import cdms.core.VectorFN;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Random;
 
 /**
  * @author rodo
@@ -71,7 +67,7 @@ public class EnumerateDAGs extends Function {
     /**
      * Vector implementation which mimics a 2d array
      */
-    public static class TOMArcVec extends Vector {
+    public static class CoreTOMArcVec extends Vector {
         /**
          * Serial ID required to evolve class while maintaining serialisation compatibility.
          */
@@ -80,12 +76,11 @@ public class EnumerateDAGs extends Function {
          * Matrix holding the data.
          */
         protected final int[][] arcMatrix;
-        ;
 
         /**
          * Create a 2d vector [[]] based on the arcs present in tom
          */
-        public TOMArcVec(TOM tom) {
+        public CoreTOMArcVec(CoreTOM tom) {
             super(new Type.Vector(new Type.Vector(Type.BOOLEAN)));
             int n = tom.getNumNodes();
             arcMatrix = new int[n][n];
@@ -149,11 +144,11 @@ public class EnumerateDAGs extends Function {
      * Shortcut to apply()
      */
     public Value.Vector _apply(int numVars) {
-        TOM[] dagArray = enumerateDAGs(numVars);
+        CoreTOM[] dagArray = enumerateDAGs(numVars);
 
         Value.Vector[] vecArray = new Value.Vector[dagArray.length];
         for (int i = 0; i < vecArray.length; i++) {
-            vecArray[i] = new TOMArcVec(dagArray[i]);
+            vecArray[i] = new CoreTOMArcVec(dagArray[i]);
         }
         return new VectorFN.FatVector(vecArray);
     }
@@ -222,18 +217,18 @@ public class EnumerateDAGs extends Function {
      * Enumerate and return all DAGs with given number of variables
      * This should not be called with n > 5 as number of dags is super-exponential.
      */
-    public TOM[] enumerateDAGs(int numVars) {
+    public CoreTOM[] enumerateDAGs(int numVars) {
         // Begin with an enumerated array of all undirected graphs
-        TOM[] graphArray = enumerateGraphs(numVars);
+        CoreTOM[] graphArray = enumerateGraphs(numVars);
         int nFact = factorial(numVars);
 
         // Create an array to store DAGs in.
-        TOM[] dagArray = new TOM[numDAGs(numVars)];
+        CoreTOM[] dagArray = new CoreTOM[numDAGs(numVars)];
         // Index to next free element of dagArray.
         int dagArrayIndex = 0;
 
         // For each TOM in graphArray enumerate all n! orderings
-        for (int i = 0; i < graphArray.length; i++) {
+        for (CoreTOM undirectedGraph : graphArray) {
             // Initialise total ordering.
             int[] order = new int[numVars];
             for (int j = 0; j < numVars; j++) {
@@ -243,22 +238,22 @@ public class EnumerateDAGs extends Function {
             // Create hashSet to hold all permutations.
             // Using a hashSet automatically removes duplicates and being a hashtable
             // is is hopefully reasonably efficient.
-            HashSet<TOM> perms = new HashSet<TOM>();  // n! possible permutations.
+            HashSet<CoreTOM> perms = new HashSet<CoreTOM>();  // n! possible permutations.
 
             // Attempt to add each of n! orderings to HashSet
             for (int j = 0; j < nFact; j++) {
                 // Create a list of N! TOMs.
-                TOM tom = (TOM) graphArray[i].clone();
+                CoreTOM tom = new CoreTOM(undirectedGraph);
                 // set order of TOM
                 for (int k = 0; k < order.length; k++) {
-                    tom.swapOrder(tom.nodeAt(k), order[k], true);
+                    tom.swapOrder(tom.nodeAt(k), order[k]);
                 }
                 perms.add(tom);
                 incrementOrder(order);
             }
 
             // perms should contain all unique DAGs for a given undirected graph.
-            TOM[] permsArray = (TOM[]) perms.toArray(new TOM[perms.size()]);
+            CoreTOM[] permsArray = perms.toArray(new CoreTOM[perms.size()]);
             for (int j = 0; j < permsArray.length; j++) {
                 dagArray[dagArrayIndex] = permsArray[j];
                 dagArrayIndex++;
@@ -270,9 +265,9 @@ public class EnumerateDAGs extends Function {
     /**
      * Enumerate and return a list of all undirected graphs with numVars variables.
      */
-    public TOM[] enumerateGraphs(int numVars) {
+    public CoreTOM[] enumerateGraphs(int numVars) {
         if (numVars == 0) {
-            return new TOM[0];
+            return new CoreTOM[0];
         }
         if (numVars >= maxGraphSize) {
             throw new RuntimeException("Too many vars, limit is " + maxGraphSize);
@@ -284,15 +279,8 @@ public class EnumerateDAGs extends Function {
 
         // Initialise graphList to be a single TOM.
         // We must create a fake Dataset for TOM (which is unused).
-        ArrayList<TOM> graphList = new ArrayList<TOM>(numGraphs);
-        Value.Vector data =
-                SearchDataCreator.generateWallaceKorbStyleDataset(new Random(123), 1, numVars, 1, 1);
-        TOM tempTOM = new TOM(data);
-        tempTOM.caseInfo.tomHash = new TOMHash(new Random(123), numVars);
-        tempTOM.caseInfo.tomHash.caseInfo = tempTOM.caseInfo;
-        tempTOM.caseInfo.nodeCache = new NodeCache(data, null, null);
-        tempTOM.caseInfo.nodeCache.caseInfo = tempTOM.caseInfo;
-        graphList.add(tempTOM);
+        ArrayList<CoreTOM> graphList = new ArrayList<CoreTOM>(numGraphs);
+        graphList.add(new CoreTOM(numVars, numVars));
 
 
         // x and y are used as an index into the list of all edges.
@@ -311,49 +299,13 @@ public class EnumerateDAGs extends Function {
             } while (x >= y);
 
             for (int j = 0; j < size; j++) {
-                TOM t = (TOM) graphList.get(j).clone();
+                CoreTOM t = new CoreTOM(graphList.get(j));
                 t.addArc(x, y);
                 graphList.add(t);
             }
         }
 
-        // Return list of graphs.
-        TOM[] graph = (TOM[]) graphList.toArray(new TOM[numGraphs]);
-        return graph;
+        // Return array of graphs.
+        return graphList.toArray(new CoreTOM[numGraphs]);
     }
-
-
-    /**
-     * Randomly generate N dags each containing M variables.
-     * This is useful when a full enumeration is undesirable (or impossible).
-     * DAGs are generated as TOMs with uniform priors over ordering, and given prior over arcs.
-     */
-    public static TOM[] randomDAGs(java.util.Random rand, int numVars, int numDAGs, double arcProb) {
-
-        // We need a dummy dataset to create a TOM with.  Tells TOM how many variables it has.
-        Value.Vector data = SearchDataCreator.generateWallaceKorbStyleDataset(new Random(123), 1, numVars, 1, 1);
-
-        TOM[] tomArray = new TOM[numDAGs];
-
-        for (int i = 0; i < tomArray.length; i++) {
-            TOM t = new TOM(data);          // Create a new TOM
-            t.randomOrder(rand);        // With a random variable ordering.
-            t.randomArcs(rand, arcProb); // And random arcs.
-            tomArray[i] = t;
-        }
-
-        return tomArray;
-    }
-
-    /**
-     * Convert an array of TOMs to a Vector of arcs.
-     */
-    public static Value.Vector tomArray2Vec(TOM[] tomArray) {
-        Value.Vector[] vecArray = new Value.Vector[tomArray.length];
-        for (int i = 0; i < vecArray.length; i++) {
-            vecArray[i] = new TOMArcVec(tomArray[i]);
-        }
-        return new VectorFN.FatVector(vecArray);
-    }
-
 }

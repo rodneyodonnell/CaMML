@@ -81,7 +81,7 @@ public class DoubleSkeletalChange extends TOMTransformation {
     /**
      * Toggle existence of two arcs into a single node.
      */
-    public boolean transform(TOM tom, double ljp) {
+    public boolean transform(TOM tom) {
         int numNodes = tom.getNumNodes();
 
         // At least 3 nodes are required to do a double skeletal change.
@@ -129,7 +129,6 @@ public class DoubleSkeletalChange extends TOMTransformation {
         // The modification of the parents of node3 means that is may change.
         // so we must find it's original cost before changing it.
         Node childNode = tom.getNode(childVar);
-        int[] originalParents = childNode.parent;
         double oldChildCost = caseInfo.nodeCache.getMMLCost(childNode);
 
         // Check if the mutation will add too many parents to NodeJ    
@@ -141,7 +140,7 @@ public class DoubleSkeletalChange extends TOMTransformation {
         else addArc++;
         if (tom.isArc(parentVar2, childVar)) addArc--;
         else addArc++;
-        if (childNode.parent.length + addArc > tom.maxNumParents)
+        if (childNode.getParent().length + addArc > tom.coreTOM.getMaxNumParents())
             return false;  // return false if too many parents are present.
 
         // Links P1-->C & P2-->C are toggled.
@@ -162,10 +161,7 @@ public class DoubleSkeletalChange extends TOMTransformation {
 
         // The new cost is original - (cost for old arcs and old node) 
         //                          + (cost for new arcs and new node)
-        oldCost = 0;
-        cost = newChildCost - oldChildCost + toggleCost;
-
-        if (accept()) {
+        if (accept(newChildCost - oldChildCost + toggleCost)) {
             if (caseInfo.updateArcWeights) {
                 if (tom.isArc(childVar, parentVar1)) {
                     caseInfo.arcWeights[childVar][parentVar1] -= caseInfo.totalWeight;
@@ -184,7 +180,6 @@ public class DoubleSkeletalChange extends TOMTransformation {
         } else {
             // toggle node1 -> node3 and node2 -> node3 back to their original state.
             doubleMutate(tom, parentVar1, parentVar2, childVar);
-            childNode.parent = originalParents;
             return false;
         }
     }

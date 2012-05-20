@@ -231,7 +231,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
                         "ed {0 -> 2; 1 -> 3 4; 2 -> 5; 3 -> 5; 4 -> 7; 5 -> 6 7;}");
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.6, edString);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         double arcCost = Math.log(0.75) - Math.log(0.25);
         assertEquals(8 * arcCost, tc.cost(tom), 0.001);
@@ -239,7 +239,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         tom.addArc(5, 6);
         assertEquals(7 * arcCost, tc.cost(tom), 0.001);
 
-        tom.swapOrder(5, 6, true);
+        tom.swapOrder(5, 6);
         assertEquals(9 * arcCost, tc.cost(tom), 0.001);
 
         tom.addArc(0, 1);
@@ -265,7 +265,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
                         "kt {0 <- 1 2; 5 <- 3 4; 6 <- 7; 7 <- 2;}");
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.6, edString);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         // Calculations done as (undirectedED + kt)*arcCost where kt
         // is found using Kevin's flawed algorithm.
@@ -276,7 +276,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         tom.addArc(0, 2);
         assertEquals((5 + 5) * arcCost, tc.cost(tom), 0.001);
 
-        tom.swapOrder(0, 2, false);
+        tom.swapOrder(0, 2);
         assertEquals((5 + 3) * arcCost, tc.cost(tom), 0.001);
 
         tom.addArc(0, 7);
@@ -304,7 +304,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
 
         double arcP = 0.6;
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(arcP, edString, data8);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         assertEquals(0.99, tc.directPrior[1][0].pArcIJ(), 0.001);
         assertEquals(0.75, tc.directPrior[2][0].pArcIJ(), 0.001);
@@ -339,9 +339,9 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         double pArc = 0.5;
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(pArc, edString);
-        TOM tom = new TOM(data3);
+        TOM tom = TOM.builder().setData(data3).build();
 
-        tom.swapOrder(1, 2, true);
+        tom.swapOrder(1, 2);
         tom.addArc(0, 2);
         tom.addArc(1, 2);
 
@@ -373,8 +373,8 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         ExpertElicitedTOMCoster tc2 = new ExpertElicitedTOMCoster(pArc, arcString);
 
         // Cost the network 0 -> 2 -> 1
-        TOM tom = new TOM(3);
-        tom.swapOrder(1, 2, true);
+        TOM tom = TOM.builder().createFakeDataFromNumNodes(3).build();
+        tom.swapOrder(1, 2);
         tom.addArc(0, 2);
         tom.addArc(1, 2);
 
@@ -413,7 +413,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
                         "arcs {0 -- 1 0.99; 2 -- 0 0.75; 5 -- 3 0.60; 5 -- 4 0.10; 6 -- 7 0.50; 7 -- 2 0.00;}");
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.9, edString);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         assertEquals(.99, tc.directPrior[1][0].pArc(), 0.001);
         assertEquals(.75, tc.directPrior[2][0].pArc(), 0.001);
@@ -444,9 +444,9 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         assertEquals(oldCost, newCost, 0.001);
 
         // Swapping ordering should not change cost
-        tom.swapOrder(7, 2, true);
-        tom.swapOrder(1, 3, true);
-        tom.swapOrder(2, 4, true);
+        tom.swapOrder(7, 2);
+        tom.swapOrder(1, 3);
+        tom.swapOrder(2, 4);
         assertEquals(oldCost, tc.cost(tom), 0.001);
     }
 
@@ -469,7 +469,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
 
         double arcP = 0.7;
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(arcP, edString);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         assertEquals(.99, tc.directPrior[1][0].pBefore(), 0.001);
         assertEquals(.75, tc.directPrior[2][0].pBefore(), 0.001);
@@ -522,7 +522,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         ExpertElicitedTOMCoster fullCoster =
                 new ExpertElicitedTOMCoster(0.5, new StringReader(setString + ktString + dArcString + uArcString + tArcString), data8);
 
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         double cost = 0.0;
         for (int i = 0; i < coster.length; i++) {
@@ -553,7 +553,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
                 "tier {_0_0_0_ 1 2 < 3 4 < 7; 5 6 < _0_0_4_;}");
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.9, edString, data8);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         double tierPriorPenalty = -Math.log(tc.getTierProb());
         double notierPriorPenalty = -Math.log(1 - tc.getTierProb());
@@ -581,8 +581,8 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         assertEquals(baseCost + 11 * tierPriorPenalty + 2 * notierPriorPenalty + -15 * Math.log(.5), tc.cost(tom), 0.001);
 
         // 13 priors satisfied.
-        tom.swapOrder(4, 5, true);
-        tom.swapOrder(4, 6, true);
+        tom.swapOrder(4, 5);
+        tom.swapOrder(4, 6);
         assertEquals(baseCost + 13 * tierPriorPenalty - 15 * Math.log(.5), tc.cost(tom), 0.001);
     }
 
@@ -607,7 +607,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
                 "tier {aa _0_0_0_ dog 1 2 < 3 4 < 7; 5 6 < _0_0_4_ hhjk;}");
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.9, edString, data8);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         double tierPriorPenalty = -Math.log(tc.getTierProb());
         double notierPriorPenalty = -Math.log(1 - tc.getTierProb());
@@ -635,8 +635,8 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         assertEquals(baseCost + 11 * tierPriorPenalty + 2 * notierPriorPenalty + -15 * Math.log(.5), tc.cost(tom), 0.001);
 
         // 13 priors satisfied.
-        tom.swapOrder(4, 5, true);
-        tom.swapOrder(4, 6, true);
+        tom.swapOrder(4, 5);
+        tom.swapOrder(4, 6);
         assertEquals(baseCost + 13 * tierPriorPenalty - 15 * Math.log(.5), tc.cost(tom), 0.001);
     }
 
@@ -652,7 +652,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         );
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.5, edString);
-        TOM tom = new TOM(data8);
+        TOM tom = TOM.builder().setData(data8).build();
 
         int preexist[] = new int[2];
         int postexist[] = new int[2];
@@ -723,7 +723,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         );
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.85, edString);
-        TOM tom = new TOM(data);
+        TOM tom = TOM.builder().setData(data).build();
 
         for (int i = 0; i < 100; i++) {
             tom.randomOrder(rand);
@@ -753,7 +753,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         );
 
         ExpertElicitedTOMCoster tc = new ExpertElicitedTOMCoster(0.85, edString);
-        TOM tom = new TOM(data);
+        TOM tom = TOM.builder().setData(data).build();
 
         for (int i = 0; i < 100; i++) {
             tom.randomOrder(rand);
@@ -946,17 +946,17 @@ public class TestExpertElicitedTOMCoster extends TestCase {
         rp.setP("--", 0.80);
         rp.setP("<<", 0.75);
 
-        TOM tom = new TOM(numNodes);
+        TOM tom = TOM.builder().createFakeDataFromNumNodes(numNodes).build();
         assertEquals(.15, rp.relationProb(tom), 0.00001);
         tom.addArc(0, 1);
         assertEquals(.60, rp.relationProb(tom), 0.00001);
-        tom.swapOrder(0, 1, true);
+        tom.swapOrder(0, 1);
         assertEquals(.20, rp.relationProb(tom), 0.00001);
         tom.removeArc(0, 1);
         assertEquals(.05, rp.relationProb(tom), 0.00001);
         // make non-local mutations, cost should not change.
         tom.addArc(1, 2);
-        tom.swapOrder(0, 4, true);
+        tom.swapOrder(0, 4);
         assertEquals(.05, rp.relationProb(tom), 0.00001);
     }
 
@@ -971,7 +971,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
 
         MetropolisSearch met1 = new MetropolisSearch(rand, data,
                 SearchPackage.mlCPTLearner, SearchPackage.mmlCPTLearner);
-        TOM tom = new TOM(data);
+        TOM tom = TOM.builder().setData(data).build();
 
         // Learn network with ancestor constraint, and other soft priors.
         String s = "arcs {3 => 1 1.0; 1 >> 2 0.6; 5 -> 4 0.0; 2 <- 3 0.5; 2 -- 3 0.6;}";
@@ -1003,7 +1003,7 @@ public class TestExpertElicitedTOMCoster extends TestCase {
             SECResultsVector.TOMStructure tomStruct = (TOMStructure) tomVec.elt(0);
             Value.Vector params = (Value.Vector) tomStruct.cmpnt(1);
 
-            tom.setStructure(params);
+            tom.setStructure(TomUtil.getParentArrays(params));
             assertTrue("Relationship 3 => 1 required", tom.isAncestor(3, 1));
             assertFalse("Relationhsip 5 -> 4 disallowed", tom.isDirectedArc(5, 4));
         }

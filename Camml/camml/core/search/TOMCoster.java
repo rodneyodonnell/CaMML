@@ -119,7 +119,7 @@ public interface TOMCoster extends Serializable {
         public double costToSwapOrder(TOM tom, int node1, int node2) {
             // Make a deep copy of tom, swap order in copy, return cost difference.
             TOM tom2 = (TOM) tom.clone();
-            tom2.swapOrder(node1, node2, true);
+            tom2.swapOrder(node1, node2);
             return cost(tom2) - cost(tom);
         }
 
@@ -391,14 +391,12 @@ public interface TOMCoster extends Serializable {
             }
 
             // Create UnlabelledGraph of TOM
-            UnlabelledGraph g = new BitSetBasedUnlabelledGraph(tom.node.length);
-            for (int i = 0; i < tom.node.length; i++) {
-                for (int j = 0; j < tom.node[i].parent.length; j++) {
-                    int a = tom.node[i].parent[j];
+            UnlabelledGraph g = new BitSetBasedUnlabelledGraph(tom.getNumNodes());
+            for (int i = 0; i < tom.getNumNodes(); i++) {
+                for (int a : tom.getParents(i)) {
                     if (!g.isDirectedArc(a, i)) {
                         g.addArc(a, i, true);
                     }
-                    ;
                 }
             }
 
@@ -419,7 +417,7 @@ public interface TOMCoster extends Serializable {
          */
         public double cost(TOM tom) {
             // Calculate the cost to state the total ordering
-            double totalOrderCost = FN.LogFactorial.logFactorial(tom.node.length);
+            double totalOrderCost = FN.LogFactorial.logFactorial(tom.getNumNodes());
 
             double ext = countExtensions(tom);
             totalOrderCost -= Math.log(ext);
@@ -448,9 +446,9 @@ public interface TOMCoster extends Serializable {
 
             if (tom.isArc(node1, node2)) {
                 double ext1 = countExtensions(tom);
-                tom.swapOrder(node1, node2, true);
+                tom.swapOrder(node1, node2);
                 double ext2 = countExtensions(tom);
-                tom.swapOrder(node1, node2, true);
+                tom.swapOrder(node1, node2);
 
                 return Math.log(ext1) - Math.log(ext2);
             } else {

@@ -75,7 +75,7 @@ public abstract class BNetSearch {
         setTemperature(1.0);
 
         // Create and cost empty TOM
-        this.tom = new TOM(caseInfo);
+        this.tom = TOM.builder().setCaseInfo(caseInfo).build();
         tomCoster.repairTOM(tom);     // Ensure any constraints are met
         this.currentCost = costNetwork(mmlModelLearner, false);
 
@@ -436,7 +436,7 @@ public abstract class BNetSearch {
 
         // Initialise order
         for (int i = 0; i < order.length; i++) {
-            tom.swapOrder(tom.nodeAt(i), order[i], true);
+            tom.swapOrder(tom.nodeAt(i), order[i]);
         }
 
         // Add arcs as required.
@@ -696,38 +696,5 @@ public abstract class BNetSearch {
         } else {
             return caseInfo.tomCoster.cost(tom);
         }
-        /*        
-                  int numNodes = tom.getNumNodes();
-        
-                  // Calculate the cost to state the total ordering
-                  double totalOrderCost = 0; //? FN.LogFactorial.logFactorial( numNodes );
-        
-                  // now calculate the cost to state all the links in the model.
-                  double linkCost = 0;
-        
-                  // Count the number of edges in TOM (or in cleaned version of TOM)
-                  int numLinks = 0;
-                  if ( clean == true ) {
-                  for ( int i = 0; i < tom.node.length; i++ ) {
-                  Node tempNode = caseInfo.nodeCache.getCleanNode( tom.node[i] );
-                  numLinks += tempNode.parent.length;
-                  }
-                  if ( numLinks > tom.getNumEdges() ) {
-                  throw new RuntimeException("Clean TOM has more edges than original?");
-                  }
-                  } 
-                  else {
-                  numLinks = tom.getNumEdges();
-                  }
-        
-                  int maxNumLinks = (numNodes * (numNodes - 1)) / 2;
-        
-                  // Calculate cost of stating links.
-                  linkCost = -1.0 * ( numLinks * Math.log( arcProb ) + 
-                  (maxNumLinks - numLinks) * Math.log(1-arcProb));
-        
-                  // Total cost to state the structure of a TOM
-                  return linkCost + totalOrderCost;
-        */
     }
 }

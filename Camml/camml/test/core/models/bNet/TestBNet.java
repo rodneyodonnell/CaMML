@@ -226,8 +226,8 @@ public class TestBNet extends TestCase {
         Value.Vector data2 = SearchDataCreator.generateWallaceKorbStyleDataset(rand, 1000, 2, 2, 2);
 
         // Generate parameters from identical TOMs. 
-        TOM tom1 = new TOM(data1);
-        TOM tom2 = new TOM(data2);
+        TOM tom1 = TOM.builder().setData(data1).build();
+        TOM tom2 = TOM.builder().setData(data2).build();
 
         BNet bNet = new BNetStochastic((Type.Structured) ((Type.Vector) data1.t).elt);
         BNet bNetNetica = new BNetNetica(bNet.getDataType());
@@ -262,7 +262,7 @@ public class TestBNet extends TestCase {
             Value.Vector y[] = new Value.Vector[tom.length];
             for (int i = 0; i < tom.length; i++) {
                 data[i] = SearchDataCreator.generateWallaceKorbStyleDataset(rand, 1000, 1, 1, size);
-                tom[i] = new TOM(data[i]);
+                tom[i] = TOM.builder().setData(data[i]).build();
                 tom[i].randomOrder(rand);
                 tom[i].randomArcs(rand, 2.0 / tom[0].getNumNodes());
                 y[i] = tom[i].makeParameters(SearchPackage.mmlCPTLearner);

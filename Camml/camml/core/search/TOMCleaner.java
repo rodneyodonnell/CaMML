@@ -43,14 +43,14 @@ public interface TOMCleaner {
             // loop through nodes cleaning each in turn.
             for (int i = 0; i < tom.getNumNodes(); i++) {
                 int nodeI = tom.nodeAt(i);
-                int[] dirtyParent = tom.node[nodeI].parent;
+                int[] dirtyParent = tom.getParents(nodeI);
 
-                double oldCost = tom.caseInfo.nodeCache.getMMLCost(tom.node[nodeI]);
+                double oldCost = tom.caseInfo.nodeCache.getMMLCost(tom.getNode(nodeI));
                 for (int j = dirtyParent.length - 1; j >= 0; j--) {
                     int nodeJ = dirtyParent[j];
                     double structureDiff = tom.caseInfo.tomCoster.costToToggleArc(tom, nodeI, nodeJ);
                     tom.removeArc(nodeI, nodeJ);
-                    double newCost = tom.caseInfo.nodeCache.getMMLCost(tom.node[nodeI]);
+                    double newCost = tom.caseInfo.nodeCache.getMMLCost(tom.getNode(nodeI));
                     if (newCost > oldCost - structureDiff) {
                         tom.addArc(nodeI, nodeJ);
                     } else {
@@ -88,7 +88,7 @@ public interface TOMCleaner {
             // loop through nodes cleaning each in turn.
             for (int nodeI = 0; nodeI < tom.getNumNodes(); nodeI++) {
                 if (nodeI != target) {
-                    int[] dirtyParent = tom.node[nodeI].parent;
+                    int[] dirtyParent = tom.getParents(nodeI);
 
                     for (int j = 0; j < dirtyParent.length; j++) {
                         int nodeJ = dirtyParent[j];
@@ -113,7 +113,7 @@ public interface TOMCleaner {
             // loop through nodes cleaning each in turn.
             for (int nodeI = 0; nodeI < tom.getNumNodes(); nodeI++) {
                 if (nodeI != target) {
-                    int[] dirtyParent = tom.node[nodeI].parent;
+                    int[] dirtyParent = tom.getParents(nodeI);
                     boolean childOfTarget = false;
                     for (int j = 0; j < dirtyParent.length; j++) {
                         if (dirtyParent[j] == target) {

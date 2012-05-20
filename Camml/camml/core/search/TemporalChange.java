@@ -98,7 +98,7 @@ public class TemporalChange extends TOMTransformation {
     /**
      * Choose a pair of consecutive nodes and try to swap their position in the Total Ordering.
      */
-    public boolean transform(TOM tom, double ljp) {
+    public boolean transform(TOM tom) {
         // choose pair to attempt swap on
         final int orderI = (int) (rand.nextDouble() * (tom.getNumNodes() - 1));
         final int orderJ = orderI + 1;
@@ -110,11 +110,11 @@ public class TemporalChange extends TOMTransformation {
         lastChild = tom.nodeAt(orderJ);
 
         // If there is a link between nodeI and nodeJ
-        if (tom.isArc(nodeI.var, nodeJ.var)) {
+        if (tom.isArc(nodeI.getVar(), nodeJ.getVar())) {
             lastConnected = true;
 
             // If maxNumParents has been reached we fail.
-            if (nodeI.parent.length == tom.maxNumParents) return false;
+            if (nodeI.getParent().length == tom.coreTOM.getMaxNumParents()) return false;
 
             // record old node costs.
             double oldCostI = caseInfo.nodeCache.getMMLCost(nodeI);
@@ -122,30 +122,28 @@ public class TemporalChange extends TOMTransformation {
 
             // Cost to swap nodes in total ordering
             double costToSwapOrder =
-                    caseInfo.tomCoster.costToSwapOrder(tom, nodeI.var, nodeJ.var);
+                    caseInfo.tomCoster.costToSwapOrder(tom, nodeI.getVar(), nodeJ.getVar());
 
-            oldCost = 0;
+            //oldCost = 0;
 
             // swap ordering
-            tom.swapOrder(nodeI.var, nodeJ.var, true);
+            tom.swapOrder(nodeI.getVar(), nodeJ.getVar());
 
             // calculate new costs        
             double newCostI = caseInfo.nodeCache.getMMLCost(nodeI);
             double newCostJ = caseInfo.nodeCache.getMMLCost(nodeJ);
 
-            cost = newCostI + newCostJ - oldCostI - oldCostJ + costToSwapOrder;
-
-            if (accept()) {
+            if (accept(newCostI + newCostJ - oldCostI - oldCostJ + costToSwapOrder)) {
                 if (caseInfo.updateArcWeights) {
                     double w = caseInfo.totalWeight;
                     // replace i -> j with j -> i
-                    caseInfo.arcWeights[nodeJ.var][nodeI.var] += w;  // i -> j
-                    caseInfo.arcWeights[nodeI.var][nodeJ.var] -= w;  // j -> i
+                    caseInfo.arcWeights[nodeJ.getVar()][nodeI.getVar()] += w;  // i -> j
+                    caseInfo.arcWeights[nodeI.getVar()][nodeJ.getVar()] -= w;  // j -> i
                 }
                 return true;
             } else {
                 // restore.
-                tom.swapOrder(nodeI.var, nodeJ.var, true);
+                tom.swapOrder(nodeI.getVar(), nodeJ.getVar());
                 return false;
             }
         } else {
@@ -154,19 +152,19 @@ public class TemporalChange extends TOMTransformation {
                 //    if unconnected, we always succeed.
                 accepted++;
                 lastConnected = false;
-                tom.swapOrder(nodeI.var, nodeJ.var, true);
-                cost = 0;
+                tom.swapOrder(nodeI.getVar(), nodeJ.getVar());
+                //cost = 0;
                 return true;
             }
 
             // If a non uniform prior over TOM space is used a change in the total ordering
             // of unconnected nodes may have an effect on the total cost.
-            oldCost = 0;
-            cost = caseInfo.tomCoster.costToSwapOrder(tom, nodeI.var, nodeJ.var);
-            if (accept()) {
+            //oldCost = 0;
+            //cost = caseInfo.tomCoster.costToSwapOrder(tom, nodeI.getVar(), nodeJ.getVar());
+            if (accept(caseInfo.tomCoster.costToSwapOrder(tom, nodeI.getVar(), nodeJ.getVar()))) {
                 accepted++;
                 lastConnected = false;
-                tom.swapOrder(nodeI.var, nodeJ.var, true);
+                tom.swapOrder(nodeI.getVar(), nodeJ.getVar());
                 return true;
             } else {
                 return false;

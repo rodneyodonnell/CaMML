@@ -51,7 +51,8 @@
 
 package camml.core.library.extensionCounter;
 
-import camml.core.search.TOM;
+import camml.core.search.CoreTOM;
+import camml.core.search.TomUtil;
 import camml.plugin.netica.NeticaFn;
 import cdms.core.Value;
 
@@ -71,11 +72,14 @@ public class ExtensionCounter {
         }
         Value.Structured my = NeticaFn.LoadNet._apply(args[0]);
 
+
         Value.Vector params = (Value.Vector) my.cmpnt(1);
         int n = params.length();
-        TOM tom = new TOM(n);
-        tom.setStructure(params);
-        UnlabelledGraph64 dag = new UnlabelledGraph64(tom);
+
+        CoreTOM coreTOM = new CoreTOM(n, n);
+        coreTOM.setStructure(TomUtil.getParentArrays(params));
+        UnlabelledGraph64 dag = new UnlabelledGraph64(coreTOM);
+
         double numPerms = DynamicCounter.dCounter.countPerms(dag);
         //System.out.println("numPerms = " + numPerms);
 

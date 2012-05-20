@@ -106,7 +106,7 @@ public class GreedyLookaheadSearch
      * Swap the order of a abd b in the network
      */
     void swapOrder(int a, int b) {
-        tom.swapOrder(a, b, true);
+        tom.swapOrder(a, b);
     }
 
     /**

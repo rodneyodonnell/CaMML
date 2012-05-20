@@ -43,7 +43,7 @@ import cdms.core.Type;
 import cdms.core.Value;
 import cdms.core.VectorFN;
 
-import java.util.BitSet;
+import java.util.Random;
 
 /**
  * TOM is a Totally Ordered Model, it is a causal model where the time ordering of the nodes is
@@ -54,58 +54,16 @@ import java.util.BitSet;
  * designed for easy searching of TOM-space. It can also be scored using some evaluation metric.
  */
 public class TOM implements Cloneable {
-    /**
-     * Maximum number of parents a node is allowed.
-     */
-    protected int maxNumParents = 7;
-
-    public int getMaxNumParents() {
-        return maxNumParents;
-    }
-
-    public void setMaxNumParents(int maxNumParents) {
-        this.maxNumParents = maxNumParents;
-    }
 
     /**
-     * This contains all the nodes, in the order of the input datafile.
+     * Object containing actual node ordering and connections.
      */
-    protected Node[] node;
+    protected final CoreTOM coreTOM;
 
     /**
-     * This is an index into the node array. It could be changed to an array of nodes itself,
-     * but we believe this is more meaningful. <br>
-     * <p/>
-     * totalOrder[i] = i'th variable in total order <br>
-     *
-     * @see variablePlace.
+     * Nodes used for parameterisation, etc.
      */
-    protected int[] totalOrder;
-
-    /**
-     * Stores where in the total ordering each variable is.  This is required to easily determing
-     * if A is before B in the total ordering.  Otherwise a linear search of totalOrder must be
-     * performed. <br>
-     * <p/>
-     * For the single straight line connected network (2) -> (1) -> (3) -> (0) -> (4) <br>
-     * totalOrder    = { 2, 1, 3, 0, 4 } <br>
-     * variablePlace = { 3, 1, 0, 2, 4 } <br>
-     *
-     * @see totalOrder
-     */
-    protected int[] variablePlace;
-
-
-    /**
-     * The edges between the nodes. The array is upper triangular, with supplied accessors
-     * which don't care about the order of the nodes. The ordering of edge follows that of node.
-     */
-    protected BitSet[] edge;
-
-    /**
-     * Keep track of how many edges (links) are present in this TOM
-     */
-    protected int numEdges;
+    private final Node[] nodes;
 
     /**
      * standard CDMS way of representing a dataset
@@ -113,62 +71,86 @@ public class TOM implements Cloneable {
     protected final Value.Vector data;
 
     /**
-     * caseInfo contains information about the current problem
+     * caseInfo contains information about the current problem.
      */
     public final CaseInfo caseInfo;
 
-    /**
-     * Note that the type of the data is IMPORTANT! It should be a Type.Structured, with each type
-     * component specifying the dataspace of that variable. The node types are generated from
-     */
-    public TOM(CaseInfo caseInfo) {
-        this.data = caseInfo.data;
-        this.caseInfo = caseInfo;
 
-        // create initial nodes, edges and ordering
+    public int getMaxNumParents() {
+        return coreTOM.getMaxNumParents();
+    }
+
+    /**
+     * Builder for creating TOMs.
+     *
+     * @return builder
+     */
+    public static TOMBuilder builder() {
+        return new TOMBuilder();
+    }
+
+    private TOM(TOMBuilder builder) {
+
+        this.data = builder.data != null ? builder.data : builder.caseInfo.data;
+        this.caseInfo = builder.caseInfo != null ? builder.caseInfo : new CaseInfo(null, null, data, null, null, -1, null);
+
         Type.Structured structure = (Type.Structured) ((Type.Vector) data.t).elt;
-        int len = structure.cmpnts.length;
-        node = new Node[len];
-        totalOrder = new int[len];
-        variablePlace = new int[len];
-        edge = new BitSet[len - 1];
-        numEdges = 0;
+        final int numNodes = structure.cmpnts.length;
+        final int maxNumParents = builder.maxNumParents != 0 ? builder.maxNumParents : CoreTOM.DEFAULT_MAX_NUM_PARENTS;
+
+        this.coreTOM = new CoreTOM(numNodes, maxNumParents);
+        this.nodes = new Node[numNodes];
 
         // iterate over the structure.
-        for (int i = 0; i < len; i++) {
-            // create initial ordering
-            totalOrder[i] = i;
-            variablePlace[i] = i;
-
-            // create node
-            node[i] = new Node(i);
-
-            // create initial edge array.
-            if (i == len - 1) {
-                break;
-            }
-            edge[i] = new BitSet(i + 1);
-            for (int j = 0; j < i + 1; j++) {
-                edge[i].set(j, false);
-            }
+        for (int i = 0; i < numNodes; i++) {
+            nodes[i] = new Node(coreTOM.getCoreNode(i));
         }
     }
 
     /**
-     * Create a TOM usable by functions not requiring CaseInfo.
-     * NOTE: This constructor should be avoided as some TOM functions may not function correctly.
+     * Builder for creating TOMs.
      */
-    public TOM(Value.Vector data) {
-        this(new CaseInfo(null, null, data, null, null, -1, null));
-    }
+    public static class TOMBuilder {
 
+        private Value.Vector data;
+        private CaseInfo caseInfo;
+        private int maxNumParents;
 
-    /**
-     * Create a TOM using a fake dataset.
-     * NOTE: This constructor should be avoided as some TOM functions may not function correctly.
-     */
-    public TOM(int numNodes) {
-        this(SearchDataCreator.generateData(1, numNodes));
+        private TOMBuilder() {
+        }
+
+        /**
+         * Set dataset to be used by the TOM.
+         * <p/>
+         * If not specified, caseInfo.data is used.
+         */
+        public TOMBuilder setData(Value.Vector data) {
+            this.data = data;
+            return this;
+        }
+
+        /**
+         * Create a fake dataset for use with this TOM.
+         * NOTE: This constructor should be avoided as some TOM functions may not function correctly.
+         */
+        public TOMBuilder createFakeDataFromNumNodes(int numNodes) {
+            setData(SearchDataCreator.generateData(1, numNodes));
+            return this;
+        }
+
+        public TOMBuilder setCaseInfo(CaseInfo caseInfo) {
+            this.caseInfo = caseInfo;
+            return this;
+        }
+
+        public TOMBuilder setMaxNumParents(int maxNumParents) {
+            this.maxNumParents = maxNumParents;
+            return this;
+        }
+
+        public TOM build() {
+            return new TOM(this);
+        }
     }
 
     /**
@@ -178,85 +160,28 @@ public class TOM implements Cloneable {
         return data;
     }
 
+
+    // Delegated to coreTOM.
+
     /**
      * return number of variables in data.
      */
     public int getNumNodes() {
-        return node.length;
+        return coreTOM.getNumNodes();
     }
 
     /**
      * return the number of edges present in this TOM
      */
     public int getNumEdges() {
-        return numEdges;
+        return coreTOM.getNumEdges();
     }
-
-    ///////////////////////
-    // utility functions //
-    ///////////////////////
 
     /**
      * return whether an arc exists between two node indices.
      */
     public boolean isArc(int x, int y) {
-        if (x == y) {
-            return false;
-        }
-
-        int first, second;
-        if (x > y) {
-            first = x - 1;
-            second = y;
-        } else {
-            first = y - 1;
-            second = x;
-        }
-
-        return edge[first].get(second);
-    }
-
-    /**
-     * set an arc.
-     */
-    protected void setArc(int x, int y, boolean arcValue) {
-        if (x == y) {
-            return;
-        }
-
-        int first, second;
-        if (x > y) {
-            first = x - 1;
-            second = y;
-        } else {
-            first = y - 1;
-            second = x;
-        }
-        boolean oldEdge = edge[first].get(second);
-        edge[first].set(second, arcValue);
-
-        int child, parent;
-        if (before(x, y)) {
-            parent = x;
-            child = y;
-        } else {
-            child = x;
-            parent = y;
-        }
-
-        if (!oldEdge && arcValue) {
-            numEdges++;
-            if (node[child].parent.length >= maxNumParents) {
-                throw new Node.ExcessiveArcsException(
-                        "MaxParents already reached, cannot add another.");
-            }
-            node[child].addParent(parent);
-        } else if (oldEdge && !arcValue) {
-            numEdges--;
-            node[child].removeParent(parent);
-        } else {
-            System.out.println("--- Link already present/absent?? ---");
-        }
+        return coreTOM.isArc(x, y);
     }
 
     /**
@@ -264,12 +189,7 @@ public class TOM implements Cloneable {
      * Returns true if an operation was performed.
      */
     public boolean addArc(int x, int y) {
-        if (isArc(x, y) || x == y) {
-            return false;
-        } else {
-            setArc(x, y, true);
-            return true;
-        }
+        return coreTOM.addArc(x, y);
     }
 
     /**
@@ -277,87 +197,175 @@ public class TOM implements Cloneable {
      * Returns true if an operation was performed.
      */
     public boolean removeArc(int x, int y) {
-        if (!isArc(x, y)) {
-            return false;
-        } else {
-            setArc(x, y, false);
-            return true;
-        }
+        return coreTOM.removeArc(x, y);
     }
 
     /**
      * returns true if variable i is before variable j in the total ordering
      */
     public boolean before(int nodeI, int nodeJ) {
-        if (variablePlace[nodeI] < variablePlace[nodeJ]) {
-            return true;
-        }
-        return false;
+        return coreTOM.before(nodeI, nodeJ);
     }
-
 
     /**
      * Swap nodeX and nodeY in the total ordering
      */
-    public void swapOrder(int x, int y, boolean updateNodes) {
+    public void swapOrder(int x, int y) {
+        coreTOM.swapOrder(x, y);
+    }
 
-        // Swap variables in total ordering
-        int tmp;
-        tmp = variablePlace[x];
-        variablePlace[x] = variablePlace[y];
-        variablePlace[y] = tmp;
-        totalOrder[variablePlace[x]] = x;
-        totalOrder[variablePlace[y]] = y;
+    /* randomise the total order */
+    public void randomOrder(Random rand) {
+        coreTOM.randomOrder(rand, caseInfo.regression);
+    }
 
-        // Update parents in node[] if required.
-        if (updateNodes) {
-            // Make sure posX < posY
-            int posX = getNodePos(x);
-            int posY = getNodePos(y);
-            if (posX > posY) {
-                int temp = posX;
-                int temp2 = x;
-                posX = posY;
-                x = y;
-                posY = temp;
-                y = temp2;
-            }
-
-            for (int i = posX; i < posY; i++) {
-                if (isArc(totalOrder[i], y)) {
-                    node[totalOrder[i]].removeParent(y);
-                    if (node[y].parent.length >= maxNumParents) {
-                        throw new Node.ExcessiveArcsException(
-                                "MaxParents already reached, cannot add another.");
-                    }
-
-                    node[y].addParent(totalOrder[i]);
-                }
-                if (isArc(totalOrder[i], x)) {
-                    node[totalOrder[i]].addParent(x);
-                    node[x].removeParent(totalOrder[i]);
-                }
-
-            }
-        }
+    /**
+     * remove all arcs from this TOM
+     */
+    public void clearArcs() {
+        coreTOM.clearArcs();
     }
 
 
-    /* randomise the total order */
-    public void randomOrder(java.util.Random rand) {
+    /**
+     * set all arcs randomly (0.5 prob of an arc)
+     */
+    public void randomArcs(Random generator) {
+        coreTOM.randomArcs(generator, 0.5);
+    }
 
-        if (caseInfo.regression) {
-            // Start with nodes in fixed order (for regression).
-            for (int i = 0; i < node.length; i++) {
-                swapOrder(nodeAt(i), i, true);
+    /**
+     * set all arcs randomly (p prob of an arc)
+     */
+    public void randomArcs(Random rand, double p) {
+        coreTOM.randomArcs(rand, p);
+    }
+
+    /**
+     * return the Nth node in the total ordering.
+     */
+    public int nodeAt(int node) {
+        return coreTOM.nodeAt(node);
+    }
+
+    /**
+     * Return the position in the total ordering of node n
+     */
+    public int getNodePos(int node) {
+        return coreTOM.getNodePos(node);
+    }
+
+    public int[] getParents(int childNode) {
+        return coreTOM.getParents(childNode);
+    }
+
+    /**
+     * Randomize the total ordering then fix it so it is consistent with arcs present.
+     */
+    public void buildOrder(Random rand) {
+        coreTOM.buildOrder(rand, caseInfo.regression);
+    }
+
+    /**
+     * Does a directed arc exist from i to j?
+     */
+    public boolean isDirectedArc(int i, int j) {
+        return coreTOM.isDirectedArc(i, j);
+    }
+
+    /**
+     * Two DAGs are considered equal if they have identical arcs, and those arcs are in the same
+     * direction.  Defining DAG equality here may be more useful than TOM equality.
+     */
+    public boolean equals(Object o) {
+        return (o instanceof TOM && coreTOM.dagEquals(((TOM) o).coreTOM));
+    }
+
+    /**
+     * Set the current node ordering and edges based on arcs <br>
+     */
+    public void setStructure(int[][] parents) {
+        coreTOM.setStructure(parents);
+    }
+
+    /**
+     * Set the current node ordering and edges to those of tom2
+     */
+    public void setStructure(TOM tom2) {
+        coreTOM.setStructure(tom2);
+    }
+
+
+    /**
+     * Set the total ordering of the tom to order.
+     */
+    public void setOrder(int[] order) {
+        coreTOM.setOrder(order);
+    }
+
+
+    /**
+     * is a an ancestor of x? (I think its O(numnodes^2), might be O(nnumnodes^3)
+     */
+    public boolean isAncestor(int ancestorNode, int descendantNode) {
+        return coreTOM.isAncestor(ancestorNode, descendantNode);
+    }
+
+    /**
+     * is d a descendant of x?
+     */
+    public boolean isDescendant(int d, int x) {
+        return coreTOM.isDescendant(d, x);
+    }
+
+    /**
+     * Return true if node1 and node2 have are correlated, that is
+     * NOT d-seperated. Correlation occurs when one node is an descendant
+     * of the other, or they have a common ancestor.
+     */
+    public boolean isCorrelated(int node1, int node2) {
+        return coreTOM.isCorrelated(node1, node2);
+    }
+
+
+    public String toNodeString(String[] name, int i) {
+        StringBuffer s = new StringBuffer();
+        s.append(name[i] + " : ");
+        for (int parent : getParents(i)) {
+            s.append(" <- " + name[parent]);
+        }
+        return s.toString();
+    }
+
+
+    /**
+     * Create ascii version of TOM
+     */
+    public String toString() {
+        String[] names = new String[getNumNodes()];
+        Type.Structured dataType = (Type.Structured) ((Type.Vector) data.t).elt;
+        for (int i = 0; i < names.length; i++) {
+            if (dataType.labels != null) {
+                names[i] = dataType.labels[i];
+            } else {
+                names[i] = "var(" + i + ")";
             }
         }
 
-        // Randomly permute total order
-        for (int i = node.length - 1; i > 0; i--) {
-            int j = (int) (rand.nextDouble() * (i + 1));
-            swapOrder(nodeAt(i), nodeAt(j), true);
+        StringBuffer s = new StringBuffer();
+        for (int i = 0; i < getNumNodes(); i++) {
+            s.append(toNodeString(names, i));
+            s.append('\n');
         }
+        return s.toString();
+    }
+
+
+    /**
+     * Accessor function for node[]
+     */
+    public Node getNode(int n) {
+        return nodes[n];
     }
 
     /**
@@ -366,9 +374,9 @@ public class TOM implements Cloneable {
      */
     public void fillArcs(int maxParents) {
         // Add up to maxParents arcs starting with nodes just before current node in total ordering.
-        for (int child = 0; child < node.length; child++) {
+        for (int child = 0; child < getNumNodes(); child++) {
             for (int parentIndex = getNodePos(child) - 1; (parentIndex >= 0) &&
-                    (node[child].parent.length < maxNumParents); parentIndex--) {
+                    (getParents(child).length < coreTOM.getMaxNumParents()); parentIndex--) {
 
                 addArc(nodeAt(parentIndex), child);
 
@@ -378,183 +386,13 @@ public class TOM implements Cloneable {
                 // and an exception is thrown upstream.
 
                 if (caseInfo.nodeCache != null &&
-                        Double.isInfinite(caseInfo.nodeCache.getMMLCost(node[child]))) {
+                        Double.isInfinite(caseInfo.nodeCache.getMMLCost(getNode(child)))) {
                     removeArc(nodeAt(parentIndex), child);
                     // break;
                 }
 
             }
         }
-    }
-
-
-    /**
-     * remove all arcs from this TOM
-     */
-    public void clearArcs() {
-        for (int i = 0; i < node.length; i++) {
-            for (int j : node[i].parent) {
-                removeArc(i, j);
-            }
-        }
-    }
-
-
-    /**
-     * set all arcs randomly (0.5 prob of an arc)
-     */
-    public void randomArcs(java.util.Random generator) {
-        randomArcs(generator, 0.5);
-    }
-
-    /**
-     * set all arcs randomly (p prob of an arc)
-     */
-    public void randomArcs(java.util.Random generator, double p) {
-        for (int i = 0; i < node.length - 1; i++) {
-            for (int j = i + 1; j < node.length; j++) {
-                boolean state = (generator.nextDouble() < p);
-                if ((state && !isArc(i, j)) ||
-                        (!state && isArc(i, j))) {
-                    setArc(i, j, state);
-                }
-            }
-        }
-    }
-
-    /**
-     * return the Nth node in the total ordering.
-     */
-    public int nodeAt(int node) {
-        return totalOrder[node];
-    }
-
-    /**
-     * Return the position in the total ordering of node n
-     */
-    public int getNodePos(int node) {
-        return variablePlace[node];
-    }
-
-    /**
-     * Accesor function for node[]
-     */
-    public Node getNode(int n) {
-        return node[n];
-    }
-
-    /**
-     * Randomize the total ordering then fix it so it is consistent with arcs present.
-     */
-    public void buildOrder(java.util.Random rand) {
-        TOM tempTOM = (TOM) this.clone();
-
-        BitSet[] ancestors = getAncestorBits();
-        final int n = node.length;
-
-        clearArcs();
-        randomOrder(rand);
-
-        // do a topological sort to get nodes back to correct order.
-        int numChanges = 1;
-        while (numChanges != 0) {
-            numChanges = 0;
-            for (int i = 0; i < n - 1; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    int varI = nodeAt(i);
-                    int varJ = nodeAt(j);
-
-                    // if VarJ is before VarI, swap them.      
-                    if (ancestors[varI].get(varJ)) {
-                        numChanges++;
-                        swapOrder(varI, varJ, false);
-                    }
-                }
-            }
-        }
-
-        // Add all original arcs to TOM
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                if (tempTOM.isArc(i, j)) {
-                    addArc(i, j);
-                }
-            }
-        }
-    }
-
-    /**
-     * Calculate an array of BitSets where (x[i].get(j) = true) implies i <= j exists.
-     */
-    public BitSet[] getAncestorBits() {
-        return getAncestorBits(-1, new BitSet[node.length]);
-    }
-
-    /**
-     * Get bits for given index, if index == -1 get all bits.
-     */
-    private BitSet[] getAncestorBits(int index, BitSet[] bits) {
-        // if index == -1, calculate all ancestors.
-        if (index == -1) {
-            for (int i = 0; i < bits.length; i++) {
-                if (bits[i] == null) {
-                    getAncestorBits(i, bits);
-                }
-            }
-        }
-        // if ancestors already calculated, nothing to do. Return.
-        else if (bits[index] != null) {
-            return bits;
-        }
-        // Calculate ancestors of ancestors.  And them together to get this node's ancestors.
-        else {
-            int[] parents = node[index].parent;
-            BitSet ancestors = new BitSet(bits.length);
-
-            for (int parent : parents) {
-                // get Parent's ancestors.
-                BitSet parAnc = bits[parent];
-                if (parAnc == null) {
-                    parAnc = getAncestorBits(parent, bits)[parent];
-                }
-                ancestors.or(parAnc);
-                ancestors.set(parent);
-            }
-            bits[index] = ancestors;
-        }
-
-        return bits;
-    }
-
-
-    /**
-     * Does a directed arc exist from i to j?
-     */
-    public boolean isDirectedArc(int i, int j) {
-        return isArc(i, j) && before(i, j);
-    }
-
-    /**
-     * Two DAGs are considered equal if they have identical arcs, and those arcs are in the same
-     * direction.  Defining DAG equality here may be more useful than TOM equality.
-     */
-    public boolean equals(Object o) {
-        TOM tom1 = this;
-        TOM tom2 = (TOM) o;
-
-        for (int i = 0; i < edge.length; i++) {
-            if (tom1.edge[i].equals(tom2.edge[i]) == false) {
-                return false;
-            }
-            for (int j = 0; j < edge[i].size(); j++) {
-                if (tom1.edge[i].get(j)) {
-                    if (tom1.variablePlace[i + 1] < tom1.variablePlace[j] !=
-                            tom2.variablePlace[i + 1] < tom2.variablePlace[j])
-                        return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
@@ -587,12 +425,12 @@ public class TOM implements Cloneable {
 
         // set value of parents.
         for (int i = 0; i < subParents.length; i++) {
-            subParents[i] = new VectorFN.FastDiscreteVector(node[i].parent.clone());
+            subParents[i] = new VectorFN.FastDiscreteVector(getParents(i).clone());
         }
 
         // set CPT models and parameters for nodes.
         for (int i = 0; i < subModel.length; i++) {
-            Value.Structured msy = node[i].learnModel(modelLearner, data);
+            Value.Structured msy = getNode(i).learnModel(modelLearner, data);
             subModel[i] = (Value.Model) msy.cmpnt(0);
             subModelParam[i] = msy.cmpnt(2);
         }
@@ -614,107 +452,13 @@ public class TOM implements Cloneable {
         return new VectorFN.FatVector(localStructure);
     }
 
-    public int[][] getParentArrays(Value.Vector params) {
-        int parents[][] = new int[params.length()][];
-        for (int i = 0; i < params.length(); i++) {
-            Value.Vector arcVec = (Value.Vector) params.cmpnt(1).elt(i);
-            parents[i] = new int[arcVec.length()];
-            for (int j = 0; j < arcVec.length(); j++) {
-                parents[i][j] = arcVec.intAt(j);
-            }
-        }
-        return parents;
-    }
-
 
     /**
-     * Set the current node ordering and edges based on params <br>
-     * Calling setStructure( makeParams( xx ) ) should leave
-     * the original TOM in tact.
+     * Return tomHash(tom=this, ml=0, clean=false) as an positive integer
      */
-    public void setStructure(Value.Vector params) {
-        setStructure(getParentArrays(params));
-    }
-
-    /**
-     * Set the current node ordering and edges based on arcs <br>
-     */
-    public void setStructure(int[][] arcs) {
-        // Remove all arcs from current TOM
-        this.clearArcs();
-
-        // Use simplistic (and possibly slow) algorithm to ensure
-        // this TOM has an ordering consistent with the arc
-        // structure in params.
-        int changes = 1;
-        while (changes != 0) {
-            changes = 0;
-            // for each arc
-            for (int i = 0; i < arcs.length; i++) {
-                for (int j = 0; j < arcs[i].length; j++) {
-
-                    // if TOM ordering inconsistent with param
-                    // ordering, swap ordering in TOM.
-                    int nodeI = i;
-                    int nodeJ = arcs[i][j];
-
-                    if (before(nodeI, nodeJ)) {
-                        swapOrder(nodeI, nodeJ, true);
-                        changes++;
-                    }
-                }
-            }
-        }
-
-        // Add required arcs to TOM.
-        for (int i = 0; i < arcs.length; i++) {
-            for (int j = 0; j < arcs[i].length; j++) {
-                this.addArc(i, arcs[i][j]);
-            }
-        }
-
-
-    }
-
-    /**
-     * Set the current node ordering and edges to those of tom2
-     */
-    public void setStructure(TOM tom2) {
-        clearArcs();
-
-        // set the ordering to be the same as tom2
-        for (int i = 0; i < node.length; i++) {
-            this.swapOrder(nodeAt(i), tom2.nodeAt(i), false);
-        }
-
-        // set arcs to be the same as 
-        for (int i = 0; i < node.length; i++) {
-            for (int j : tom2.getNode(i).parent) {
-                this.addArc(i, j);
-            }
-        }
-    }
-
-
-    /**
-     * Set the total ordering of the tom to order.
-     */
-    public void setOrder(int[] order) {
-        if (order.length != totalOrder.length) {
-            throw new IllegalArgumentException("Invalid Ordering specified");
-        }
-
-        for (int i = 0; i < totalOrder.length; i++) {
-            this.swapOrder(nodeAt(i), order[i], true);
-        }
-
-        // If order[] is not a valid ordering (eg. duplicate values)
-        // the total ordering may not match.
-        for (int i = 0; i < totalOrder.length; i++) {
-            if (order[i] != totalOrder[i]) {
-                throw new RuntimeException("totalOrder != specified order");
-            }
-        }
+    public int hashCode() {
+        long hash = caseInfo.tomHash.hash(this, 0);
+        return ((int) hash);
     }
 
 
@@ -726,61 +470,22 @@ public class TOM implements Cloneable {
      * - Shallow copy of Value.Vector data
      */
     public Object clone() {
-        TOM tempTOM = new TOM(caseInfo);
-
-        tempTOM.totalOrder = new int[totalOrder.length];
-        tempTOM.variablePlace = new int[variablePlace.length];
-        for (int i = 0; i < totalOrder.length; i++) {
-            tempTOM.totalOrder[i] = totalOrder[i];
-            tempTOM.variablePlace[i] = variablePlace[i];
-        }
-
-        tempTOM.node = new Node[node.length];
-
-        for (int i = 0; i < node.length; i++) {
-            tempTOM.node[i] = (Node) node[i].clone();
-        }
-
-        tempTOM.edge = new BitSet[edge.length];
-        for (int i = 0; i < edge.length; i++) {
-            tempTOM.edge[i] = (BitSet) edge[i].clone();
-        }
-
-        tempTOM.numEdges = numEdges;
-
-
-        return tempTOM;
+        return new TOM(this);
     }
 
-    public String toNodeString(String[] name, int i) {
-        StringBuffer s = new StringBuffer();
-        s.append(name[i] + " : ");
-        for (int j = 0; j < node[i].parent.length; j++)
-            s.append(" <- " + name[node[i].parent[j]]);
-        return s.toString();
-    }
+    private TOM(TOM tom) {
+        this.data = tom.data;
+        this.caseInfo = tom.caseInfo;
 
-    /**
-     * Create ascii version of TOM
-     */
-    public String toString() {
-        String[] name = new String[node.length];
-        Type.Structured dataType = (Type.Structured) ((Type.Vector) data.t).elt;
-        for (int i = 0; i < name.length; i++) {
-            if (dataType.labels != null) {
-                name[i] = dataType.labels[i];
-            } else {
-                name[i] = "var(" + i + ")";
-            }
-        }
+        int len = tom.getNumNodes();
+        this.nodes = new Node[len];
 
-        StringBuffer s = new StringBuffer();
-        for (int i = 0; i < node.length; i++) {
-            //        updateParents(i);
-            s.append(toNodeString(name, i));
-            s.append('\n');
+        this.coreTOM = new CoreTOM(tom.coreTOM);
+
+        // iterate over the structure.
+        for (int i = 0; i < len; i++) {
+            nodes[i] = new Node(coreTOM.getCoreNode(i));
         }
-        return s.toString();
     }
 
     /**
@@ -803,7 +508,7 @@ public class TOM implements Cloneable {
         // for each node
         for (int i = 0; i < getNumNodes(); i++) {
 
-            Node currentNode = node[i];
+            Node currentNode = getNode(i);
             double tempNodeCost = caseInfo.nodeCache.getMMLCost(currentNode);
             totalCost += tempNodeCost;
         }
@@ -812,112 +517,4 @@ public class TOM implements Cloneable {
         return structureCost + totalCost;
     }
 
-
-    /**
-     * is a an ancestor of x? (I think its O(numnodes^2), might be O(nnumnodes^3)
-     */
-    public boolean isAncestor(int ancestorNode, int descendantNode) {
-        // quick check if a is not before descendantNode. 
-        // Also catches case when ancestorNode == descendantNode.
-        if (!before(ancestorNode, descendantNode)) {
-            return false;
-        }
-
-        boolean[] checked = new boolean[node.length];
-        return isAncestor(ancestorNode, descendantNode, checked);
-    }
-
-    /**
-     * returns true if 'a' is an ancestor of 'd'
-     */
-    protected boolean isAncestor(int a, int d, boolean[] checked) {
-        int[] parent = node[d].parent;
-        for (int i = 0; i < parent.length; i++) {
-            if (parent[i] == a) {
-                return true;
-            }
-            if (!checked[parent[i]]) {
-                checked[parent[i]] = true;
-                if (isAncestor(a, parent[i], checked)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * is d a descendant of x?
-     */
-    public boolean isDescendant(int d, int x) {
-        return isAncestor(x, d);
-    }
-
-    /**
-     * Return true if node1 and node2 have are correlated, that is
-     * NOT d-seperated. Correlation occurs when one node is an descendant
-     * of the other, or they have a common ancestor.
-     */
-    public boolean isCorrelated(int node1, int node2) {
-        boolean a1[] = flagAncestors(node1, new boolean[getNumNodes()]);
-        boolean a2[] = flagAncestors(node2, new boolean[getNumNodes()]);
-        a1[node1] = true;
-        a2[node2] = true;
-        for (int i = 0; i < a1.length; i++) {
-            if (a1[i] && a2[i]) return true;
-        }
-        return false;
-    }
-
-    /**
-     * set flagged[i] = true if node[i] is an ancestor of node[n]
-     */
-    protected boolean[] flagAncestors(int n, boolean[] flagged) {
-        int[] parents = node[n].parent;
-        for (int i = 0; i < parents.length; i++) {
-            if (!flagged[parents[i]]) {
-                flagAncestors(parents[i], flagged);
-            }
-        }
-        flagged[n] = true;
-        return flagged;
-    }
-
-
-    /**
-     * Return tomHash(tom=this, ml=0, clean=false) as an positive integer
-     */
-    public int hashCode() {
-        long hash = caseInfo.tomHash.hash(this, 0);
-        return ((int) hash);
-    }
-
-
-    /**
-     * Enumeration of elements returned by edit distance {add,del,rev,correct}
-     */
-    enum EditDistance {
-        add, del, rev, correct
-    }
-
-    ;
-
-    /**
-     * Return Edit Distance between two TOMs. ED indexed by EditDistance enum.
-     */
-    public int[] editDistance(TOM t2) {
-        int[] ed = new int[EditDistance.values().length];
-        for (int i = 0; i < getNumNodes(); i++) {
-            for (int j = 0; j < getNumNodes(); j++) {
-                if (this.isDirectedArc(i, j)) {
-                    if (t2.isDirectedArc(i, j)) ed[EditDistance.correct.ordinal()]++;
-                    else if (t2.isDirectedArc(j, i)) ed[EditDistance.rev.ordinal()]++;
-                    else ed[EditDistance.del.ordinal()]++;
-                } else if (t2.isDirectedArc(i, j) && !this.isDirectedArc(j, i)) {
-                    ed[EditDistance.add.ordinal()]++;
-                }
-            }
-        }
-        return ed;
-    }
-};
+}

@@ -31,21 +31,21 @@
 // TOM hashing class for CaMML
 //
 
-// File: TOMHash.java
+// File: DAGHash.java
 // Author: {rodo,lhope}@csse.monash.edu.au
 
 package camml.core.search;
 
 
 /**
- * A unique TOM hash is formed by
+ * A unique DAG hash is formed by
  * 1) Creating a N*N array of random numbers
  * 2) For each arc present, sum the values of these numbers
  * <p/>
  * This differs from a SEC hashing in that the direction of the arcs should distinguish
- * between two TOMs.  This method does not require a ML scors.
+ * between two TOMs.  This method does not require a ML scores.
  */
-public class TOMHash extends ModelHash {
+public class DAGHash extends ModelHash {
     /**
      * Serial ID required to evolve class while maintaining serialisation compatibility.
      */
@@ -64,7 +64,7 @@ public class TOMHash extends ModelHash {
     /**
      * Constructor
      */
-    public TOMHash(java.util.Random rand, int numNodes) {
+    public DAGHash(java.util.Random rand, int numNodes) {
         this.rand = rand;
         init(numNodes);
     }
@@ -91,20 +91,36 @@ public class TOMHash extends ModelHash {
     /**
      * hash = sum_{directedArcs}( matrix[i][j] )
      */
+    // TODO: hash(TOM) is being replaced with hash(CoreTom) so this can go away soon?
     public long hash(TOM tom, double logL) {
         long skelHash = 0L;
         int numNodes = tom.getNumNodes();
 
-        // The calculateion of tomHash is now performes locally in nodes (the sum is the tomHash)
+        // The calculation of tomHash is now performed locally in nodes (the sum is the tomHash)
         for (int i = 0; i < numNodes; i++) {
-            int[] parent = tom.node[i].parent;
-            for (int j = 0; j < parent.length; j++) {
-                skelHash += getRandom(parent[j], i);
+            for (int parent : tom.getParents(i)) {
+                skelHash += getRandom(parent, i);
             }
         }
 
         return skelHash;
     }
 
+    /**
+     * hash = sum_{directedArcs}( matrix[i][j] )
+     */
+    public long hash(CoreTOM tom, double logL) {
+        long skelHash = 0L;
+        int numNodes = tom.getNumNodes();
+
+        // The calculation of tomHash is now performed locally in nodes (the sum is the tomHash)
+        for (int i = 0; i < numNodes; i++) {
+            for (int parent : tom.getParents(i)) {
+                skelHash += getRandom(parent, i);
+            }
+        }
+
+        return skelHash;
+    }
 
 }

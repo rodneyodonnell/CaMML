@@ -149,8 +149,8 @@ public class UltraSimpleSearch implements Search.SearchObject {
             // Add an arc.  Make sure no more than Node.maxNumParents connect to any one node to
             // avoid Node.ExcessiveArcsException.
             else {
-                if (arcsConnecting[a] < tom.maxNumParents &&
-                        arcsConnecting[b] < tom.maxNumParents) {
+                if (arcsConnecting[a] < tom.coreTOM.getMaxNumParents() &&
+                        arcsConnecting[b] < tom.coreTOM.getMaxNumParents()) {
                     tom.addArc(a, b);
                     arcsConnecting[a]++;
                     arcsConnecting[b]++;
@@ -190,7 +190,7 @@ public class UltraSimpleSearch implements Search.SearchObject {
         fullData = data;  // save the full data set for future use.
         // Function to create views into the data.
         dataView = (Value.Function) camml.core.library.CammlFN.view.apply(fullData);
-        tom = new TOM(fullData); // create the tom to search over
+        tom = TOM.builder().setData(data).build();
         nodeCost = new double[tom.getNumNodes()];//Allocate memory to store individual node costs.
         this.arcsConnecting = new int[nodeCost.length];
         bestCost = Double.POSITIVE_INFINITY;

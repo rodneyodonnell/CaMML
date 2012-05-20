@@ -125,7 +125,7 @@ public class SEC implements Serializable {
 
         // extract undirected edge listfrom TOM
         edgeList2 = new int[2][cleanTom.getNumEdges()];
-        int numNodes = cleanTom.node.length;
+        int numNodes = cleanTom.getNumNodes();
 
         // NOTE: Previous behaviour "double cleaned" TOMs, this may have cause different behaviour.
         //cleanTom.clean();
@@ -133,9 +133,9 @@ public class SEC implements Serializable {
         int edgeNum = 0;
         for (int i = 0; i < numNodes; i++) {
             Node currentNode = cleanTom.getNode(i);
-            for (int j = 0; j < currentNode.parent.length; j++) {
+            for (int j = 0; j < currentNode.getParent().length; j++) {
                 edgeList2[0][edgeNum] = i;
-                edgeList2[1][edgeNum] = currentNode.parent[j];
+                edgeList2[1][edgeNum] = currentNode.getParent()[j];
                 edgeNum++;
             }
         }
@@ -321,7 +321,7 @@ public class SEC implements Serializable {
         protected double totalWeight;
 
         /**
-         * TOMHash() of this TOM
+         * DAGHash() of this TOM
          */
         public final long hash;
 
@@ -334,7 +334,7 @@ public class SEC implements Serializable {
          * Constructor : store totalOrder.clone() and hash
          */
         public CompactTOM(TOM tom, long hash) {
-            this.order = (int[]) tom.totalOrder.clone();
+            this.order = tom.coreTOM.cloneTotalOrder().clone();
             this.hash = hash;
         }
 
@@ -401,12 +401,12 @@ public class SEC implements Serializable {
          */
         public TOM makeTOM() {
             // create TOM
-            TOM tom = new TOM(caseInfo);
+            TOM tom = TOM.builder().setCaseInfo(caseInfo).build();
 
             // set total ordering to match CompactTOM
             // This must be done before adding arcs to avoid having too many parents present.
             for (int i = 0; i < order.length; i++) {
-                tom.swapOrder(tom.nodeAt(i), this.order[i], false);
+                tom.swapOrder(tom.nodeAt(i), this.order[i]);
             }
 
             for (int i = 0; i < edgeList2[0].length; i++) {

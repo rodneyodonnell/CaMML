@@ -35,7 +35,7 @@
 package camml.plugin.tomCoster;
 
 import camml.core.library.WallaceRandom;
-import camml.core.search.TOM;
+import camml.core.search.CoreTOM;
 
 import java.io.Serializable;
 import java.util.Random;
@@ -127,8 +127,7 @@ public class PriorProb implements Serializable {
         Random rand = new WallaceRandom(new int[]{123, 456});
 
         // Create a TOM using a fake dataset.
-        TOM tom = new TOM(numNodes);
-        tom.setMaxNumParents(numNodes);
+        CoreTOM tom = new CoreTOM(numNodes, numNodes, null); // pass in Null for DagHasher so we don't end up recreating it every time this is called.
 
 
         // Count #connected, #ancestors and #commonCause.
@@ -139,7 +138,7 @@ public class PriorProb implements Serializable {
         int n = 10000;
         for (int i = 1; i < n; i++) {
             tom.clearArcs();
-            tom.randomOrder(rand);
+            tom.randomOrder(rand, true);
             tom.randomArcs(rand, arcP);
 
             if (tom.isArc(0, 1) || tom.isArc(1, 0)) {

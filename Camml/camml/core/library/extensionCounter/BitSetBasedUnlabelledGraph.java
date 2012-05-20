@@ -29,7 +29,7 @@
 
 package camml.core.library.extensionCounter;
 
-import camml.core.search.TOM;
+import camml.core.search.CoreTOM;
 
 import java.util.BitSet;
 
@@ -98,7 +98,7 @@ public class BitSetBasedUnlabelledGraph extends UnlabelledGraph {
     /**
      * Initialise UnlabelledGraph from a TOM
      */
-    public BitSetBasedUnlabelledGraph(TOM tom) {
+    public BitSetBasedUnlabelledGraph(CoreTOM tom) {
         this(tom.getNumNodes());
         initFromTOM(tom);
     }

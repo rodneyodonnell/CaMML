@@ -29,7 +29,7 @@
 
 package camml.core.library.extensionCounter;
 
-import camml.core.search.TOM;
+import camml.core.search.CoreTOM;
 
 import java.util.Random;
 
@@ -96,7 +96,7 @@ public abstract class UnlabelledGraph {
     /**
      * Initialise UnlabelledGraph based on the given TOM
      */
-    public void initFromTOM(TOM tom) {
+    public void initFromTOM(CoreTOM tom) {
         for (int i = 0; i < numNodes; i++) {
             for (int j = 0; j < numNodes; j++) {
                 if (i != j && tom.isDirectedArc(tom.nodeAt(i), tom.nodeAt(j))) {

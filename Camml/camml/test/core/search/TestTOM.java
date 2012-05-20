@@ -40,6 +40,7 @@ package camml.test.core.search;
 import camml.core.search.SearchDataCreator;
 import camml.core.search.SearchPackage;
 import camml.core.search.TOM;
+import camml.core.search.TomUtil;
 import cdms.core.Value;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -69,7 +70,7 @@ public class TestTOM extends TestCase {
 
 
     public void testConstructor() {
-        TOM newTOM = new TOM(data);
+        TOM newTOM = TOM.builder().setData(data).build();
 
         assertEquals(8, newTOM.getNumNodes());  // tests getNumNodes too.
 
@@ -78,7 +79,7 @@ public class TestTOM extends TestCase {
 
 
     public void testArcOperations() {
-        TOM newTOM = new TOM(data);
+        TOM newTOM = TOM.builder().setData(data).build();
         //isArc
         for (int i = 0; i < newTOM.getNumNodes(); i++) {
             for (int j = 0; j < newTOM.getNumNodes(); j++) {
@@ -122,7 +123,7 @@ public class TestTOM extends TestCase {
 
     public void testIsAncestor() {
         // build TOM
-        TOM newTOM = new TOM(data);
+        TOM newTOM = TOM.builder().setData(data).build();
         // order starts ascending.
         newTOM.addArc(0, 2);
         newTOM.addArc(1, 2);
@@ -138,7 +139,7 @@ public class TestTOM extends TestCase {
 
     public void testIsDescendant() {
         // build TOM
-        TOM newTOM = new TOM(data);
+        TOM newTOM = TOM.builder().setData(data).build();
         // order starts ascending.
         newTOM.addArc(0, 2);
         newTOM.addArc(1, 2);
@@ -155,7 +156,7 @@ public class TestTOM extends TestCase {
 
     public void testIsCorrelated() {
         // build TOM
-        TOM tom = new TOM(data);
+        TOM tom = TOM.builder().setData(data).build();
         // order starts ascending.
         tom.addArc(0, 2);
         tom.addArc(0, 3);
@@ -204,9 +205,9 @@ public class TestTOM extends TestCase {
     public void testSwapOrder() {
 
         // Initialise test TOMs
-        TOM emptyTOM = new TOM(data);
-        TOM fullTOM = new TOM(data);
-        TOM partialTOM = new TOM(data);
+        TOM emptyTOM = TOM.builder().setData(data).build();
+        TOM fullTOM = TOM.builder().setData(data).build();
+        TOM partialTOM = TOM.builder().setData(data).build();
 
         partialTOM.addArc(1, 5);
         partialTOM.addArc(4, 5);
@@ -232,9 +233,9 @@ public class TestTOM extends TestCase {
             int x = rand.nextInt(order.length);
             int y = rand.nextInt(order.length);
 
-            emptyTOM.swapOrder(x, y, true);
-            fullTOM.swapOrder(x, y, true);
-            partialTOM.swapOrder(x, y, true);
+            emptyTOM.swapOrder(x, y);
+            fullTOM.swapOrder(x, y);
+            partialTOM.swapOrder(x, y);
             swap(order, x, y);
 
             for (int j = 0; j < emptyTOM.getNumNodes(); j++) {
@@ -261,14 +262,14 @@ public class TestTOM extends TestCase {
      */
     public void testClone() {
         // build TOM
-        TOM newTOM = new TOM(data);
+        TOM newTOM = TOM.builder().setData(data).build();
         // order starts ascending.
         newTOM.addArc(0, 2);
         newTOM.addArc(1, 2);
         newTOM.addArc(2, 3);
 
         // New order should be {2,1,0,3}
-        newTOM.swapOrder(newTOM.nodeAt(0), newTOM.nodeAt(2), false);
+        newTOM.swapOrder(newTOM.nodeAt(0), newTOM.nodeAt(2));
 
 
         // clone TOM.  Node & data should be a shallow copy, order & arc should be a deep copy.
@@ -283,7 +284,7 @@ public class TestTOM extends TestCase {
 
         // Make some modifications and check deep copies remain unchanged.
         clonedTOM.addArc(0, 3);
-        clonedTOM.swapOrder(clonedTOM.nodeAt(0), clonedTOM.nodeAt(1), false);  // new Order {1,2,0,3}
+        clonedTOM.swapOrder(clonedTOM.nodeAt(0), clonedTOM.nodeAt(1));  // new Order {1,2,0,3}
 
         assertEquals(newTOM.isArc(2, 0), clonedTOM.isArc(2, 0));
         assertEquals(false, newTOM.isArc(0, 3));
@@ -298,7 +299,7 @@ public class TestTOM extends TestCase {
 
     public void testSetStructure() {
         // build TOM
-        TOM tom = new TOM(data);
+        TOM tom = TOM.builder().setData(data).build();
 
         // randomise order
         java.util.Random rand = new java.util.Random(123);
@@ -331,7 +332,7 @@ public class TestTOM extends TestCase {
         assertFalse(tom.equals(cloneTOM));
 
         // Set structure based on original TOM
-        tom.setStructure(params);
+        tom.setStructure(TomUtil.getParentArrays(params));
         assertTrue(tom.equals(cloneTOM));
 
 
@@ -342,7 +343,7 @@ public class TestTOM extends TestCase {
         assertFalse(tom.equals(cloneTOM));
 
         // Set structure based on original TOM
-        tom.setStructure(params);
+        tom.setStructure(TomUtil.getParentArrays(params));
         assertTrue(tom.equals(cloneTOM));
     }
 

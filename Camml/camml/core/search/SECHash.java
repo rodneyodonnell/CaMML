@@ -126,9 +126,9 @@ public class SECHash extends ModelHash {
         long skelHash = 0L;
         int numNodes = tom.getNumNodes();
 
-        // The calculateion of tomHash is now performes locally in nodes (the sum is the tomHash)
+        // The calculation of tomHash is now performs locally in nodes (the sum is the tomHash)
         for (int i = 0; i < numNodes; i++) {
-            int[] parent = tom.node[i].parent;
+            int[] parent = tom.getParents(i);
             for (int j = 0; j < parent.length; j++) {
                 skelHash += getRandom(parent[j], i);
             }

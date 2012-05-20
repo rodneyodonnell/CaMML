@@ -60,7 +60,6 @@ public class TestCases extends TestCase {
 
         tSuite.addTest(TestUltraSimpleSearch.suite());
         tSuite.addTest(TestMetropolisSearch.suite());
-        tSuite.addTest(TestQuickSearch.suite());
 
         tSuite.addTest(TestGreedyLookaheadSearch.suite());
         tSuite.addTest(TestAnnealSearch.suite());
