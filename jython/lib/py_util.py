@@ -19,13 +19,13 @@ def saveData(fName, data, overwritable = False):
 
 def loadNet(fName, check=True,names=None):
 	if os.path.isfile(fName):
-		my = camml.plugin.netica.NeticaFn.LoadNet.loadNet._apply(fName)
+		my = camml.plugin.netica.NeticaFn.LoadNet._apply(fName)
 		if not warn[loadNet]:
 			print "Warning: loadNet bahaviour changed. reorder no longer called."
 			warn[loadNet] = True
 		#names = map(lambda i: "var"+str(i),range(my.cmpnt(1).length()))
 		if (names != None):
-			my = camml.plugin.netica.NeticaFn.ReorderNet.reorderNet._apply(names,my)
+			my = camml.plugin.netica.NeticaFn.ReorderNet._apply(names,my)
 		return my
 	else:
 		if check: raise Exception("File not found" + fName)
