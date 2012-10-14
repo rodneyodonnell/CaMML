@@ -64,7 +64,6 @@ public class GUIModel implements GUIAvailableParameters {
 	//Full results:
 	protected Value.Vector searchResults = null;
 	
-	
 
 	
 

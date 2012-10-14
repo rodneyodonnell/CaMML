@@ -1,6 +1,7 @@
 package camml.core.newgui;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -178,6 +179,7 @@ public class cammlGUI extends javax.swing.JFrame {
         searchParametersScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         setupLabelMMLLearner.setText("Parameterization Type");
+        setupLabelMMLLearner.setToolTipText("<html>Parameterization type for Bayesian Network nodes.<br>\nBasically: What sort of distribution should be used?<br>\n- CPT = Conditional Probability Table<br>\n- DTree = Decision Tree<br>\n- Logit = Logit Distribution</html>");
 
         MMLLearnerCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -186,6 +188,7 @@ public class cammlGUI extends javax.swing.JFrame {
         });
 
         setupLabelSearchFactor.setText("Search Factor");
+        setupLabelSearchFactor.setToolTipText("<html>Search factor multiplies the base number of loops of the search algorithm. Default: 1.0<br>\nHigher numbers mean a greater number of loops in the Metropolis Algorithm are<br>\nrun, with a corresponding increase in the amount of time taken for the algorithm to complete.<br>\nFor example: Search Factor = 2.0 -> Twice as many model changes attempted.</html>");
 
         searchFactorTextfield.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         searchFactorTextfield.setText("1.0");
@@ -196,8 +199,10 @@ public class cammlGUI extends javax.swing.JFrame {
         });
 
         setupLabelMinTotalPosterior.setText("Minimum Total Posterior");
+        setupLabelMinTotalPosterior.setToolTipText("<html>Minimal total SEC posterior to retain from Metropolis Sampling.<br>\nNote: This value is ignored if more than the specified 'Maximum Number<br>\nof SECs' is required.</html>");
 
         setupLabelMaxSECs.setText("Maximum Number of SECs");
+        setupLabelMaxSECs.setToolTipText("<html>Maximum number of SECs to retain post-Metropolis sampling.<br>\nNote: Making this number larger slows down the process of combining<br>\nmodels after running search (i.e time taken to generate full results).</html>");
 
         maxSECsTextfield.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         maxSECsTextfield.setText("30");
@@ -222,6 +227,7 @@ public class cammlGUI extends javax.swing.JFrame {
         });
 
         setupLabelRNG.setText("Random Number Generator");
+        setupLabelRNG.setToolTipText("<html>Random Number Generator used during search.<br>\nIn general, the default RNG is appropriate, unless there is a specific<br>\nreason (i.e. regression testing, etc) to use one of the others.\n</html>\n");
 
         setupRNGCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -230,6 +236,7 @@ public class cammlGUI extends javax.swing.JFrame {
         });
 
         setupLabelRNGSeed.setText("Random Number Generator Seed/s");
+        setupLabelRNGSeed.setToolTipText("<html>Seed values for the random number generators.<br>\nText boxes are only enabled if a RNG that allows for the seed to<br>\nbe set is selected in the Random Number Generator combo box.</html>");
 
         setupRNGSeed.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         setupRNGSeed.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -242,6 +249,7 @@ public class cammlGUI extends javax.swing.JFrame {
         setupLabelAdvancedSettings.setText("Advanced Settings");
 
         setupLabelGenerateFullResults.setText("Generate Full Results");
+        setupLabelGenerateFullResults.setToolTipText("<html>There are two types of results:<br>\n- The best scoring network (always generated), and<br>\n- A collection of networks (and associated statistics) based on all networks<br>\n&nbsp;&nbsp;&nbsp;generated during the search process.<br>\nIf checkbox is selected, the latter (\"full results\") will be generated automatically,<br>\nonce the search is complete.<br>\nNote: Full results can be generated after search is complete, using the<br>\n'Generate Full Results' button in the Results tab.</html>");
 
         setupGenerateFullResultsCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -353,7 +361,7 @@ public class cammlGUI extends javax.swing.JFrame {
             .addGroup(setupPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(setupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(searchParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 615, Short.MAX_VALUE)
+                    .addComponent(searchParametersScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
                     .addGroup(setupPanelLayout.createSequentialGroup()
                         .addComponent(jLabelDataFileLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -443,7 +451,7 @@ public class cammlGUI extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addGroup(priorsPanelLayout.createSequentialGroup()
                         .addComponent(useExpertPriorsCheckbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 329, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 320, Short.MAX_VALUE)
                         .addComponent(newExpertPriorsBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(loadExpertPriorsBtn)
@@ -509,7 +517,7 @@ public class cammlGUI extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(runPanelLayout.createSequentialGroup()
                         .addComponent(runCammlRunBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 422, Short.MAX_VALUE)
                         .addComponent(runClearOutputBtn)))
                 .addContainerGap())
         );
@@ -590,7 +598,7 @@ public class cammlGUI extends javax.swing.JFrame {
                         .addComponent(resultsGenerateFullResultsBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(resultsViewSelectedNetworkBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 254, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
                         .addComponent(resultsExportFullResults))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, resultsPanelLayout.createSequentialGroup()
                         .addComponent(resultsViewNetworkBtn)
@@ -1045,17 +1053,7 @@ public class cammlGUI extends javax.swing.JFrame {
 
     //User clicks the "Run" (i.e. run search) button in the Run tab
     private void runCammlRunBtnActionPerformed(java.awt.event.ActionEvent evt) {
-    	//First: Get/check most recent version of Expert Priors:
-    	if( guimodel.useExpertPriors ){
-    		try{
-    			guimodel.validateExpertPriors( expertPriorsTextArea.getText() );
-    			guimodel.expertPriorsString = expertPriorsTextArea.getText();
-    		} catch( Exception e ){
-    			guimodel.expertPriorsString = null;
-    		}
-    	}
-
-
+    	/* ORIGINAL CODE:
     	if( checkSearchSettingsAndDisplayErrors() ){
     		guimodel.runSearch();
     	} else {
@@ -1067,6 +1065,48 @@ public class cammlGUI extends javax.swing.JFrame {
     	} else {
     		resultsScrollPane.setViewportView( null );
     	}
+    	*/
+    	
+    	
+    	//Check that search is is not currently running:
+    	if( searchThread != null && searchThread.isAlive() ){	//Search is currently running!
+    		JOptionPane.showMessageDialog( mainTabbedPane, "Cannot start search: Search already underway.");
+    		return;
+    	}
+    	
+    	//First: Get/check most recent version of Expert Priors:
+    	if( guimodel.useExpertPriors ){
+    		try{
+    			guimodel.validateExpertPriors( expertPriorsTextArea.getText() );
+    			guimodel.expertPriorsString = expertPriorsTextArea.getText();
+    		} catch( Exception e ){
+    			guimodel.expertPriorsString = null;
+    		}
+    	}
+    	
+    	//Set full results table ('results' tab) to null (so results from previous run - if any -
+    	// are not displayed while the search is being run.
+    	resultsScrollPane.setViewportView( null );
+    	
+		Runnable r = new Runnable(){
+			public void run(){
+		    	if( checkSearchSettingsAndDisplayErrors() ){
+		    		guimodel.runSearch();
+		    	} else {
+		    		return;
+		    	}
+		    	
+		    	if( guimodel.fullResults ){
+		    		updateFullResultsDisplay();
+		    	} else {
+		    		resultsScrollPane.setViewportView( null );
+		    	}
+			}
+		};
+		
+		searchThread = new Thread(r);
+		searchThread.start();
+
     }
     
     //User clicks "Clear" button in Run tab
@@ -1091,10 +1131,39 @@ public class cammlGUI extends javax.swing.JFrame {
     
     //Helper method: Create/update the table with the full results in Results tab
     private void updateFullResultsDisplay(){
+    	if( searchThread != null && searchThread.isAlive() && !guimodel.metropolisSearch.isFinished() ){
+    		JOptionPane.showMessageDialog( mainTabbedPane, "Cannot generate results: Search still running.");
+    		return;
+    	}
+    	if( resultsThread != null && resultsThread.isAlive() ){
+    		JOptionPane.showMessageDialog( mainTabbedPane, "Generating full results currently underway. This may take some time.");
+    		return;
+    	}
+    	if( guimodel.metropolisSearch == null || !guimodel.metropolisSearch.isFinished() ){
+    		JOptionPane.showMessageDialog( mainTabbedPane, "Cannot generate results: Search not run.");
+    		return;
+    	}
+    	
+    	Runnable r = new Runnable(){
+			public void run(){
+		    	if( guimodel.searchResults == null ){
+		    		guimodel.generateFullResults();
+		    	}
+		    	
+		    	fullResultsTable = new JTable( new FullResultsTableModel( guimodel.searchResults) );
+		    	resultsScrollPane.setViewportView( fullResultsTable );
+			}
+		};
+		
+		resultsThread = new Thread(r);
+		resultsThread.start();
+    	
+    	
+    	/*Original Code:
     	if( guimodel.searchResults == null ){
     		if( !guimodel.generateFullResults() ){
     			if( guimodel.metropolisSearch == null || !guimodel.metropolisSearch.isFinished() ){
-    				JOptionPane.showMessageDialog( mainTabbedPane, "Cannot generate results: search not complete.");
+    				JOptionPane.showMessageDialog( mainTabbedPane, "Cannot generate results: Search not complete.");
     				return;
     			} else {
     				JOptionPane.showMessageDialog( mainTabbedPane, "Cannot generate results.");
@@ -1104,6 +1173,7 @@ public class cammlGUI extends javax.swing.JFrame {
     	}
     	fullResultsTable = new JTable( new FullResultsTableModel( guimodel.searchResults) );
     	resultsScrollPane.setViewportView( fullResultsTable );
+    	*/
     }
     
     //User clicks "View Network": View the network for the best TOM generated during search
@@ -1541,6 +1611,11 @@ public class cammlGUI extends javax.swing.JFrame {
     
     //Full results table:
     private JTable fullResultsTable;
+    
+    
+    //Thread for running search in:
+    Thread searchThread = null;			//Thread for running the search
+    Thread resultsThread = null;		//Thread for generating the results after search has completed...
 }
 
 

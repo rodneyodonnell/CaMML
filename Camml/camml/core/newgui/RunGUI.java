@@ -10,9 +10,7 @@ import java.awt.EventQueue;
 public class RunGUI {
 	
 	public static void main( String args[] ){
-		
-		
-		//Create model for storing data:
+		//Create model object for storing data:
 		final GUIModel model = new GUIModel();
 		
 		//Create GUI object and run CaMML:
