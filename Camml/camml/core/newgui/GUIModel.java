@@ -328,6 +328,12 @@ public class GUIModel implements GUIAvailableParameters {
 		metropolisSearch.caseInfo.maxNumSECs = maxSECs;						//No separate value kept in MetropolisSearch
 		metropolisSearch.caseInfo.minTotalPosterior = minTotalPosterior;	//No separate value kept in MetropolisSearch
 		
+		//Set expert priors, if they are being used:
+		if( useExpertPriors ){
+			Value.Str s = new Value.Str( expertPriorsString );
+			metropolisSearch.setOption("TOMPrior", s );
+		}
+		
 		//Reset search results in case already run before this session:
 		searchResults = null;
 		
