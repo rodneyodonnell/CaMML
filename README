@@ -57,8 +57,9 @@ CaMML has a stand-alone Java-based GUI (added 02/2013) that should be suitable f
 most basic learning tasks. The GUI has a data viewer, basic network viewer (based
 on Netica libraries), and support for learning DBNs.
 
-- To run the GUI under Windows, use:
-  > camml_gui.bat
+- To run the GUI, use:
+  > camml_gui.sh
+  > camml_gui.bat (Windows)
 
 Note that the -Djava.library.path field in the camml_gui.bat file may need to be
 edited if the Netica libraries are not in the /jar/ folder - the GUI will run, but
