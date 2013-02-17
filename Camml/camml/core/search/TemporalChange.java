@@ -101,7 +101,7 @@ public class TemporalChange extends TOMTransformation
             lastConnected = true;
             
             // If maxNumParents has been reached we fail.
-            if ( nodeI.parent.length == tom.maxNumParents ) return false;
+            if ( nodeI.getNumParents() == tom.maxNumParents ) return false;
             
             // record old node costs.
             double oldCostI = caseInfo.nodeCache.getMMLCost( nodeI );

@@ -115,7 +115,7 @@ public class DoubleSkeletalChange extends TOMTransformation {
         int addArc = 0;
         if ( tom.isArc( parentVar1, childVar ) ) addArc--; else addArc++;
         if ( tom.isArc( parentVar2, childVar ) ) addArc--; else addArc++;
-        if ( childNode.parent.length + addArc > tom.maxNumParents ) 
+        if ( childNode.getNumParents() + addArc > tom.maxNumParents ) 
             return false;  // return false if too many parents are present.
         
         // Links P1-->C & P2-->C are toggled.

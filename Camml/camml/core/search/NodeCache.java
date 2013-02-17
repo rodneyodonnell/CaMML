@@ -257,7 +257,7 @@ public class NodeCache implements Serializable
      * overwrite the entry of index[hash] with a new entry.  The cacheIndex of the new entry
      *  is specified by longHash.
      */
-    void overwriteCacheEntry( int index, long hash )
+    protected void overwriteCacheEntry( int index, long hash )
     {
         // clear all cached information at index[hash]
         mmlCost[index] = -1;
@@ -270,7 +270,7 @@ public class NodeCache implements Serializable
     }
     
     /** Generate an index into the cache */
-    int getIndex( Node node ) {
+    protected int getIndex( Node node ) {
         getIndexCalled ++;
         
         // if not allocated, create parentHash and childHash

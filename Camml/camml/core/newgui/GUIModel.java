@@ -9,11 +9,11 @@ import java.util.Random;
 import camml.core.library.WallaceRandom;
 import camml.core.models.ModelLearner;
 import camml.core.models.bNet.BNet;
-//import camml.core.models.bNet.BNetVisualiser;
-import camml.core.search.CaseInfo;
 import camml.core.search.MMLEC;
 import camml.core.search.MetropolisSearch;
-import camml.core.search.SearchPackage;
+import camml.core.searchDBN.DTOM;
+import camml.core.searchDBN.ExportDBNNetica;
+import camml.core.searchDBN.MetropolisSearchDBN;
 import camml.plugin.friedman.FriedmanWrapper;
 import camml.plugin.netica.NeticaFn;
 import camml.plugin.rodoCamml.RodoCammlIO;
@@ -22,19 +22,20 @@ import camml.plugin.weka.Converter;
 import cdms.core.Type;
 import cdms.core.Value;
 
-/**Code for actually running a search. 
+/**Code for actually running a search, exporting results etc. 
  * Designed to work closely with the cammLGUI class: i.e. a GUIModel object
- *  is passed to the cammlGUI constructor.
+ *  is passed to the cammlGUI constructor.<br>
  * 
  * Much of this class amounts to a wrapper for existing CaMML methods, as well
- *  as checks on the parameters selected by the user via the GUI
+ *  as checks on the parameters selected by the user via the GUI. <br>
+ * See also:<br>
+ * - GUIParameters<br>
+ * - CaMMLGUI
  * 
- * @author Alex
- *
+ * @author Alex Black
  */
-public class GUIModel implements GUIAvailableParameters {
+public class GUIModel implements GUIParameters {
 	protected MetropolisSearch metropolisSearch = null;
-	protected CaseInfo caseInfo = null;
 	
 	//Data:
 	Value.Vector data = null;
@@ -45,12 +46,10 @@ public class GUIModel implements GUIAvailableParameters {
 	protected int maxSECs = 30;
 	protected double minTotalPosterior = 0.999;
 	
-	protected File selectedFile = null;			//Used mainly for path...
+	protected File selectedFile = null;			//Used mainly for path - for file dialog boxes etc
 	protected File lastExportedBNet = null;
 	
-	protected boolean fullResults = false;		//Should full results be generated after running search?
-	
-	protected Random r = RNGs[0];				//Random number generator. Defined in GUIAvailableParameters interface
+	protected Random r = RNGs[0];				//Random number generator. Defined in GUIParameters interface
 	protected boolean useSetSeed = RNGUseSetSeed[0];
 	protected boolean useSetSeed2 = RNGUseSetSeed2[0];
 	//Note: random seeds for WallaceRandom must be integers, seed for java.util.Random is long (hence integer OK)
@@ -61,42 +60,11 @@ public class GUIModel implements GUIAvailableParameters {
 	protected boolean useExpertPriors = false;
 	String expertPriorsString = null;			//String of the expert priors entered by the user
 	
-	//Full results:
-	protected Value.Vector searchResults = null;
+	//Results:
+	protected Value.Vector searchResults = null;	//Results for standard BNs
+	protected MMLEC[] searchResultsDBN = null;		//Results for learning DBNs
 	
-
 	
-
-	/**Outputs the best scoring network from search to the specified location.
-	 * @param filepath Path (including filename) to export best scoring network to.
-	 */
-	public void outputNeticaBN( String filepath ) throws Exception {
-		if( metropolisSearch == null || !metropolisSearch.isFinished() )
-			throw new Exception("Cannot produce network if search has not been run.");
-
-		
-		BNet outputNet = metropolisSearch.getBNet();
-		
-		//Try exporting best TOM to Netica format:
-		Value.Vector params = null;
-		try{
-			params = metropolisSearch.getBestTOM().makeParameters( MMLLearner );
-		} catch( Exception e ){
-			System.out.println("Error: makeParameters for BestTOM failed!");
-		}
-		
-		
-		Value.Structured saveStruct = new Value.DefStructured( new Value[] {
-                new Value.Str(filepath), outputNet, params
-            });
-		
-		try{
-			NeticaFn.SaveNet SaveNet = new NeticaFn.SaveNet();
-			SaveNet.apply(saveStruct);
-		} catch( Exception e ){
-			System.out.println("Error: Saving netica BN failed!");
-		}
-	}
 	
 	/**Export ONE network (Netica format) from the set of 'representative networks'
 	 *  in the full results to a specified location.
@@ -104,12 +72,14 @@ public class GUIModel implements GUIAvailableParameters {
 	 * 
 	 * @param filepath Path and file name to save the specified network. 
 	 * @param index Index of network in full results array. NOTE: index appended to filename automatically.
-	 * @throws Exception
+	 * @throws Exception IO errors, invalid index etc
 	 */
-	public void outputFullResultsBN( String filepath, int index ) throws Exception {		
+	public void exportFullResultsBN( String filepath, int index ) throws Exception {		
 		if( metropolisSearch == null || !metropolisSearch.isFinished() ) throw new Exception("Cannot produce network if search has not been run.");
-		if( searchResults == null ) throw new Exception("Search results: Not generated.");
-		if( index > searchResults.length()-1 || index < 0 ) throw new Exception("Invalid Index.");
+		if( searchResults == null && searchResultsDBN == null ) throw new Exception("Search results: Not generated.");
+		if( index < 0 ) throw new Exception("Invalid Index.");
+		if( searchResults != null && index > searchResults.length()-1 ) throw new Exception("Invalid Index.");
+		if( searchResultsDBN != null && index > searchResultsDBN.length-1 ) throw new Exception("Invalid Index.");
 		
 		//Generate the file path:
 		String path;
@@ -119,21 +89,27 @@ public class GUIModel implements GUIAvailableParameters {
 			path = filepath;
 		}
 		
-		path = path + index;	//Concatenate number at end
-		path = path + ".dne";
+		path = path + index + ".dne";	//Concatenate number at end
 		
-		Value.Structured repNetwork = (Value.Structured)MMLEC.getRepresentative.apply( searchResults.elt(index) );
-		
-		//File path, Network, parameters
-		Value.Structured saveStruct = new Value.DefStructured( new Value[] {
-                new Value.Str(path), (BNet)repNetwork.cmpnt(0), (Value.Vector)repNetwork.cmpnt(1)
-            });
-		
-		try{
-			NeticaFn.SaveNet SaveNet = new NeticaFn.SaveNet();
-			SaveNet.apply(saveStruct);
-		} catch( Exception e ){
-			System.out.println("Error: Saving netica BN failed!");
+		if( searchResults != null ){	//Export standard BN
+			Value.Structured repNetwork = (Value.Structured)MMLEC.getRepresentative.apply( searchResults.elt(index) );
+			
+			//File path, Network, parameters
+			Value.Structured saveStruct = new Value.DefStructured( new Value[] {
+	                new Value.Str(path), (BNet)repNetwork.cmpnt(0), (Value.Vector)repNetwork.cmpnt(1)
+	            });
+			
+			try{
+				NeticaFn.SaveNet SaveNet = new NeticaFn.SaveNet();
+				SaveNet.apply(saveStruct);
+			} catch( Exception e ){
+				System.out.println("Error: Saving netica BN failed!");
+			}
+			
+		} else {	//Export DBN
+			//Get the representative network:
+			DTOM repNetwork = (DTOM)searchResultsDBN[index].getSEC(0).getTOM(0);
+			ExportDBNNetica.export( path, repNetwork, "_0", "_1" );
 		}
 		
 	}
@@ -143,25 +119,29 @@ public class GUIModel implements GUIAvailableParameters {
 	 *  NOTE: Number of network (sorted by posterior) appended to filename.
 	 * 
 	 * @param filepath Path and filename to export networks to.
-	 * @throws Exception
+	 * @throws Exception On IO errors, etc
 	 */
 	public void outputFullResultsAllBNs( String filepath ) throws Exception{
 		if( metropolisSearch == null || !metropolisSearch.isFinished() ) throw new Exception("Cannot produce network if search has not been run.");
-		if( searchResults == null ) throw new Exception("Search results: Not generated.");
+		if( searchResults == null && searchResultsDBN == null ) throw new Exception("Search results: Not generated.");
 		
-		for( int i = 0; i < searchResults.length(); i++ ){
-			outputFullResultsBN( filepath, i );
+		int numBNs;
+		if( searchResults != null ) numBNs = searchResults.length();
+		else numBNs = searchResultsDBN.length;
+		
+		for( int i = 0; i < numBNs; i++ ){
+			exportFullResultsBN( filepath, i );
 		}
 	}
 	
 	
-	//Load data file:
+	/**Load data file. See loadDataFile( String path )*/
 	public void loadDataFile( File f ) throws Exception
 	{
 		loadDataFile( f.getAbsolutePath() );
 	}
 	
-	/**Load data from a file. 
+	/**Load data from a file, using absolute path.
 	 * Currently supported formats: arff, cas and data 
 	 * @param path Location of data file (inc. file name)
 	 * @throws Exception If file not found, error loading file, etc
@@ -170,19 +150,19 @@ public class GUIModel implements GUIAvailableParameters {
 	{
 		if( path.endsWith( "arff" ) ){
 			try{
-				//TODO: Currently set NOT to discretize continuous or replace missing values. Need to fix this.
+				//TODO: Currently set NOT to discretize continuous or replace missing values.
 				data = Converter.load( path, false, false);
 				//System.out.println("File loaded OK");
 			} catch( FileNotFoundException e ){
 				data = null;
-				throw new Exception( "File not found." );
+				throw new Exception( "File not found. " + e );
 			} catch( IOException e ){
 				data = null;
-				throw new Exception( "IO Exception" );
+				throw new Exception( "IO Exception: " + e);
 			}
 			catch( Exception e ){
 				data = null;
-				throw new Exception( "Error loading file" );
+				throw new Exception( "Error loading file: " + e);
 			}
 			return;
 		}
@@ -192,14 +172,14 @@ public class GUIModel implements GUIAvailableParameters {
 				data = RodoCammlIO.load( path );
 			} catch( FileNotFoundException e ){
 				data = null;
-				throw new Exception( "File not found." );
+				throw new Exception( "File not found. " + e );
 			} catch( IOException e ){
 				data = null;
-				throw new Exception( "IO Exception" );
+				throw new Exception( "IO Exception: " + e );
 			}
 			catch( Exception e ){
 				data = null;
-				throw new Exception( "Error loading file" );
+				throw new Exception( "Error loading file: " + e );
 			}
 			return;
 		}
@@ -210,14 +190,14 @@ public class GUIModel implements GUIAvailableParameters {
 				data = FriedmanWrapper.loadData( path );
 			} catch( FileNotFoundException e ){
 				data = null;
-				throw new Exception( "File not found." );
+				throw new Exception( "File not found. " + e );
 			} catch( IOException e ){
 				data = null;
-				throw new Exception( "IO Exception" );
+				throw new Exception( "IO Exception: " + e );
 			}
 			catch( Exception e ){
 				data = null;
-				throw new Exception( "Error loading file" );
+				throw new Exception( "Error loading file: " + e );
 			}
 			return;
 		}
@@ -225,16 +205,16 @@ public class GUIModel implements GUIAvailableParameters {
 		//If file extension not matched by now: Unknown format.
 		data = null;
 		throw new Exception("Unknown file format.");
-		
 	}
 	
-	//Returns true if not continuous; false otherwise
-	//TODO: Weka plugin does have the ability to deal with missing and continuous data: this needs to be implemented/tested!
+	/**Checks a dataset to determine if discrete or continuous.
+	 * Returns true if discrete (not continuous); false otherwise.
+	 */
+	//TODO: Weka plugin does have the ability to deal with missing and continuous data: we might want this to be implemented/tested!
 	public boolean checkDataNotContinuous(){
 		if( data == null ) return true;
 		
 		//First: determine number of variables:
-		//TODO: Surely there must be a better way to find number of variables?
 		int numVars = ((Type.Structured)((Type.Vector)data.t).elt).labels.length;
 		
 		for( int i = 0; i < numVars; i++ ){
@@ -242,7 +222,6 @@ public class GUIModel implements GUIAvailableParameters {
 				return false;
 			}
 		}
-		
 		return true;
 	}
 	
@@ -256,7 +235,7 @@ public class GUIModel implements GUIAvailableParameters {
 	{
 		StringReader rd = new StringReader( ExpertPriors );
 		try{
-			ExpertElicitedTOMCoster tempCoster = new ExpertElicitedTOMCoster( 0.5, rd, data );
+			new ExpertElicitedTOMCoster( 0.5, rd, data );
 		} catch( RuntimeException e ){
 			//Constructor threw exception -> error in Expert Prior text...
 			throw new Exception( e );
@@ -264,17 +243,17 @@ public class GUIModel implements GUIAvailableParameters {
 		return true;
 	}
 	
-	
+	/**Checks if the loaded data is valid. More checks in this function would probably be a good idea... */
 	public boolean dataValid(){
 		//TODO: More checks? i.e. only discrete or symbolic, not continuous...
 		return data != null;
 	}
 	
 	public boolean MMLLearnerValid(){
-		return MLLearner != null;
+		return MMLLearner != null;
 	}
 	
-	/**Method to check if expert priors OK
+	/**Method to check if expert priors are OK.
 	 * @return True if expert priors OK, or expert priors are not used.
 	 */
 	public boolean expertPriorsValid(){
@@ -291,51 +270,50 @@ public class GUIModel implements GUIAvailableParameters {
 	}
 	
 	public boolean searchFactorValid(){
-		return ( searchFactor >= 0.1 && searchFactor <= 20 );
+		return ( searchFactor >= GUIParameters.minSearchFactor && searchFactor <= GUIParameters.maxSearchFactor );
 	}
 	
 	public boolean maxSECsValid(){
-		return ( maxSECs >= 3 );
+		return ( maxSECs >= GUIParameters.minSECs && maxSECs <= GUIParameters.maxSECs );
 	}
 	
 	public boolean minTotalPosteriorValid(){
-		return ( minTotalPosterior >=0.3 && minTotalPosterior <= 1.0 );
-	}
-	
-	public boolean randomSeedValid(){
-		//TODO
-		return true;
-	}
-	
-	public boolean randomSeed2Valid(){
-		//TODO
-		return true;
+		return ( minTotalPosterior >= GUIParameters.min_minTotalPosterior && minTotalPosterior <= GUIParameters.max_minTotalPosterior );
 	}
 	
 	/**Method that actually runs the full Metropolis Search.
 	 * Does not check if data/parameters are valid: assumes these checks
 	 *  have already been conducted.
-	 * Once search complete: results can be obtained from the appropriate GUIModel object:
-	 *  - GUIModel.metropolisSearch
-	 *  - GUIModel.searchResults
+	 * Once search complete: results can be obtained from the appropriate GUIModel object: i.e.<br>
+	 *  - GUIModel.searchResults, or<br>
+	 *  - GUIModel.searchResultsDBN
+	 *  @param learnDBN False if learning a standard BN; True if learning a DBN
 	 */
-	public void runSearch(){
-		//Create metropolis search object:
-		metropolisSearch = new MetropolisSearch( r, data, MLLearner, MMLLearner );
+	public void runSearch( boolean learnDBN ){
+		//Reset search results in case already run before this session:
+		searchResults = null;
+		searchResultsDBN = null;
+		
+		if( !learnDBN ){	//Learn a normal BN
+			//Create MetropolisSearch object:
+			metropolisSearch = new MetropolisSearch( r, data, MLLearner, MMLLearner );
+			//Set expert priors, if they are being used:
+			if( useExpertPriors ){
+				Value.Str s = new Value.Str( expertPriorsString );
+				metropolisSearch.setOption("TOMPrior", s );
+			}
+			System.out.println(" -- Learning Bayesian Network -- ");
+		} else {			//Use DBN code to learn a DBN
+			//Create a MetropolisSearchDBN object:
+			metropolisSearch = new MetropolisSearchDBN( r, data, MLLearner, MMLLearner );
+			System.out.println(" -- Learning Dynamic Bayesian Network (DBN) -- ");
+		}
 		
 		//Change settings:
 		metropolisSearch.caseInfo.searchFactor = searchFactor;				//No separate value kept in MetropolisSearch
 		metropolisSearch.caseInfo.maxNumSECs = maxSECs;						//No separate value kept in MetropolisSearch
 		metropolisSearch.caseInfo.minTotalPosterior = minTotalPosterior;	//No separate value kept in MetropolisSearch
 		
-		//Set expert priors, if they are being used:
-		if( useExpertPriors ){
-			Value.Str s = new Value.Str( expertPriorsString );
-			metropolisSearch.setOption("TOMPrior", s );
-		}
-		
-		//Reset search results in case already run before this session:
-		searchResults = null;
 		
 		//Display whether using set RNG seed or random, plus what the seed is:
 		System.out.print("RNG = " + r );
@@ -359,49 +337,26 @@ public class GUIModel implements GUIAvailableParameters {
 		}
 		System.out.println("\n\nSearch finished... " + count + " loops");
 		
-		if( fullResults ){
-			System.out.println("\n\n===================================");
-			System.out.println("----- Generating full results -----");
-			generateFullResults();
-		}
 		
+		System.out.println("\n\n===================================");
+		System.out.println("----- Generating Results -----");
+		generateFullResults();
 	}
 	
 	/**Generate full results.
-	 * After calling this function, results can be obtained from: GUIModel.searchResults
+	 * After calling this function, results can be obtained from: GUIModel.searchResults or GUIModel.searchResultsDBN
 	 * @return True if results generated successfully, false otherwise (i.e. search not run)
 	 */
 	public boolean generateFullResults(){
 		if( metropolisSearch == null ) return false;
 		if( !metropolisSearch.isFinished() ) return false;
 		
-		searchResults = metropolisSearch.getResults();
-		return true;
-		
-	}
-	
-	/**Generates a netica BN for the best TOM found during search as a String
-	 * String intended to be used by BNetViewer class to display a network.
-	 * @return String representation of the single best TOM generated during search.
-	 * @throws Exception If search not run; if error during creation of parameters.
-	 */
-	public String generateBestNeticaNetworkString() throws Exception
-	{
-		if( !metropolisSearch.isFinished() ) throw new Exception("Cannot produce network if search has not been run.");
-		
-		BNet network = metropolisSearch.getBNet();
-		Value.Vector parameters;
-
-		try{
-			parameters = metropolisSearch.getBestTOM().makeParameters( metropolisSearch.getMMLModelLearner() );
-		} catch( Exception e ){
-			throw new Exception("Error: makeParameters for BestTOM failed!");
+		if( metropolisSearch instanceof MetropolisSearchDBN ){	//Learning a DBN
+			searchResultsDBN = ((MetropolisSearchDBN)metropolisSearch).getResultsMMLEC();
+		} else {	//Learning a standard BN
+			searchResults = metropolisSearch.getResults();
 		}
-		
-		String filename = selectedFile.getName();
-		if( filename == null || filename.equals("") ) filename = "Network";
-		
-		return network.export( filename, parameters, "netica");
+		return true;
 	}
 	
 	/**Return one of the representative networks (from full results) as a String
@@ -413,18 +368,30 @@ public class GUIModel implements GUIAvailableParameters {
 	public String generateNetworkStringFullResults( int index ) throws Exception
 	{
 		if( metropolisSearch == null || !metropolisSearch.isFinished() ) throw new Exception("Cannot produce network if search has not been run.");
-		if( searchResults == null ) throw new Exception("Search results: Not generated.");
-		if( index > searchResults.length()-1 || index < 0 ) throw new Exception("Invalid Index.");
+		if( searchResults == null && searchResultsDBN == null ) throw new Exception("Error: Search results not generated.");
+		if( index < 0 ) throw new Exception("Invalid Index.");
+		if( searchResults != null && index > searchResults.length()-1 ) throw new Exception("Invalid Index.");
+		if( searchResultsDBN != null && index > searchResultsDBN.length-1 ) throw new Exception("Invalid Index.");
 		
-		//(Model,params)
-		Value.Structured repNetwork = (Value.Structured)MMLEC.getRepresentative.apply( searchResults.elt(index) );
 		
-		BNet network = (BNet)repNetwork.cmpnt(0);
-		
-		String filename = selectedFile.getName();
-		if( filename == null || filename.equals("") ) filename = "Network";
-		filename = filename + " - " + index;
-		
-		return network.export( filename, (Value.Vector)repNetwork.cmpnt(1), "netica");
+		if( searchResults != null ){	//Standard BN
+			//(Model,params)
+			Value.Structured repNetwork = (Value.Structured)MMLEC.getRepresentative.apply( searchResults.elt(index) );
+			
+			BNet network = (BNet)repNetwork.cmpnt(0);
+			
+			String filename = selectedFile.getName();
+			if( filename == null || filename.equals("") ) filename = "Network";
+			filename = filename + " - " + index;
+			
+			return network.export( filename, (Value.Vector)repNetwork.cmpnt(1), "netica");
+			
+		} else { //DBN
+			MMLEC m = searchResultsDBN[index];
+			
+			DTOM repNetwork = (DTOM)m.getSEC(0).getTOM(0);
+			
+			return ExportDBNNetica.makeNeticaFileString(repNetwork, "_0", "_1" );
+		}
 	}
 }
