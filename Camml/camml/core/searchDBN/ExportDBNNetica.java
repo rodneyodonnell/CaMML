@@ -139,6 +139,7 @@ public class ExportDBNNetica {
             }
             
             //Need to loop through parent assignments: [0,0,0], [0,0,1], [0,0,2], ..., [N,N,N]
+            //BUT: CPT parameters are ordered by parent assignment as per [0,0,0], [1,0,0], [2,0,0], ..., [N,N,N]
             for( int j=0; j<parentComs; j++ ){
             	
             	//Write close brackets, commas, etc:
@@ -162,8 +163,12 @@ public class ExportDBNNetica {
 		        	}
             	}
             	
+            	//Given a current assignment of parents for netica (i.e. [0,0,0]), find the appropriate index for
+            	// the correct set of parameters, given that CPTs are indexed (0,0,0), (1,0,0), (2,0,0) etc
+            	int paramIndex = DBNStaticMethods.assignmentToIndexReverse(parentAssignment, parentArity );
+            	
             	//Write the current set of parameters:
-            	Structured values = (Value.Structured)param.elt(j);		//Structure of values...
+            	Structured values = (Value.Structured)param.elt( paramIndex );		//Structure of values...
             	int numValues = values.length();
             	s.append("(");
             	for( int k=0; k<numValues; k++ ){
@@ -238,6 +243,7 @@ public class ExportDBNNetica {
             }
             
             //Need to loop through parent assignments: [0,0,0], [0,0,1], [0,0,2], ..., [N,N,N]
+            //BUT: CPT parameters are ordered by parent assignment as per [0,0,0], [1,0,0], [2,0,0], ..., [N,N,N]
             for( int j=0; j<parentComs; j++ ){
             	
             	//Write close brackets, commas, etc:
@@ -261,8 +267,12 @@ public class ExportDBNNetica {
 		        	}
             	}
             	
+            	//Given a current assignment of parents for Netica (i.e. [0,0,0]), find the appropriate index for
+            	// the correct set of parameters, given that CPTs are indexed (0,0,0), (1,0,0), (2,0,0) etc
+            	int paramIndex = DBNStaticMethods.assignmentToIndexReverse(parentAssignment, parentArity );
+            	
             	//Write the current set of parameters:
-            	Structured values = (Value.Structured)param.elt(j);		//Structure of values...
+            	Structured values = (Value.Structured)param.elt( paramIndex );		//Structure of values...
             	int numValues = values.length();
             	s.append("(");
             	for( int k=0; k<numValues; k++ ){

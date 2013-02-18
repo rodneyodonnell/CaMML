@@ -41,9 +41,7 @@ public class DBNStaticMethods {
             int l = x.cmpnt(current).length();
             Value.Vector output = x.cmpnt(current).sub(1, l-1);		//Child data (t1 timeslice); 1 to length-1 (can't t=0, as no temporal parents for this instance)
             
-            //total += subModel[current].logP( output, subParam[current], input );	//How it used to be done;
-            //CDMS logP(...) is using the wrong index (i.e. wrong conditional distribution) to to find P and hence logP 
-            total += logPCalc( output, (Value.Vector)subParam[current], parentData );
+            total += subModel[current].logP( output, subParam[current], parentData );
         }
         
         return total;
@@ -154,10 +152,10 @@ public class DBNStaticMethods {
     				assignment[z] = assignmentT0[ currParents[z] ];
     				ar[z] = arity[ currParents[z] ];
     			}
-    			int index2 = assignmentToIndex( assignment, ar );
+    			int index = assignmentToIndexReverse( assignment, ar );
     			
     			//Find the set of parameters for the current parent assignment:
-    			vals = (Value.Structured)currParams.elt(index2);	//Contains the actual probability values for the current assignment of parents
+    			vals = (Value.Structured)currParams.elt(index);	//Contains the actual probability values for the current assignment of parents
     		}
     		
     		//Now, sample a value according to the probability distribution:
@@ -219,10 +217,10 @@ public class DBNStaticMethods {
         					ar[z] = arity[ currParentsTemporal[ z-currParents.length] ];
         				}
         			}
-        			int index2 = assignmentToIndex( assignment, ar );
+        			int index = assignmentToIndexReverse( assignment, ar );
         			
         			//Find the set of parameters for the current parent assignment:
-        			vals = (Value.Structured)currParams.elt(index2);	//Contains the actual probability values for the current assignment of parents
+        			vals = (Value.Structured)currParams.elt(index);	//Contains the actual probability values for the current assignment of parents
         		}
         		
         		//Now, sample a value according to the probability distribution:
@@ -284,7 +282,8 @@ public class DBNStaticMethods {
     	return parents;
     }
     
-    /**Calculates an index to an array, where array has multiple parents, and is indexed as follows:
+    /**Calculates an index to an array of parameters for a node, where node has multiple parents, and
+     * parameters are indexed as follows:
      * [0,0,0]=0, [0,0,1]=1, [0,0,2]=2, ..., etc
      * Argument takes current assignment to a set of variables; also arity for those variables.
      * @see Also BNet.incrementBitfield(...)
@@ -304,39 +303,24 @@ public class DBNStaticMethods {
 		return index;
     }
     
-    /**Calculates logP(data|model,params) for a given node.
-     * Replacement for CDMS.core.VALUE.MODEL.logP(...)
-     * For some obscure reason, the CDMS version is using the wrong parameters index to calculate logP(data|model)
-     * on some occasions (when called from DBNStaticMethods.DBNLogP)
+    /**Calculates an index to an array of parameters for a node, where node has multiple parents, and
+     * parameters are indexed as follows:
+     * (0,0,0), (1,0,0), (0,1,0), (1,1,0), (0,0,1), (1,0,1), (0,1,1), (1,1,1)  
+     * @param assignment Current assignment to the parents
+     * @param arity Arity of the parents
+     * @see Also BNet.reverseIncrementBitfield(...)
      */
-    public static double logPCalc( Value.Vector nodeData, Value.Vector nodeParams, Value.Vector parentData ){
+    public static int assignmentToIndexReverse( int[] assignment, int[] arity ){
+    	if( assignment.length == 0 ) return 0;
     	
-    	//First: Need to determine number of variables in parent data, and their arity
-    	final Type.Structured datatype = (Type.Structured)((Type.Vector)(parentData).t).elt;
-    	int numParents = datatype.labels.length;
-    	int[] parentArity = new int[ numParents ];
-		for( int i=0; i<numParents; i++ ){
-			Type.Symbolic sType = (Type.Symbolic)datatype.cmpnts[i];
-            parentArity[i] = NeticaFn.makeValidNeticaNames(sType.ids,true).length;
+    	int index = 0;
+		for( int i=0; i < assignment.length; i++ ){
+			int mult = 1;
+			for( int x=i-1; x>=0; x-- ){
+				mult *= arity[ x ];
+			}
+			index += assignment[ i ]*mult;
 		}
-    	
-    	double logP = 0.0;
-    	for( int i=0; i<nodeData.length(); i++ ){
-    		
-    		int[] parentAssignment = new int[numParents];
-    		for( int j=0; j<numParents; j++ ){
-    			parentAssignment[j] = parentData.cmpnt(j).intAt(i);
-    		}
-    		
-    		//Now, find the index of the appropriate parameters given these parents:
-    		int idx = assignmentToIndex( parentAssignment, parentArity );
-    		
-    		// nodeParams = [ ( P(X=0|Pa1=0,Pa2=0), P(X=1|Pa1=0,Pa2=0), ... ), (P(X=0|Pa1=0,Pa2=1),...), ... ]
-    		//Extract the appropriate distribution (given assignment of parents) using the calculated index:
-    		Value.Structured currDistribution = (Value.Structured)((Value.Structured)nodeParams.elt(idx)).cmpnt(1);
-    		
-    		logP += Math.log( currDistribution.doubleCmpnt( nodeData.intAt(i) ) );
-    	}
-    	return logP;
+		return index;
     }
 }
