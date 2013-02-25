@@ -79,6 +79,15 @@ public class ParentSwapChange extends TOMTransformation
         
         // get the jth node in the total ordering.
         int nj = (int)( (tom.getNumNodes() - 2) * moveran );
+        
+        /*Fix to avoid numerical precision issue: When moveran is sufficiently small, moveran * moveran = 0
+         * (i.e. the square of the random number can be too small to represent with a double)
+         * As a result, maybe one in a million (or less) calls to this function will result in an array index error */
+        while( nj >= tom.getNumNodes() - 2 ){ 
+        	double r = rand.nextDouble();
+        	nj = (int)( (tom.getNumNodes()-2) * (1.0 - r*r ) );
+        }
+        
         Node nodeJ = tom.getNode( tom.nodeAt(nj+2) );
         int numParents = nodeJ.parent.length;
         

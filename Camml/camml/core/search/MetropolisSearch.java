@@ -125,7 +125,7 @@ public class MetropolisSearch extends BNetSearch
     /** Class used as key to secHashTable.  This is essentially a long (64 bit) value 
      *      turned into an object so it can be used as a key to a hashtable.
      */
-    private static class SECHashKey implements Cloneable { 
+    protected static class SECHashKey implements Cloneable { 
         private long key;
         public SECHashKey( long key ) { this.key = key; }
         public int hashCode() { return (int)((key >> 32) + key); }
@@ -137,7 +137,7 @@ public class MetropolisSearch extends BNetSearch
     }
     
     /** We allocate a single key to save reallocation for each iteration. */
-    private SECHashKey tempKey = new SECHashKey(0);
+    protected SECHashKey tempKey = new SECHashKey(0);
     
     /** Run AnnealSearch to estimate arcProb and set bestModel */
     private void runAnnealSearch( ) {
