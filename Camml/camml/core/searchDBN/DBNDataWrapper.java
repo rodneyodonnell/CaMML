@@ -26,7 +26,7 @@ public class DBNDataWrapper extends Value.Vector {
 
 	public DBNDataWrapper( Value.Vector data, final int[] intrasliceVars, final int[] temporalVars ) {
 		//Make new type from selected columns:
-		super( makeSelectedVectorType( (Type.Vector)data.t, intrasliceVars, temporalVars ));
+		super( makeVectorType((Type.Vector) data.t, intrasliceVars, temporalVars));
 		this.fullDataset = data;
 		this.intrasliceVars = intrasliceVars;
 		this.temporalVars = temporalVars;
@@ -35,7 +35,7 @@ public class DBNDataWrapper extends Value.Vector {
 	/**Make the type information for the vector.
 	 * Adapted from SelectedVector.makeSelectedVectorType
 	 */
-	public static Type.Vector makeSelectedVectorType( Type.Vector vType, int[] iCol, int[] tCol ){
+	private static Type.Vector makeVectorType( Type.Vector vType, int[] iCol, int[] tCol ){
 		if( iCol == null && tCol == null ){
 			return vType;
 		} else{

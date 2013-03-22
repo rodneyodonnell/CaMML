@@ -1,3 +1,31 @@
+/*
+ *  [The "BSD license"]
+ *  Copyright (c) 2002-2011, Rodney O'Donnell, Lloyd Allison, Kevin Korb
+ *  Copyright (c) 2002-2011, Monash University
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *    1. Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *    3. The name of the author may not be used to endorse or promote products
+ *       derived from this software without specific prior written permission.*
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ *  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package camml.core.newgui;
 
 import java.awt.Component;
@@ -82,7 +110,7 @@ public class BNetViewer extends JFrame {
 		netPanel = new NetPanel(net, NodePanel.NODE_STYLE_AUTO_SELECT);
 
 		// Make all the components listen for mouse clicks
-		netPanel.addListenerToAllComponents(new Viewer_MouseInputAdapter( this ));
+		netPanel.addListenerToAllComponents(new ViewerMouseInputAdapter( this ));
 
 		// Add the panel to the application's content pane
 		getContentPane().add(new JScrollPane(netPanel));
@@ -130,108 +158,108 @@ public class BNetViewer extends JFrame {
 			int posY = rowNum * (nodeHeight + nodeSeparation);
 			int posX = nodeSeparation + i % numPerRow * ( nodeWidth + nodeSeparation );
 			try{
-				n.visual().setPosition(posX, posY);
-			} catch( NeticaException e ){
-				//Do nothing?
-			}
-		}
-	}
-}
+                n.visual().setPosition(posX, posY);
+            } catch( NeticaException e ){
+                //Do nothing?
+            }
+        }
+    }
 
-/**Class to deal with mouse events: i.e. click, click+drag on BN nodes
- * Required for inference (click) and repositioning nodes (click+drag).
- * @author Alex Black
- */
-class Viewer_MouseInputAdapter extends MouseInputAdapter {
-	
-	int mouseDownStartX = 0;	//Used for moving nodes - click + drag
-	int mouseDownStartY = 0;	//Used for moving nodes - click + drag
-	Component lastClicked;		//Used for moving nodes - click + drag
-	
-	BNetViewer viewer;
-	
-	public Viewer_MouseInputAdapter( BNetViewer viewer ){
-		this.viewer = viewer;
-	}
-	
-	//User clicks mouse:
-	public void mouseClicked(MouseEvent me) {
-		try {
-			// Find out which component got clicked
-			Component comp = me.getComponent();
-			
-			// If a belief bar was clicked...
-			if (comp instanceof NodePanel_BeliefBarsRow) {
-				NodePanel_BeliefBarsRow row = (NodePanel_BeliefBarsRow) comp;
+    /**Class to deal with mouse events: i.e. click, click+drag on BN nodes
+     * Required for inference (click) and repositioning nodes (click+drag).
+     * @author Alex Black
+     */
+    static class ViewerMouseInputAdapter extends MouseInputAdapter {
 
-				// Find the state index of the belief bar
-				int clickedState = row.getState().getIndex();
-				
-				// Get the node that owns this belief bar, and get that node's current finding
-				Value finding    = row.getState().getNode().finding();
-				
-				// If the node finding is what was clicked, clear the finding
-				if (finding.getState() == clickedState) {
-					finding.clear();
-				// Otherwise, set the finding
-				} else {
-					finding.setState(clickedState);
-				}
-				
-				// Compile net and refresh the display
-				viewer.netPanel.getNet().compile();
-				viewer.netPanel.refreshDataDisplayed();
-			}
-		} catch (NeticaException e) { e.printStackTrace(); }
-	}
-	
-	//User clicks and holds mouse button down:
-	public void mousePressed(MouseEvent me){
-		//Store the location (+component) where the click+drag started, for later use:
-		mouseDownStartX = me.getX();
-		mouseDownStartY = me.getY();
-		lastClicked = me.getComponent();
-	}
-	
-	//User releases mouse after holding down:
-	public void mouseReleased(MouseEvent me){
-		if( lastClicked == null ) return;
-		
-		Component toMove;
-		
-		if( lastClicked instanceof NodePanel ){
-			toMove = lastClicked;
-		} else if( lastClicked instanceof NodePanel_BeliefBarsRow ){
-			toMove = ((NodePanel_BeliefBarsRow)lastClicked).getParent().getParent();
-		} else if( lastClicked instanceof NodePanel_BeliefBars ){
-			toMove = ((NodePanel_BeliefBars)lastClicked).getParent();
-		} else if( lastClicked instanceof JLabel ){
-			toMove = ((JLabel)lastClicked).getParent();
-		} else{
-			//Unknown component: Don't know how to deal with it...
-			return;
-		}
-		
-		if( toMove == null ) return;	//Should never happen...
-		
-		int newX = toMove.getX() + me.getX() - mouseDownStartX;
-		int newY = toMove.getY() + me.getY() - mouseDownStartY;
-		
-		
-		
-		//Make sure it cannot be moved outside of window:
-		if( newX < 0 ) newX = 0;
-		if( newY < 0 ) newY = 0;
-		if( newX > viewer.getWidth() - toMove.getWidth()  ) newX = viewer.getWidth() - toMove.getWidth();
-		if( newY > viewer.getHeight() - toMove.getHeight() ) newY = viewer.getHeight() - toMove.getHeight();
-		
-		toMove.setLocation( newX, newY);
-		
-		// Compile net and refresh the display
-		try{
-			viewer.netPanel.getNet().compile();
-			viewer.netPanel.refreshDataDisplayed();
-		} catch( NeticaException e){ 
-		}
-	}
+        int mouseDownStartX = 0;	//Used for moving nodes - click + drag
+        int mouseDownStartY = 0;	//Used for moving nodes - click + drag
+        Component lastClicked;		//Used for moving nodes - click + drag
+
+        BNetViewer viewer;
+
+        public ViewerMouseInputAdapter(BNetViewer viewer){
+            this.viewer = viewer;
+        }
+
+        //User clicks mouse:
+        public void mouseClicked(MouseEvent me) {
+            try {
+                // Find out which component got clicked
+                Component comp = me.getComponent();
+
+                // If a belief bar was clicked...
+                if (comp instanceof NodePanel_BeliefBarsRow) {
+                    NodePanel_BeliefBarsRow row = (NodePanel_BeliefBarsRow) comp;
+
+                    // Find the state index of the belief bar
+                    int clickedState = row.getState().getIndex();
+
+                    // Get the node that owns this belief bar, and get that node's current finding
+                    Value finding    = row.getState().getNode().finding();
+
+                    // If the node finding is what was clicked, clear the finding
+                    if (finding.getState() == clickedState) {
+                        finding.clear();
+                        // Otherwise, set the finding
+                    } else {
+                        finding.setState(clickedState);
+                    }
+
+                    // Compile net and refresh the display
+                    viewer.netPanel.getNet().compile();
+                    viewer.netPanel.refreshDataDisplayed();
+                }
+            } catch (NeticaException e) { e.printStackTrace(); }
+        }
+
+        //User clicks and holds mouse button down:
+        public void mousePressed(MouseEvent me){
+            //Store the location (+component) where the click+drag started, for later use:
+            mouseDownStartX = me.getX();
+            mouseDownStartY = me.getY();
+            lastClicked = me.getComponent();
+        }
+
+        //User releases mouse after holding down:
+        public void mouseReleased(MouseEvent me){
+            if( lastClicked == null ) return;
+
+            Component toMove;
+
+            if( lastClicked instanceof NodePanel ){
+                toMove = lastClicked;
+            } else if( lastClicked instanceof NodePanel_BeliefBarsRow ){
+                toMove = ((NodePanel_BeliefBarsRow)lastClicked).getParent().getParent();
+            } else if( lastClicked instanceof NodePanel_BeliefBars ){
+                toMove = ((NodePanel_BeliefBars)lastClicked).getParent();
+            } else if( lastClicked instanceof JLabel ){
+                toMove = ((JLabel)lastClicked).getParent();
+            } else{
+                //Unknown component: Don't know how to deal with it...
+                return;
+            }
+
+            if( toMove == null ) return;	//Should never happen...
+
+            int newX = toMove.getX() + me.getX() - mouseDownStartX;
+            int newY = toMove.getY() + me.getY() - mouseDownStartY;
+
+
+
+            //Make sure it cannot be moved outside of window:
+            if( newX < 0 ) newX = 0;
+            if( newY < 0 ) newY = 0;
+            if( newX > viewer.getWidth() - toMove.getWidth()  ) newX = viewer.getWidth() - toMove.getWidth();
+            if( newY > viewer.getHeight() - toMove.getHeight() ) newY = viewer.getHeight() - toMove.getHeight();
+
+            toMove.setLocation( newX, newY);
+
+            // Compile net and refresh the display
+            try{
+                viewer.netPanel.getNet().compile();
+                viewer.netPanel.refreshDataDisplayed();
+            } catch( NeticaException e){
+            }
+        }
+    }
 }

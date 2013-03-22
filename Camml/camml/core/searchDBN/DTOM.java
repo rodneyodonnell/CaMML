@@ -52,19 +52,6 @@ public class DTOM extends TOM {
         //BitSet values are set to false by default, so no explicit initialization is required.
 	}
 
-	/** Not Implemented */
-	public DTOM(Vector data) {
-		super(data);
-		throw new RuntimeException("METHOD NOT IMPLEMENTED");
-	}
-
-	/** Not Implemented */
-	public DTOM(int numNodes) {
-		super(numNodes);
-		throw new RuntimeException("METHOD NOT IMPLEMENTED");
-	}
-	
-	
 	/*--------- Methods for modifying arcs: ----------*/
 	///////////////////////////
 	// DBN utility functions //

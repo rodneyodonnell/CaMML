@@ -142,7 +142,7 @@ public abstract class BNetSearch implements Search.SearchObject
     /** The cost of bestTOM */
     protected double bestCost;
     
-    /** caseUnfo holds assorted values relevent to the current search. */
+    /** caseUnfo holds assorted values relevant to the current search. */
     public CaseInfo caseInfo;
     
     /** Function to make Skeletal changes to TOMs  */
