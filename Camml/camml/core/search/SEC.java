@@ -60,7 +60,7 @@ public class SEC implements Serializable
     protected final ArrayList<CompactTOM> tomList;
     
     /** Layout of undirected edges for this SEC */
-    private final int[][] edgeList2;
+    protected final int[][] edgeList2;
     
     /** total weight of all TOMs in this SEC */
     protected double weight = 0;

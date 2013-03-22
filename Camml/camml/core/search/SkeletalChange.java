@@ -96,7 +96,7 @@ public class SkeletalChange extends TOMTransformation
         //Node nodeI = tom.getNode(i);
         Node nodeJ = tom.getNode(j);
         // If adding an extra parent would violate maxParents
-        if ( nodeJ.parent.length == tom.maxNumParents && !tom.isArc(i,j) ) {
+        if ( nodeJ.getNumParents() == tom.maxNumParents && !tom.isArc(i,j) ) {
             return false;
         }
         //Value.Vector data = tom.getData();

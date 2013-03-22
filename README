@@ -1,5 +1,5 @@
 
-Quick guide to getting CaMML started (updated 18-01-2011) :
+Quick guide to getting CaMML started (updated 17-02-2013) :
 
 for the latest src see:
     https://github.com/rodneyodonnell/CaMML
@@ -41,6 +41,7 @@ for docs & discussion see:
 =================
 
 There are several plausible ways to use CaMML, common approaches include:
+ - Using the CaMML GUI
  - Using the weka wrapper
  - Using the CDMS GUI
    - Interacting Manually
@@ -48,7 +49,24 @@ There are several plausible ways to use CaMML, common approaches include:
  - (advanced) Using a JVM based scripting language (e.g., jython)
 
 One or the other may be easiest depending on the task.
-The 'weka wrapper' is probably the easiest place to start for most users.
+The 'CaMML GUI' and 'weka wrapper' are probably the easiest places to start for
+most users.
+
+== CaMML GUI
+CaMML has a stand-alone Java-based GUI (added 02/2013) that should be suitable for
+most basic learning tasks. The GUI has a data viewer, basic network viewer (based
+on Netica libraries), and support for learning DBNs.
+
+- To run the GUI, use:
+  > camml_gui.sh
+  > camml_gui.bat (Windows)
+
+Note that the -Djava.library.path field in the camml_gui.bat file may need to be
+edited if the Netica libraries are not in the /jar/ folder - the GUI will run, but
+viewing learned networks will be unavailable.
+
+At present, this GUI only supports data files that are discrete and contain no
+missing values.
 
 == Weka Wrapper
 CaMML can be used like a standard weka classifier from the command line.

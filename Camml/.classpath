@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="src" path="/CDMS"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="/home/rodo/classpath/junit.jar"/>
-	<classpathentry kind="lib" path="/home/rodo/classpath/weka.jar"/>
-	<classpathentry kind="lib" path="/home/rodo/classpath/NeticaJ.jar"/>
-	<classpathentry kind="lib" path="/home/rodo/classpath/tetrad4.jar"/>
+	<classpathentry kind="lib" path="C:/CaMML/jar/junit.jar"/>
+	<classpathentry kind="lib" path="C:/CaMML/jar/weka.jar"/>
+	<classpathentry kind="lib" path="C:/CaMML/jar/tetrad4.jar"/>
+	<classpathentry kind="lib" path="C:/CaMML/jar/NeticaJ.jar"/>
+	<classpathentry kind="lib" path="C:/CaMML/jar/cdms.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
